@@ -6,8 +6,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string>
+#include "Constants.h"
 #include "EquirectangularProjection.h"
 #include "ProjectiveTransformation.h"
+#include "Quadrilateral.h"
 
 class ImageSets
 {
@@ -15,6 +17,7 @@ class ImageSets
   /* Declaration of class variables */
   /***********************************/
   private:
+    double area;
     double lower_left_latitude;
     double lower_left_longitude;
     double lower_left_x;
@@ -47,6 +50,7 @@ class ImageSets
     int id;
     int width;
     ProjectiveTransformation pt;
+    Quadrilateral quad;
     std::string created_at;
     std::string description;
     std::string details;
@@ -61,7 +65,9 @@ class ImageSets
   /* Declaration of class functions */
   /************************************/
   public:
+    ImageSets();
     ImageSets(int, std::string, int, double, double, double, double, double, double, double, double, double, double, double, std::string, std::string, std::string, std::string);
+    double GetArea();
     double GetLower_left_latitude();
     double GetLower_left_longitude();
     double GetLower_left_x();
@@ -94,6 +100,7 @@ class ImageSets
     int GetId();
     int GetWidth();
     ProjectiveTransformation GetProjective_transformation();
+    Quadrilateral GetQuadrilateral();
     std::string GetCreated_at();
     std::string GetDescription();
     std::string GetDetails();
@@ -103,6 +110,7 @@ class ImageSets
     std::string GetUpper_left_corner_y_status();
     std::vector <double> GetPhysical_height();
     std::vector <double> GetPhysical_width();
+    std::vector <std::string> GetFields();
     void AuxilaryFunction(bool = false);
     void CalculateLower_left_x();
     void CalculateLower_left_y();
@@ -110,6 +118,7 @@ class ImageSets
     void CalculateLower_right_y();
     void CalculatePhysical_height();
     void CalculatePhysical_width();
+    void CalculateQuadrilateral();
     void CalculateTransforms();
     void CalculateUpper_left_x();
     void CalculateUpper_left_y();
@@ -119,6 +128,7 @@ class ImageSets
     void DetermineImageReference();
     void RetrieveHeight();
     void RetrieveWidth();
+    void *GetValue(std::string);
 };
 
 #endif

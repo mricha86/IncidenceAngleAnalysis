@@ -41,6 +41,7 @@ class Marks
   /* Declaration of class functions */
   /************************************/
   public:
+    Marks();
     Marks(int, int, int, int, int, int, int, double, double, double, int, int, double, std::string, std::string, std::string, std::string, std::string);
     double GetDiameter();
     double GetLatitude();
@@ -67,6 +68,7 @@ class Marks
     std::string GetSub_type();
     std::string GetType();
     std::string GetUpdated_at();
+    std::vector <std::string> GetFields();
     void AuxilaryFunction(std::vector <double> &, std::vector <double> &, std::vector <double> &, double);
     void * GetValue(std::string);
     void SetX(double);

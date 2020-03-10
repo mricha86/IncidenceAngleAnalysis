@@ -2,6 +2,10 @@
 
 using namespace std;
 
+Marks::Marks()
+{
+}
+
 Marks::Marks(int ID, int UID, int IID, int AID, int IUID, int MMID, int SMID, double X, double Y, double DIA, int SUBTIME, int C, double S, string T, string SUBTYPE, string DET, string CREATE, string UPDATE)
 {
   application_id = AID;
@@ -155,6 +159,18 @@ string Marks::GetType()
 string Marks::GetUpdated_at()
 {
   return updated_at;
+}
+
+vector <string> Marks::GetFields()
+{
+  vector <string> fields{"id",
+      "image_id",
+      "application_id",
+      "x",
+      "y",
+      "diameter"};
+
+  return fields;
 }
 
 void Marks::AuxilaryFunction(vector <double> &adjustedpixelcoordinate, vector <double> &selenographiccoordinate, vector <double> &cartesiancoordinate, double d)

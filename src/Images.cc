@@ -208,6 +208,16 @@ int Images::GetId()
   return id;
 }
 
+int Images::GetImage_number()
+{
+  return image_number;
+}
+
+int Images::GetImage_scale()
+{
+  return image_scale;
+}
+
 int Images::GetImage_set_id()
 {
   return image_set_id;
@@ -258,6 +268,11 @@ string Images::GetFile_location()
   return file_location;
 }
 
+string Images::GetMaster_image_name()
+{
+  return master_image_name;
+}
+
 string Images::GetName()
 {
   return name;
@@ -286,6 +301,24 @@ vector <double> Images::GetPhysical_height()
 vector <double> Images::GetPhysical_width()
 {
   return physical_width;
+}
+
+vector <string> Images::GetFields()
+{
+  vector <string> fields{"id",
+      "image_set_id",
+      "application_id",
+      "name",
+      "upper_left_x",
+      "upper_left_y",
+      "upper_right_x",
+      "upper_right_y",
+      "lower_right_x",
+      "lower_right_y",
+      "lower_left_x",
+      "lower_left_y"};
+  
+  return fields;
 }
 
 vector < vector <double> > Images::GetShape_vector()
@@ -346,15 +379,30 @@ void Images::AuxilaryFunction(string XORIGIN, string YORIGIN, ProjectiveTransfor
     CalculatePhysical_width();
     CalculatePhysical_height();
   }
+
+  /****************************************/
+  /* Step 10: Determine master image name */
+  /****************************************/
+  DetermineMasterImageName();
+  
+  /**************************************/
+  /* Step 11: Determine sub-image scale */
+  /**************************************/
+  DetermineImageScale();
+  
+  /***************************************/
+  /* Step 12: Determine sub-image number */
+  /***************************************/
+  DetermineImageNumber();
 }
+
 void Images::CalculateBoundingRegionCartesianCoordinates()
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  double phi_1 = 0; // Flat square projection (Unit: radian)
-  double lambda_0 = 0; // Central meridian (Unit: radian)
-  double R_moon = 1737400; // Physical mean radius of the moon (Unit: meter)
+  double phi_1 = 0; // Flat square projection (Unit: degree)
+  double lambda_0 = 0; // Central meridian (Unit: degree)
   
   /*******************************************************************************/
   /* Calculate x and y position of sub-image upper left corner as viewed by user */
@@ -425,10 +473,11 @@ void Images::CalculatePhysical_height()
   double constant = y_relative+height;
   for(int i=0; i<width; i++)
   {
-    double h_0 = pt.ComputeTarget2SourceCoordinate_y(x_relative+i, y_relative);
-    double h_1 = pt.ComputeTarget2SourceCoordinate_y(x_relative+i, constant);
-    double diff = abs(h_1-h_0);
-    physical_height.push_back(diff); // Unit: meters
+    double h_0 = pt.ComputeTarget2SourceCoordinate_y(x_relative+i, y_relative); // Unit: degree
+    double h_1 = pt.ComputeTarget2SourceCoordinate_y(x_relative+i, constant); // Unit: degree
+    double diff = fabs(h_1-h_0); // Unit: degree
+    double ph = EquirectangularProjection::CalculateY(diff, 0.0, R_moon); // Unit: meter
+    physical_height.push_back(ph); // Unit: meter
   }
 }
 
@@ -440,17 +489,17 @@ void Images::CalculatePhysical_width()
   double constant = x_relative+width;
   for(int i=0; i<height; i++)
   {
-    double w_0 = pt.ComputeTarget2SourceCoordinate_y(x_relative, y_relative+i);
-    double w_1 = pt.ComputeTarget2SourceCoordinate_y(constant, y_relative+i);
-    double diff = abs(w_1-w_0);
-    physical_height.push_back(diff); // Unit: meters
+    double w_0 = pt.ComputeTarget2SourceCoordinate_x(x_relative, y_relative+i); // Unit: degree
+    double w_1 = pt.ComputeTarget2SourceCoordinate_x(constant, y_relative+i); // Unit: degree
+    double diff = fabs(w_1-w_0); // Unit: degree
+    double wh = EquirectangularProjection::CalculateX(diff, 0.0, 0.0, R_moon); // Unit: meter
+    physical_height.push_back(wh); // Unit: meter
   }
 }
 
 void Images::CalculateQuadrilateral()
 {
-  quad = Quadrilateral(upper_left_longitude, upper_left_latitude, upper_right_longitude, upper_right_latitude, lower_right_longitude, lower_right_latitude, lower_left_longitude,
-		       lower_left_latitude);
+  quad = Quadrilateral(upper_left_x, upper_left_y, upper_right_x, upper_right_y, lower_right_x, lower_right_y, lower_left_x, lower_left_y);
   area = quad.GetArea();
   shape_vector = quad.GetVector();
 }
@@ -488,6 +537,28 @@ void Images::DetermineCoordinateExtrema()
     minimum_latitude = (upper_left_latitude < upper_right_latitude) ? upper_left_latitude : upper_right_latitude;
     minimum_y = (upper_left_y < upper_right_y) ? upper_left_y : upper_right_y;
   }
+}
+
+void Images::DetermineImageNumber()
+{
+  int pos1 = name.rfind("_")+1;
+  image_number = stoi(name.substr(pos1));
+}
+
+void Images::DetermineImageScale()
+{
+  int pos1 = name.find("_")+1;
+  int pos2 = name.rfind("_");
+  int len = pos2-pos1;
+  image_scale = stoi(name.substr(pos1, len));
+}
+
+void Images::DetermineMasterImageName()
+{
+  int pos1 = 0;
+  int pos2 = name.find("_");
+  int len = pos2-pos1;
+  master_image_name = name.substr(pos1, len);
 }
 
 void Images::RetrieveHeight()
@@ -582,6 +653,14 @@ void * Images::GetValue(string field)
   if(field.compare("id") == 0)
   {
     return &id;
+  }
+  if(field.compare("image_number") == 0)
+  {
+    return &image_number;
+  }
+  if(field.compare("image_scale") == 0)
+  {
+    return &image_scale;
   }
   if(field.compare("image_set_id") == 0)
   {

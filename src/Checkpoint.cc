@@ -15,6 +15,11 @@ Checkpoint::Checkpoint()
   /* Store result */
   /****************/
   Interpreter(start_time);
+
+  /*********************************/
+  /* Initialize checkpoint counter */
+  /*********************************/
+  ncheckpoints = 0;
 }
 
 void Checkpoint::ElapsedTime(string statement)

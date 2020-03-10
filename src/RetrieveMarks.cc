@@ -3,12 +3,13 @@
 using namespace std;
 using namespace sql;
 
-RetrieveMarks::RetrieveMarks(Connection *CONN, string TABLE, string FIELD, string OPTION)
+RetrieveMarks::RetrieveMarks(Connection *CONN, int DATASET, string TABLE, string FIELD, string OPTION)
 {
   /*******************************************************************/
   /* Retrieve needed information for database information extraction */
   /*******************************************************************/
   conn = CONN;
+  dataset = DATASET;
   table = TABLE;
   field = FIELD;
   option = OPTION;
@@ -77,7 +78,7 @@ void RetrieveMarks::Fetch()
     while(rs->next())
     {
       int application_id = rs->getInt("application_id");
-      if(application_id == 1)
+      if(application_id == dataset)
       {
       	Marks myMark(rs->getInt("id"), 0, rs->getInt("image_id"), rs->getInt("application_id"), 0, 0, 0, rs->getDouble("x"), rs->getDouble("y"), rs->getDouble("diameter"), 0, 0, 0, "", "", "", "", "");
       	data.push_back(myMark);

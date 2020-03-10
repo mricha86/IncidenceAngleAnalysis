@@ -3,12 +3,13 @@
 using namespace std;
 using namespace sql;
 
-RetrieveImages::RetrieveImages(Connection *CONN, string TABLE, string FIELD, string OPTION)
+RetrieveImages::RetrieveImages(Connection *CONN, int DATASET, string TABLE, string FIELD, string OPTION)
 {
   /*******************************************************************/
   /* Retrieve needed information for database information extraction */
   /*******************************************************************/
   conn = CONN;
+  dataset = DATASET;
   table = TABLE;
   field = FIELD;
   option = OPTION;
@@ -19,7 +20,7 @@ vector <Images> RetrieveImages::GetData()
   return data;
 }
 
-void RetrieveImages::Display(vector <Images> &list)
+void RetrieveImages::Display(vector <Images> &list, bool details)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
@@ -29,39 +30,47 @@ void RetrieveImages::Display(vector <Images> &list)
   /********************/
   /* Print header row */
   /********************/
-  printf("%-5s %-4s %-3s %-19s %11s %11s %11s %11s %11s %11s %11s %11s\n", 
-	 "ID", 
-	 "ISID", 
-	 "AID", 
-	 "NAME",
-	 "ULX",
-	 "ULY",
-	 "URX",
-	 "URY",
-	 "LRX",
-	 "LRY",
-	 "LLX",
-	 "LLY");
+  if(details)
+    printf("%50s\n", 
+	   "DETAILS");
+  else
+    printf("%-5s %-4s %-3s %-19s %11s %11s %11s %11s %11s %11s %11s %11s\n", 
+	   "ID", 
+	   "ISID", 
+	   "AID", 
+	   "NAME",
+	   "ULX",
+	   "ULY",
+	   "URX",
+	   "URY",
+	   "LRX",
+	   "LRY",
+	   "LLX",
+	   "LLY");
   
   /********************/
   /* Print data rows */
   /********************/
   nelements = (int)list.size();
   for(int i=0; i<nelements; i++)
-    printf("%-5d %-4d %-3d %-19s %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf\n", 
-	   list[i].GetId(), 
-	   list[i].GetImage_set_id(), 
-	   list[i].GetApplication_id(), 
-	   list[i].GetName().c_str(), 
-	   list[i].GetUpper_left_x(), 
-	   list[i].GetUpper_left_y(),
-	   list[i].GetUpper_right_x(), 
-	   list[i].GetUpper_right_y(),
-	   list[i].GetLower_right_x(), 
-	   list[i].GetLower_right_y(),
-	   list[i].GetLower_left_x(), 
-	   list[i].GetLower_left_y());
-
+    if(details)
+      printf("%50s\n",  
+	     list[i].GetDetails().c_str());
+    else
+      printf("%-5d %-4d %-3d %-19s %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf %11.2lf\n", 
+	     list[i].GetId(), 
+	     list[i].GetImage_set_id(), 
+	     list[i].GetApplication_id(), 
+	     list[i].GetName().c_str(), 
+	     list[i].GetUpper_left_x(), 
+	     list[i].GetUpper_left_y(),
+	     list[i].GetUpper_right_x(), 
+	     list[i].GetUpper_right_y(),
+	     list[i].GetLower_right_x(), 
+	     list[i].GetLower_right_y(),
+	     list[i].GetLower_left_x(), 
+	     list[i].GetLower_left_y());
+  
   return;
 }
 
@@ -101,7 +110,7 @@ void RetrieveImages::Fetch()
     while(rs->next())
     {
       int application_id = rs->getInt("application_id");
-      if(application_id == 1)
+      if(application_id == dataset)
       {
 	Images myImage(rs->getInt("id"), rs->getInt("image_set_id"), application_id, rs->getString("name"), "", 0, 0, 0, 0, rs->getString("details"), "", "");
 	data.push_back(myImage);

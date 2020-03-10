@@ -3,6 +3,7 @@
 #ifndef READAUXILARYDATA_H
 #define READAUXILARYDATA_H
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -25,7 +26,8 @@ class ReadAuxilaryData
     ReadAuxilaryData(std::string);
     std::vector <IncidenceAngles> GetIncidenceAngleData();
     void Read();
-    static void Display(std::vector <IncidenceAngles> &);
+    static void DisplayData(std::vector <double> &);
+    static void DisplayData(std::vector <IncidenceAngles> &);
 };
 
 #endif

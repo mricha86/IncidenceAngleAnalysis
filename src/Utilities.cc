@@ -1,6 +1,7 @@
 #include "Utilities.h"
 
 using namespace boost;
+using namespace sql;
 using namespace std;
 
 bool Utilities::do_LinesIntersect(double x, double y, double x1, double y1, double x2, double y2)
@@ -144,160 +145,119 @@ bool Utilities::is_PointContained(double x, double y, vector < vector <double> >
   return false;
 }
 
-// bool Utilities::int_equality_cmp(int &a, int &b)
-// {
-//   return (a == b);
-// }
-
-// bool Utilities::int_greater_than_cmp(int &a, int &b)
-// {
-//   return (a > b);
-// }
-
-// bool Utilities::int_less_than_cmp(int &a, int &b)
-// {
-//   return (a < b);
-// }
-
-// bool Utilities::string_equality_cmp(string &a, string &b)
-// {
-//   return (a.compare(b) == 0);
-// }
-
-// bool Utilities::string_greater_than_cmp(string &a, string &b)
-// {
-//   return (a > b);
-// }
-
-// bool Utilities::string_less_than_cmp(string &a, string &b)
-// {
-//   return (a < b);
-// }
-
-double Utilities::ArrayMaximum(double *arr, int n)
-{
-  double max = arr[0];
-  for(int i=1; i<n; i++)
-    max = (max > arr[i]) ? max : arr[i];
-
-  return max;
-}
-
-double Utilities::ArrayMinimum(double *arr, int n)
-{
-  double min = arr[0];
-  for(int i=1; i<n; i++)
-    min = (min < arr[i]) ? min : arr[i];
-
-  return min;
-}
-
-// double Utilities::Max(double v1, double v2)
-// {
-//   return (v1 > v2) ? v1 : v2;
-// }
-
-// double Utilities::Min(double v1, double v2)
-// {
-//   return (v1 < v2) ? v1 : v2;
-// }
-
-// int Utilities::IntVectorSearch(vector <int> &list, int m, int n, int value)
-// {
-//   if(n >= m)
-//   {
-//     /***********************************/
-//     /* Calculate value of middle index */
-//     /***********************************/
-//     int midpoint = m+(n-m)/2;
-    
-//     /****************************************************/
-//     /* Compare wanted value to value of middle element. */
-//     /* If equal, return index of middle element.        */
-//     /****************************************************/
-//     if(int_equality_cmp(list[midpoint], value))
-//     {
-//       return midpoint;
-//     }
-
-//     /**************************************************/
-//     /* If value of the middle element is smaller than */
-//     /* the wanted value, then the wanted value must   */
-//     /* reside in the right portion of the array.      */
-//     /**************************************************/
-//     if(int_less_than_cmp(list[midpoint], value))
-//     {
-//       return IntVectorSearch(list, midpoint+1, n, value);
-//     }
-
-//     /*************************************************/
-//     /* If value of the middle element is larger than */
-//     /* the wanted value, then the wanted value must  */
-//     /* reside in the left portion of the array.      */
-//     /*************************************************/
-//     if(int_greater_than_cmp(list[midpoint], value))
-//     {
-//       return IntVectorSearch(list, m, midpoint-1, value);
-//     }
-//   }
-
-//   /***********************************************************/
-//   /* If value is not present in array, return negative index */
-//   /***********************************************************/
-//   return -1;
-// }
-
-// int Utilities::StringVectorSearch(vector <string> &list, int m, int n, string value)
-// {
-//   if(n >= m)
-//   {
-//     /***********************************/
-//     /* Calculate value of middle index */
-//     /***********************************/
-//     int midpoint = m+(n-m)/2;
-    
-//     /****************************************************/
-//     /* Compare wanted value to value of middle element. */
-//     /* If equal, return index of middle element.        */
-//     /****************************************************/
-//     if(string_equality_cmp(list[midpoint], value))
-//     {
-//       return midpoint;
-//     }
-
-//     /**************************************************/
-//     /* If value of the middle element is smaller than */
-//     /* the wanted value, then the wanted value must   */
-//     /* reside in the right portion of the array.      */
-//     /**************************************************/
-//     if(string_less_than_cmp(list[midpoint], value))
-//     {
-//       return StringVectorSearch(list, midpoint+1, n, value);
-//     }
-
-//     /*************************************************/
-//     /* If value of the middle element is larger than */
-//     /* the wanted value, then the wanted value must  */
-//     /* reside in the left portion of the array.      */
-//     /*************************************************/
-//     if(string_greater_than_cmp(list[midpoint], value))
-//     {
-//       return StringVectorSearch(list, m, midpoint-1, value);
-//     }
-//   }
-
-//   /***********************************************************/
-//   /* If value is not present in array, return negative index */
-//   /***********************************************************/
-//   return -1;
-// }
-
-vector <double> Utilities::RetrieveUniqueIncidenceAngles(std::vector <IncidenceAngles> &incidenceangles)
+double Utilities::ImageTotalArea(vector <double> &selected_incidence_angles, vector <IncidenceAngles> &ia, vector <ImageSets> &imagesets)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  vector <double> ia;
+  double total_area;
+  int n;
+  int npolygons;
+  string field;
+  vector < vector <double> > Polygon_Overlap(4, vector <double> (2));
+
+  /*******************************************/
+  /* Resultant overlapping polygon variables */
+  /*******************************************/
+  vector <polygon> input;
+  vector <polygon> output;
+
+  /*********************************************************/
+  /* Sort incidence angle (ia) vector based on name column */
+  /*********************************************************/
+  field = "name";
+  SortIncidenceAngles sortincidenceangles(ia, field);
+  sortincidenceangles.arrange();
+  ia = sortincidenceangles.GetIncidenceangles();
+  //ReadAuxilaryData::Display(ia); exit(0);
+
+  /************************************************************/
+  /* Calculate total area by iterating through the image sets */
+  /* vector and selecting regions used for the analysis       */
+  /************************************************************/
+  n = (int)ia.size();
+  npolygons = 0;
+  for(int i=0; i<(int)imagesets.size(); i++)
+  {
+    /**********************/
+    /* Current image name */
+    /**********************/
+    string image_name = imagesets[i].GetName();
+
+    /**********************************************/
+    /* Retrieve incidence angle for current image */
+    /**********************************************/
+    int nth_element = SearchIncidenceAngles::BinarySearch(ia, 0, n-1, field, &image_name);
+    double angle = ia[nth_element].GetIncidence_angle();
+    
+    /********************************************************/
+    /* Include region in area calculation if it's incidence */
+    /* angle is within the selected incidence angle list    */
+    /********************************************************/
+    bool skip = true;
+    for(int j=0; j<(int)selected_incidence_angles.size(); j++)
+      if(angle == selected_incidence_angles[j])
+      {
+	skip = false;
+	break;
+      }
+    if(skip)
+      continue;
+
+    /****************************/
+    /* Region shape information */
+    /****************************/
+    Polygon_Overlap[0][0] = imagesets[i].GetUpper_left_x();
+    Polygon_Overlap[0][1] = imagesets[i].GetUpper_left_y();
+    Polygon_Overlap[1][0] = imagesets[i].GetUpper_right_x();
+    Polygon_Overlap[1][1] = imagesets[i].GetUpper_right_y();
+    Polygon_Overlap[2][0] = imagesets[i].GetLower_right_x();
+    Polygon_Overlap[2][1] = imagesets[i].GetLower_right_y();
+    Polygon_Overlap[3][0] = imagesets[i].GetLower_left_x();
+    Polygon_Overlap[3][1] = imagesets[i].GetLower_left_y();
+
+    /******************************/
+    /* Gather overlapping regions */
+    /******************************/
+    string buffer = "POLYGON(("+to_string(Polygon_Overlap[0][0])+" "+to_string(Polygon_Overlap[0][1])+","+
+                                to_string(Polygon_Overlap[1][0])+" "+to_string(Polygon_Overlap[1][1])+","+
+	                        to_string(Polygon_Overlap[2][0])+" "+to_string(Polygon_Overlap[2][1])+","+
+	                        to_string(Polygon_Overlap[3][0])+" "+to_string(Polygon_Overlap[3][1])+","+
+	                        to_string(Polygon_Overlap[0][0])+" "+to_string(Polygon_Overlap[0][1])+"))";
+    polygon current_polygon;
+    boost::geometry::read_wkt(buffer.c_str(), current_polygon);
+    boost::geometry::correct(current_polygon);
+    input.push_back(current_polygon);
+
+    /***********************************/
+    /* Update number of polygons added */
+    /***********************************/
+    npolygons++;
+  }
+
+  /******************/
+  /* Calculate Area */
+  /******************/
+  int i = 0;
+  total_area = 0;
+  union_polys(input, output);
+  BOOST_FOREACH(polygon const& p, output)
+  {
+    //cout << i++ << ": " << boost::geometry::area(p) << endl;
+    i++;
+    total_area += boost::geometry::area(p);
+  }
+
+  return total_area;
+}
+
+vector <double> Utilities::RetrieveUniqueIncidenceAngles(vector <IncidenceAngles> &incidenceangles)
+{
+  /****************************************************/
+  /* Declaration/Initialization of function variables */
+  /****************************************************/
+  set <double> input;
+  vector <double> unique_incidence_angles;
 
   /**************************************************************/
   /* Sort incidenceangles vector based on incidenceangle column */
@@ -305,37 +265,61 @@ vector <double> Utilities::RetrieveUniqueIncidenceAngles(std::vector <IncidenceA
   SortIncidenceAngles sortincidenceangles(incidenceangles, "incidence_angle");
   sortincidenceangles.arrange();
   incidenceangles = sortincidenceangles.GetIncidenceangles();
-  //ReadAuxilaryData::Display(incidenceangles); exit(0);
 
   /******************************************/
   /* Retrieve unique incidence angle values */
   /******************************************/
   for(int i=0; i<(int)incidenceangles.size(); i++)
-  {
-    double angle = incidenceangles[i].GetIncidence_angle();
-    if(angle != incidenceangles[i-1].GetIncidence_angle())
-      ia.push_back(angle);
-  }
+    input.insert(incidenceangles[i].GetIncidence_angle());
 
-  return ia;
+  /*****************************/
+  /* Copy set values to vector */
+  /*****************************/
+  copy(input.begin(), input.end(), back_inserter(unique_incidence_angles));
+  
+  return unique_incidence_angles;
 }
 
-void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence_angle_2, vector <OverlappedImages> &OI, vector <Marks> &marks, vector <Marks> &RM1, vector <Marks> &RM2, vector <double> &OA1, vector <double> &OA2, vector <int> &AID1, vector <int> &AID2)
+void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence_angle_2, vector <OverlappedImages> &OI, vector <Marks> &marks, vector < vector <string> > &imagenames, vector <Marks> &RM1, vector <Marks> &RM2, vector <double> &OA1, vector <double> &OA2, vector <int> &AID1, vector <int> &AID2)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
   double incidence_angle_sum;
+  double total_area;
+  int counter;
+  int npolygons;
+  int old_image_id1;
+  int old_image_id2;
   int point_set_size;
-  set < pair <double, double> > point;
+  set <string> imagenames1;
+  set <string> imagenames2;
+  set < pair < int, pair <double, double> > > point;
   string field;
   vector <double> overlap_area_1;
   vector <double> overlap_area_2;
   vector <int> area_id_1;
   vector <int> area_id_2;
+  vector <int> overlap_entry;
   vector <Marks> retained_marks_1;
   vector <Marks> retained_marks_2;
   vector < vector <double> > Polygon_Overlap(4, vector <double> (2));
+  vector < vector <string> > imgnames(2, vector <string> ());
+  
+  /*******************************************/
+  /* Resultant overlapping polygon variables */
+  /*******************************************/
+  vector <polygon> input;
+  vector <polygon> output;
+
+  /***********************/
+  /* Sort overlap vector */
+  /***********************/
+  field = "overlap_minimum_x";
+  SortOverlappedImages sortoverlap(OI, field);
+  sortoverlap.arrange();
+  OI = sortoverlap.GetOverlappedimages();
+  // OverlappedImages::Display(OI); exit(0);
 
   /*********************/
   /* Sort marks vector */
@@ -344,8 +328,7 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
   SortMarks sortmarks(marks, field);
   sortmarks.arrange();
   marks = sortmarks.GetMarks();
-  //RetrieveMarks::Display(marks); exit(0);
-  
+
   /******************************************************/
   /* Used as rejection criterion for overlapping images */
   /******************************************************/
@@ -354,7 +337,12 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
   /*********************************************/
   /* Iterate through overlapping images vector */
   /*********************************************/
+  counter = 0;
   point_set_size = 0;
+  total_area = 0;
+  npolygons = 0;
+  old_image_id1 = -1;
+  old_image_id2 = -1;
   int n = (int)marks.size();
   for(int i=0; i<(int)OI.size(); i++)
   {
@@ -364,57 +352,82 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
     /*********************************************/
     if(incidence_angle_sum != OI[i].GetImage1_incidence_angle()+OI[i].GetImage2_incidence_angle())
       continue;
+    if((incidence_angle_1 != OI[i].GetImage1_incidence_angle()) && (incidence_angle_1 != OI[i].GetImage2_incidence_angle()))
+      continue;
 
-    /*********************/
-    /* Image information */
-    /*********************/
-    int image1_id = OI[i].GetImage1_id();
-    int image2_id = OI[i].GetImage2_id();
-    
+    /*************/
+    /* Image ids */
+    /*************/
+    int image1_id;
+    int image2_id;
+    string image1_name;
+    string image2_name;
+    if(incidence_angle_1 == OI[i].GetImage1_incidence_angle())
+    {
+      image1_id = OI[i].GetImage1_id();
+      image1_name = OI[i].GetImage1_name().substr(0, 12);
+      image2_id = OI[i].GetImage2_id();
+      image2_name = OI[i].GetImage2_name().substr(0, 12);
+    }
+    else
+    {
+      image1_id = OI[i].GetImage2_id();
+      image1_name = OI[i].GetImage2_name().substr(0, 12);
+      image2_id = OI[i].GetImage1_id();
+      image2_name = OI[i].GetImage1_name().substr(0, 12);
+    }
+
     /****************************************/
     /* Reject moon_mappers_tutorial_4 image */
     /****************************************/
     if((image1_id == 60639) || (image2_id == 60639))
       continue;
-    
+
     /******************/
     /* Overlap region */
     /******************/
-    Polygon_Overlap[0][0] = OI[i].GetOverlap_upper_left_longitude();
-    Polygon_Overlap[0][1] = OI[i].GetOverlap_upper_left_latitude();
-    Polygon_Overlap[1][0] = OI[i].GetOverlap_upper_right_longitude();
-    Polygon_Overlap[1][1] = OI[i].GetOverlap_upper_right_latitude();
-    Polygon_Overlap[2][0] = OI[i].GetOverlap_lower_right_longitude();
-    Polygon_Overlap[2][1] = OI[i].GetOverlap_lower_right_latitude();
-    Polygon_Overlap[3][0] = OI[i].GetOverlap_lower_left_longitude();
-    Polygon_Overlap[3][1] = OI[i].GetOverlap_lower_left_latitude();
-    
+    Polygon_Overlap[0][0] = OI[i].GetOverlap_upper_left_x();
+    Polygon_Overlap[0][1] = OI[i].GetOverlap_upper_left_y();
+    Polygon_Overlap[1][0] = OI[i].GetOverlap_upper_right_x();
+    Polygon_Overlap[1][1] = OI[i].GetOverlap_upper_right_y();
+    Polygon_Overlap[2][0] = OI[i].GetOverlap_lower_right_x();
+    Polygon_Overlap[2][1] = OI[i].GetOverlap_lower_right_y();
+    Polygon_Overlap[3][0] = OI[i].GetOverlap_lower_left_x();
+    Polygon_Overlap[3][1] = OI[i].GetOverlap_lower_left_y();
+
     /*********************************************************************/
     /* Isolate marks that are associated with current overlapping images */
     /*********************************************************************/
     int index1 = SearchMarks::FirstOccurence(marks, 0, n-1, field, &image1_id);
     int index2 = SearchMarks::LastOccurence(marks, 0, n-1, field, &image1_id);
-    
+
     /***********************************************************************/
     /* Determine which marks are in overlap region and record unique marks */
     /***********************************************************************/
-    for(int j=index1; j<index2; j++)
+    bool include_area = false;
+    if(index1 != -1)
     {
-      double longitude = marks[j].GetLongitude();
-      double latitude = marks[j].GetLatitude();
-      pair <double, double> entry(longitude, latitude);
-      if(point.find(entry) == point.end())
+      for(int j=index1; j<=index2; j++)
       {
-	if(is_PointContained(longitude, latitude, Polygon_Overlap))
+	double x = marks[j].GetPhysical_x();
+	double y = marks[j].GetPhysical_y();
+	int id = marks[j].GetId();
+	pair <double, double> position(x, y);
+	pair < double, pair <double, double> > entry(id, position);
+	if(point.find(entry) == point.end())
 	{
-	  retained_marks_1.push_back(marks[j]);
-	  overlap_area_1.push_back(OI[i].GetOverlap_area());
-	  area_id_1.push_back(OI[i].GetId());
-	  point.insert(entry);
+	  if(is_PointContained(x, y, Polygon_Overlap))
+	  {
+	    retained_marks_1.push_back(marks[j]);
+	    area_id_1.push_back(OI[i].GetId());
+	    imagenames1.insert(image1_name);
+	    point.insert(entry);
+	    include_area = true;
+	  }
 	}
       }
     }
-  
+    
     /*********************************************************************/
     /* Isolate marks that are associated with current overlapping images */
     /*********************************************************************/
@@ -424,24 +437,77 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
     /***********************************************************************/
     /* Determine which marks are in overlap region and record unique marks */
     /***********************************************************************/
-    for(int j=index1; j<index2; j++)
+    if(index1 != -1)
     {
-      double longitude = marks[j].GetLongitude();
-      double latitude = marks[j].GetLatitude();
-      pair <double, double> entry(longitude, latitude);
-      if(point.find(entry) == point.end())
+      for(int j=index1; j<=index2; j++)
       {
-	if(is_PointContained(longitude, latitude, Polygon_Overlap))
+	double x = marks[j].GetPhysical_x();
+	double y = marks[j].GetPhysical_y();
+	int id = marks[j].GetId();
+	pair <double, double> position(x, y);
+	pair < int, pair <double, double> > entry(id, position);
+	if(point.find(entry) == point.end())
 	{
-	  retained_marks_2.push_back(marks[j]);
-	  overlap_area_2.push_back(OI[i].GetOverlap_area());
-	  area_id_2.push_back(OI[i].GetId());
-	  point.insert(entry);
+	  if(is_PointContained(x, y, Polygon_Overlap))
+	  {
+	    retained_marks_2.push_back(marks[j]);
+	    area_id_2.push_back(OI[i].GetId());
+	    imagenames2.insert(image2_name);
+	    point.insert(entry);
+	    include_area = true;
+	  }
 	}
       }
     }
+    
+    /****************************************************************/
+    /* Include surface area as we iterate through overlapping pairs */
+    /* if a mark has been added to the list of raw user markings    */
+    /****************************************************************/
+    if(include_area)
+    {
+      /******************************/
+      /* Gather overlapping regions */
+      /******************************/
+      string buffer = "POLYGON(("+to_string(Polygon_Overlap[0][0])+" "+to_string(Polygon_Overlap[0][1])+","+
+	                          to_string(Polygon_Overlap[1][0])+" "+to_string(Polygon_Overlap[1][1])+","+
+	                          to_string(Polygon_Overlap[2][0])+" "+to_string(Polygon_Overlap[2][1])+","+
+	                          to_string(Polygon_Overlap[3][0])+" "+to_string(Polygon_Overlap[3][1])+","+
+	                          to_string(Polygon_Overlap[0][0])+" "+to_string(Polygon_Overlap[0][1])+"))";
+      polygon current_polygon;
+      boost::geometry::read_wkt(buffer.c_str(), current_polygon);
+      boost::geometry::correct(current_polygon);
+      input.push_back(current_polygon);
+
+      /***********************************/
+      /* Update number of polygons added */
+      /***********************************/
+      npolygons++;
+    }
   }
-  
+
+  /*******************************/
+  /* Retrieve master image names */
+  /*******************************/
+  copy(imagenames1.begin(), imagenames1.end(), back_inserter(imgnames[0]));
+  copy(imagenames2.begin(), imagenames2.end(), back_inserter(imgnames[1]));
+  imagenames = imgnames;
+
+  /******************/
+  /* Calculate Area */
+  /******************/
+  int i = 0;
+  union_polys(input, output);
+  BOOST_FOREACH(polygon const& p, output)
+  {
+    //cout << i++ << ": " << boost::geometry::area(p) << endl;
+    i++;
+    total_area += boost::geometry::area(p);
+  }
+
+  //cout << "True total area: " << total_area*(m2km*m2km) << " km^2" << endl;
+  //cout << "Number of polygons used: " << npolygons << " : " << output.size() << endl;
+
   /****************************/
   /* Record surviving craters */
   /****************************/
@@ -452,6 +518,10 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
   /* Record area of overlapping region between both */
   /* NACs from which marks are associated with      */
   /**************************************************/
+  int n1 = (int)retained_marks_1.size();
+  int n2 = (int)retained_marks_2.size();
+  overlap_area_1.assign(n1, total_area);
+  overlap_area_2.assign(n2, total_area);
   OA1 = overlap_area_1;
   OA2 = overlap_area_2;
 
@@ -460,137 +530,9 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
   /***************************************************/
   AID1 = area_id_1;
   AID2 = area_id_2;
+
+  return;
 }
-
-// vector <Marks> Utilities::RetrieveNACMarks(int global_imageid, int scale, vector <Images> &images, vector <Marks> &marks)
-// {
-//   /****************************************************/
-//   /* Declaration/Initialization of function variables */
-//   /****************************************************/
-//   int nelements;
-//   string field;
-//   vector <double> subimagex;
-//   vector <double> subimagey;
-//   vector <int> subimageids;
-//   vector <Marks> selected_marks;
-
-//   /********************************************/
-//   /* Sort images vector based on image_set_id */
-//   /********************************************/
-//   field = "image_set_id";
-//   SortImages sortimages(images, field);
-//   sortimages.arrange();
-//   images = sortimages.GetImages();
-//   //RetrieveImages::Display(images); exit(0);
-
-//   /********************************************************/
-//   /* Select sub-image ids associated with global image id */
-//   /********************************************************/
-//   nelements = (int)images.size();
-//   int starting_index = SearchImages::FirstOccurence(images, 0, nelements-1, field, &global_imageid);
-//   int ending_index = SearchImages::LastOccurence(images, 0, nelements-1, field, &global_imageid);
-
-//   /**************************/
-//   /* Copy images sub vector */
-//   /**************************/
-//   vector <Images> temp_images;
-//   std::copy(images.begin()+starting_index, images.begin()+ending_index, back_inserter(temp_images));
-
-//   /********************************/
-//   /* Sort temp vector based on id */
-//   /********************************/
-//   field = "id";
-//   SortImages sortimages2(temp_images, field);
-//   sortimages2.arrange();
-//   temp_images = sortimages2.GetImages();
-//   //RetrieveImages::Display(temp_images); exit(0);
-
-//   /************************************************************/
-//   /* Record all sub-image ids and x and y reference positions */
-//   /************************************************************/
-//   for(int i=0; i<(int)temp_images.size(); i++)
-//   {
-//     /****************************/
-//     /* Retrieve sub-image scale */
-//     /****************************/
-//     int p1 = temp_images[i].GetName().find("_");    
-//     int ss = stoi(temp_images[i].GetName().substr(p1+1, 1), NULL);
-
-//     /**********************************/
-//     /*Apply scale restriction, if any */
-//     /**********************************/
-//     if(scale == ss)
-//     {
-//       subimageids.push_back(temp_images[i].GetId());
-//       subimagex.push_back(temp_images[i].GetX_relative());
-//       subimagey.push_back(temp_images[i].GetY_relative());
-//     }
-//     if(scale > 2)
-//     {
-//       subimageids.push_back(temp_images[i].GetId());
-//       subimagex.push_back(temp_images[i].GetX_relative());
-//       subimagey.push_back(temp_images[i].GetY_relative());
-//     }
-//   }
-//   temp_images.clear();
-
-//   /***************************************/
-//   /* Sort marks vector based on image_id */
-//   /***************************************/
-//   field = "image_id";
-//   SortMarks sortmarks(marks, field);
-//   sortmarks.arrange();
-//   marks = sortmarks.GetMarks();
-//   //RetrieveMarks::Display(marks); exit(0);
-
-//   /*************************************/
-//   /* Extract marks that are associated */
-//   /* with extracted sub-image ids      */
-//   /*************************************/
-//   int index = 0;
-//   nelements = (int)marks.size();
-//   while(index < (int)subimageids.size())
-//   {
-//     /****************************************************************/
-//     /* Find first occurence of current sub-image id in marks vector */
-//     /****************************************************************/
-//     int value = subimageids[index];
-//     int first = SearchMarks::FirstOccurence(marks, 0, nelements-1, field, &value);
-    
-//     /*********************************************************/
-//     /* Relative modify x and y position of mark using offset */
-//     /*********************************************************/
-//     double x_offset = subimagex[index];
-//     double y_offset = subimagey[index];
-
-//     /************************************************************/
-//     /* Iterate through marks sub vector and record wanted marks */
-//     /************************************************************/
-//     int index2 = first;
-//     while(value == marks[index2].GetImage_id())
-//     {
-//       /**************************/
-//       /* Modify and Record mark */
-//       /**************************/
-//       Marks newmark = marks[index2];
-//       newmark.SetX(x_offset+marks[index2].GetX());
-//       newmark.SetY(y_offset+marks[index2].GetY());
-//       selected_marks.push_back(newmark);
-
-//       /*****************/
-//       /* Update index2 */
-//       /*****************/
-//       index2++;
-//     }
-
-//     /****************/
-//     /* Update index */
-//     /****************/
-//     index++;
-//   }
-
-//   return selected_marks;
-// }
 
 vector <OverlappedImages> Utilities::FindDifferentIncidenceAngleOverlappingImages(vector <OverlappedImages> &OI)
 {
@@ -630,7 +572,7 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
   /***********************/
   /* Define field values */
   /***********************/
-  field1 = "minimum_longitude";
+  field1 = "minimum_x";
   field2 = "name";
 
   /***********************************************/
@@ -662,42 +604,48 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
     /******************************************/
     int image1_id = images[i].GetId();
     string image1_name = images[i].GetName();
-    double image1_upper_left_longitude = images[i].GetUpper_left_longitude();
-    double image1_upper_left_latitude = images[i].GetUpper_left_latitude();
-    double image1_upper_right_longitude = images[i].GetUpper_right_longitude();
-    double image1_upper_right_latitude = images[i].GetUpper_right_latitude();
-    double image1_lower_right_longitude = images[i].GetLower_right_longitude();
-    double image1_lower_right_latitude = images[i].GetLower_right_latitude();
-    double image1_lower_left_longitude = images[i].GetLower_left_longitude();
-    double image1_lower_left_latitude = images[i].GetLower_left_latitude();
-    double image1_minimum_longitude = images[i].GetMinimum_longitude();
-    double image1_minimum_latitude = images[i].GetMinimum_latitude();
-    double image1_maximum_longitude = images[i].GetMaximum_longitude();
-    double image1_maximum_latitude = images[i].GetMaximum_latitude();
+    double image1_upper_left_x = images[i].GetUpper_left_x();
+    double image1_upper_left_y = images[i].GetUpper_left_y();
+    double image1_upper_right_x = images[i].GetUpper_right_x();
+    double image1_upper_right_y = images[i].GetUpper_right_y();
+    double image1_lower_right_x = images[i].GetLower_right_x();
+    double image1_lower_right_y = images[i].GetLower_right_y();
+    double image1_lower_left_x = images[i].GetLower_left_x();
+    double image1_lower_left_y = images[i].GetLower_left_y();
+    double image1_minimum_x = images[i].GetMinimum_x();
+    double image1_minimum_y = images[i].GetMinimum_y();
+    double image1_maximum_x = images[i].GetMaximum_x();
+    double image1_maximum_y = images[i].GetMaximum_y();
     double image1_area = images[i].GetArea();
     vector < vector <double> > image1_shape_vector = images[i].GetShape_vector();
     int length = image1_name.find_first_of("_");
     string basename = image1_name.substr(0, length); 
     int nth_element = SearchIncidenceAngles::BinarySearch(incidenceangles, 0, n2-1, field2, &basename);
     double image1_incidence_angle = incidenceangles[nth_element].GetIncidence_angle();
-
+    
     /**************************************************/
     /* Determine ending index of optimal search range */
     /**************************************************/
-    int index = SearchImages::LastNearestValue(images, i+1, n1-1, field1, &image1_maximum_longitude);
+    int index = SearchImages::LastNearestValue(images, i+1, n1-1, field1, &image1_maximum_x);
+
+    /************************************/
+    /* Ensure index is not out of range */
+    /************************************/
+    if (index >= n1)
+      index = n1-1;
     
     /************************************************************/
     /* Iterate over a select few sub-images after the ith image */
     /************************************************************/
-    for(int j=i+1; j<index; j++)
-    {      
+    for(int j=i+1; j<=index; j++)
+    {
       /**************************************/
       /* Retrieve image 2 shape information */
       /**************************************/
-      double image2_minimum_longitude = images[j].GetMinimum_longitude();
-      double image2_minimum_latitude = images[j].GetMinimum_latitude();
-      double image2_maximum_longitude = images[j].GetMaximum_longitude();
-      double image2_maximum_latitude = images[j].GetMaximum_latitude();
+      double image2_minimum_x = images[j].GetMinimum_x();
+      double image2_minimum_y = images[j].GetMinimum_y();
+      double image2_maximum_x = images[j].GetMaximum_x();
+      double image2_maximum_y = images[j].GetMaximum_y();
       double image2_area = images[j].GetArea();
       vector < vector <double> > image2_shape_vector = images[j].GetShape_vector();
       
@@ -705,13 +653,14 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
       /* Check if two images overlap */
       /*******************************/
       CheckOverlap OL(image1_shape_vector,
-		      image1_minimum_longitude, image1_minimum_latitude,
-		      image1_maximum_longitude, image1_maximum_latitude,
+		      image1_minimum_x, image1_minimum_y,
+		      image1_maximum_x, image1_maximum_y,
 		      image1_area,
 		      image2_shape_vector,
-		      image2_minimum_longitude, image2_minimum_latitude,
-		      image2_maximum_longitude, image2_maximum_latitude,
+		      image2_minimum_x, image2_minimum_y,
+		      image2_maximum_x, image2_maximum_y,
 		      image2_area);
+      
       if(OL.are_Overlapping())
       {	
 	/*****************************************************/
@@ -719,14 +668,14 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
 	/*****************************************************/
 	int image2_id = images[j].GetId();
 	string image2_name = images[j].GetName();
-	double image2_upper_left_longitude = images[j].GetUpper_left_longitude();
-	double image2_upper_left_latitude = images[j].GetUpper_left_latitude();
-	double image2_upper_right_longitude = images[j].GetUpper_right_longitude();
-	double image2_upper_right_latitude = images[j].GetUpper_right_latitude();
-	double image2_lower_right_longitude = images[j].GetLower_right_longitude();
-	double image2_lower_right_latitude = images[j].GetLower_right_latitude();
-	double image2_lower_left_longitude = images[j].GetLower_left_longitude();
-	double image2_lower_left_latitude = images[j].GetLower_left_latitude();
+	double image2_upper_left_x = images[j].GetUpper_left_x();
+	double image2_upper_left_y = images[j].GetUpper_left_y();
+	double image2_upper_right_x = images[j].GetUpper_right_x();
+	double image2_upper_right_y = images[j].GetUpper_right_y();
+	double image2_lower_right_x = images[j].GetLower_right_x();
+	double image2_lower_right_y = images[j].GetLower_right_y();
+	double image2_lower_left_x = images[j].GetLower_left_x();
+	double image2_lower_left_y = images[j].GetLower_left_y();
         length = image2_name.find_first_of("_");
 	basename = image2_name.substr(0, length);
 	nth_element = SearchIncidenceAngles::BinarySearch(incidenceangles, 0, n2-1, field2, &basename);
@@ -748,14 +697,14 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
 	/***************************************/
 	/* Retrieve overlap region information */
 	/***************************************/
-	double overlap_upper_left_longitude = OverlappingBoundary[0][0];
-	double overlap_upper_left_latitude = OverlappingBoundary[0][1];
-	double overlap_upper_right_longitude = OverlappingBoundary[1][0];
-	double overlap_upper_right_latitude = OverlappingBoundary[1][1];
-	double overlap_lower_right_longitude = OverlappingBoundary[2][0];
-	double overlap_lower_right_latitude = OverlappingBoundary[2][1];
-	double overlap_lower_left_longitude = OverlappingBoundary[3][0];
-	double overlap_lower_left_latitude = OverlappingBoundary[3][1];
+	double overlap_upper_left_x = OverlappingBoundary[0][0];
+	double overlap_upper_left_y = OverlappingBoundary[0][1];
+	double overlap_upper_right_x = OverlappingBoundary[1][0];
+	double overlap_upper_right_y = OverlappingBoundary[1][1];
+	double overlap_lower_right_x = OverlappingBoundary[2][0];
+	double overlap_lower_right_y = OverlappingBoundary[2][1];
+	double overlap_lower_left_x = OverlappingBoundary[3][0];
+	double overlap_lower_left_y = OverlappingBoundary[3][1];
 	
 	/*****************************************/
 	/* Record overlapping images information */
@@ -763,36 +712,36 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
 	OLImages.push_back(OverlappedImages(counter,
 					    image1_id,
 					    image1_name,
-					    image1_upper_left_longitude,
-					    image1_upper_left_latitude,
-					    image1_upper_right_longitude,
-					    image1_upper_right_latitude,
-					    image1_lower_right_longitude,
-					    image1_lower_right_latitude,
-					    image1_lower_left_longitude,
-					    image1_lower_left_latitude,
+					    image1_upper_left_x,
+					    image1_upper_left_y,
+					    image1_upper_right_x,
+					    image1_upper_right_y,
+					    image1_lower_right_x,
+					    image1_lower_right_y,
+					    image1_lower_left_x,
+					    image1_lower_left_y,
 					    image1_area,
 					    image1_incidence_angle,
 					    image2_id,
 					    image2_name,
-					    image2_upper_left_longitude,
-					    image2_upper_left_latitude,
-					    image2_upper_right_longitude,
-					    image2_upper_right_latitude,
-					    image2_lower_right_longitude,
-					    image2_lower_right_latitude,
-					    image2_lower_left_longitude,
-					    image2_lower_left_latitude,
+					    image2_upper_left_x,
+					    image2_upper_left_y,
+					    image2_upper_right_x,
+					    image2_upper_right_y,
+					    image2_lower_right_x,
+					    image2_lower_right_y,
+					    image2_lower_left_x,
+					    image2_lower_left_y,
 					    image2_area,
 					    image2_incidence_angle,
-					    overlap_upper_left_longitude,
-					    overlap_upper_left_latitude,
-					    overlap_upper_right_longitude,
-					    overlap_upper_right_latitude,
-					    overlap_lower_right_longitude,
-					    overlap_lower_right_latitude,
-					    overlap_lower_left_longitude,
-					    overlap_lower_left_latitude,
+					    overlap_upper_left_x,
+					    overlap_upper_left_y,
+					    overlap_upper_right_x,
+					    overlap_upper_right_y,
+					    overlap_lower_right_x,
+					    overlap_lower_right_y,
+					    overlap_lower_left_x,
+					    overlap_lower_left_y,
 					    overlap_area));
 	counter++;
       }
@@ -843,49 +792,35 @@ vector <OverlappedImages> Utilities::FindSameScaleOverlappingImages(vector <Over
   return SameScaleOverlappingImages;
 }
 
-// vector <OverlappedImages> Utilities::FindTotalOverlappingImages(vector <OverlappedImages> &OI, bool plot)
-// {
-//   /****************************************************/
-//   /* Declaration/Initialization of function variables */
-//   /****************************************************/
-//   string field;
-//   vector <OverlappedImages> TOI;
-
-//   /********************************************/
-//   /* Sort overlap vector based on "id" column */
-//   /********************************************/
-//   field = "id";
-//   SortOverlappedImages sortoverlappedimages(OI, field);
-//   sortoverlappedimages.arrange();
-//   OI = sortoverlappedimages.GetOverlappedimages();
-//   //OverlappedImages::Display(OI); exit(0);
-
-//   /****************************/
-//   /* Retrieve neccessary data */
-//   /****************************/
-//   for(int i=0; i<(int)OI.size(); i++)
-//   {
-//     double imagearea1 = OI[i].GetImage1_area();
-//     double imagearea2 = OI[i].GetImage2_area();
-//     double oarea = OI[i].GetOverlap_area();
-//     double overlap_percentage = 100*oarea/Utilities::Min(imagearea1, imagearea2);
-//     if(overlap_percentage == 100)
-//       TOI.push_back(OI[i]);
-//   }
-
-//   /********/
-//   /* Plot */
-//   /********/
-
-//   return TOI;
-// }
-
-void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_angle_2, vector <IncidenceAngles> &IA, vector <OverlappedImages> &OI, vector <Marks> &marks, bool print)
+vector <OverlappedImages> Utilities::FindTotalOverlappingImages(vector <OverlappedImages> &OI)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  int index;
+  string field;
+  vector <OverlappedImages> TOI;
+
+  /****************************/
+  /* Retrieve neccessary data */
+  /****************************/
+  for(int i=0; i<(int)OI.size(); i++)
+  {
+    double imagearea1 = OI[i].GetImage1_area();
+    double imagearea2 = OI[i].GetImage2_area();
+    double oarea = OI[i].GetOverlap_area();
+    double overlap_percentage = 100*oarea/Min(imagearea1, imagearea2);
+    if(overlap_percentage == 100)
+      TOI.push_back(OI[i]);
+  }
+
+  return TOI;
+}
+
+void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_angle_2, vector <IncidenceAngles> &IA, vector <OverlappedImages> &OI, vector <Marks> &marks, int run, bool print)
+{
+  /****************************************************/
+  /* Declaration/Initialization of function variables */
+  /****************************************************/
   int nelements;
   ofstream File;
   string field;
@@ -898,34 +833,43 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
   vector <int> AID2;
   vector <Marks> RM1;
   vector <Marks> RM2;
-  
-  /******************/
-  /* Sort IA vector */
-  /******************/
-  SortIncidenceAngles sortincidenceangles(IA, "incidence_angle");
-  sortincidenceangles.arrange();
-  IA = sortincidenceangles.GetIncidenceangles();
-  //ReadAuxilaryData::Display(IA); exit(0);
-  
-  /****************************/
-  /* Retrieve NAC image names */
-  /****************************/
-  field = "incidence_angle";
-  nelements = (int)IA.size();
-  index = SearchIncidenceAngles::BinarySearch(IA, 0, nelements-1, field, &incidence_angle_1);
-  master_image_1_name = IA[index].GetName();
-  index = SearchIncidenceAngles::BinarySearch(IA, 0, nelements-1, field, &incidence_angle_2);
-  master_image_2_name = IA[index].GetName();
+  vector < vector <string> > imagenames(2, vector <string> ());
   
   /**********************/
   /* Retrieve NAC marks */
   /**********************/
-  RetrieveCraterCatalog(incidence_angle_1, incidence_angle_2, OI, marks, RM1, RM2, OA1, OA2, AID1, AID2);
+  RetrieveCraterCatalog(incidence_angle_1, incidence_angle_2, OI, marks, imagenames, RM1, RM2, OA1, OA2, AID1, AID2);
+
+  /****************************/
+  /* Retrieve NAC image names */
+  /****************************/
+  if(imagenames[0].size() == 1)
+    master_image_1_name = imagenames[0][0];
+  else if(imagenames[0].size() == 2)
+    master_image_1_name = imagenames[0][0].substr(0, 10)+"LERE";
+  else
+  {
+    printf("Error: Invalid number of imagenames (%d).\nNow terminating program...\n", (int)imagenames[0].size());
+    for(int i=0; i<(int)imagenames[0].size(); i++)
+      cout << imagenames[0][i] << endl;
+    exit(1);
+  }
+  if(imagenames[1].size() == 1)
+    master_image_2_name = imagenames[1][0];
+  else if(imagenames[1].size() == 2)
+    master_image_2_name = imagenames[1][0].substr(0, 10)+"LERE";
+  else
+  {
+    printf("Error: Invalid number of imagenames (%d).\nNow terminating program...\n", (int)imagenames[1].size());
+    for(int i=0; i<(int)imagenames[1].size(); i++)
+      cout << imagenames[0][i] << endl;
+    exit(1);
+  }
 
   /**************************/
   /* Create output filename */
   /**************************/
-  filename = "Crater_catalog_"+master_image_1_name+"_"+to_string(incidence_angle_1)+".txt";
+  filename = "Crater_catalog_"+to_string(run)+"_"+master_image_1_name+"_"+to_string(incidence_angle_1)+".txt";
 
   /***************************/
   /* Print to screen or file */
@@ -964,7 +908,7 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
   /**************************/
   /* Create output filename */
   /**************************/
-  filename = "Crater_catalog_"+master_image_2_name+"_"+to_string(incidence_angle_2)+".txt";
+  filename = "Crater_catalog_"+to_string(run)+"_"+master_image_2_name+"_"+to_string(incidence_angle_2)+".txt";
 
   /***************************/
   /* Print to screen or file */
@@ -1003,77 +947,69 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
   return;
 }
 
-// void Utilities::PrintNACMarks(double incidence_angle, int scale, vector <IncidenceAngles> &ia, vector <ImageSets> &imagesets, vector <Images> &images, vector <Marks> &marks, bool print)
-// {
-//   /****************************************************/
-//   /* Declaration/Initialization of function variables */
-//   /****************************************************/
-//   int global_imageid = 0;
-//   int nelements;
-//   ofstream File;
-//   string filename;
-//   string global_imagename;
-//   vector <Marks> selected_marks;
+int Utilities::DataSetSelector(string dsn)
+{
+  to_upper(dsn);
+  if(dsn.compare("MARS") == 0) return 18;
+  else if(dsn.compare("MERCURY") == 0) return 5;
+  else if(dsn.compare("MOON") == 0) return 1;
+  else if(dsn.compare("VESTA") == 0) return 4;
+  else
+  {
+    printf("Invalid data set (%s) request. Terminating program ...\n", dsn.c_str());
+    exit(EXIT_FAILURE);
+  }
 
-//   /*******************************/
-//   /* Determine global image name */
-//   /*******************************/
-//   for(int i=0; i<(int)ia.size(); i++)
-//     if(ia[i].GetIncidence_angle() == incidence_angle)
-//     {
-//       global_imagename = ia[i].GetName();
-//       break;
-//     }
+  return 0;
+}
 
-//   /*****************************/
-//   /* Determine global image id */
-//   /*****************************/
-//   for(int i=0; i<(int)imagesets.size(); i++)
-//     if(imagesets[i].GetName() == global_imagename)
-//     {
-//       global_imageid = imagesets[i].GetId();
-//       break;
-//     }
-
-//   /**********************/
-//   /* Retrieve NAC marks */
-//   /**********************/
-//   selected_marks = RetrieveNACMarks(global_imageid, scale, images, marks);
-
-//   /**************************/
-//   /* Create output filename */
-//   /**************************/
-//   filename = global_imagename+"_crater_catalog.txt";
-
-//   /***************************/
-//   /* Print to screen or file */
-//   /***************************/
-//   nelements = (int)selected_marks.size();
-//   if(print)
-//   {
-//     File.open(filename.c_str());
-//     File << "X\tY\tD\tC" << endl;
-//     for(int i=0; i<nelements; i++)
-//       File << setprecision(7) << setw(7) << left << selected_marks[i].GetX() << "\t"
-// 	   << setprecision(7) << setw(7) << left << selected_marks[i].GetY() << "\t"
-// 	   << setprecision(7) << setw(7) << left << selected_marks[i].GetDiameter() << "\t"
-// 	   << setprecision(7) << setw(7) << left << 1 
-// 	   << endl;
-//     File.close();
-//   }
-//   else
-//   {
-//     cout << "X\tY\tD\tC" << endl;
-//     for(int i=0; i<nelements; i++)
-//       cout << setprecision(7) << setw(7) << left << selected_marks[i].GetX() << "\t"
-// 	   << setprecision(7) << setw(7) << left << selected_marks[i].GetY() << "\t"
-// 	   << setprecision(7) << setw(7) << left << selected_marks[i].GetDiameter() << "\t"
-// 	   << setprecision(7) << setw(7) << left << 1 
-// 	   << endl;
-//   }
+void Utilities::ExecuteAuxilaryFunctions(std::vector <ImageSets> &imagesets, std::vector <Images> &images, std::vector <Marks> &marks)
+{
+  /***************************************/
+  /* Declaration of function variable(s) */
+  /***************************************/
+  string buffer;
   
-//   return;
-// }
+  /*************************/
+  /* Initialize checkpoint */
+  /*************************/
+  Checkpoint myCheckpoint;
+  
+  /****************************************/
+  /* Execute imagesets auxilary functions */
+  /****************************************/
+  ExecuteImageSetsAuxilaryFunction(imagesets);
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to execute imagesets auxilary function:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  /*************************************/
+  /* Execute images auxilary functions */
+  /*************************************/
+  ExecuteImagesAuxilaryFunction(images, imagesets);
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to execute images auxilary function:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  /************************************/
+  /* Execute marks auxilary functions */
+  /************************************/
+  ExecuteMarksAuxilaryFunction(marks, images);
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to execute marks auxilary function:";
+  myCheckpoint.ElapsedTime(buffer);
+  
+  return;
+}
 
 void Utilities::ExecuteImagesAuxilaryFunction(vector <Images> &images, vector <ImageSets> &imagesets)
 {
@@ -1083,7 +1019,6 @@ void Utilities::ExecuteImagesAuxilaryFunction(vector <Images> &images, vector <I
   SortImageSets sortimagesets(imagesets, "name");
   sortimagesets.arrange();
   imagesets = sortimagesets.GetImageSets();
-  //RetrieveImageSets::Display(imagesets); exit(0);
   
   /*******************************************/
   /* Sort images vector based on name column */
@@ -1091,7 +1026,6 @@ void Utilities::ExecuteImagesAuxilaryFunction(vector <Images> &images, vector <I
   SortImages sortimages(images, "name");
   sortimages.arrange();
   images = sortimages.GetImages();
-  //RetrieveImages::Display(images); exit(0);
 
   /****************/
   /* Images index */
@@ -1133,17 +1067,25 @@ void Utilities::ExecuteImagesAuxilaryFunction(vector <Images> &images, vector <I
       /* Execute AuxilaryFunction */
       /****************************/
       images[index].AuxilaryFunction(upper_left_x, upper_left_y, pt);
-
+      
       /**************************/
       /* Increment images index */
       /**************************/
       index++;
     }
   }
+  
+  if((int)imagesets.size() == 0)
+  {
+    cout << "Error in \"ExecuteImagesAuxilaryFunction\". ImageSets array has zero elements!\n Now terminating program ..." << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  return;
 }
 
 void Utilities::ExecuteImageSetsAuxilaryFunction(vector <ImageSets> &imagesets)
-{
+{  
   /*****************************************************************/
   /* Iterate through imagesets vector and execute AuxilaryFunction */
   /*****************************************************************/
@@ -1168,7 +1110,6 @@ void Utilities::ExecuteMarksAuxilaryFunction(vector <Marks> &marks, vector <Imag
   SortImages sortimages(images, field);
   sortimages.arrange();
   images = sortimages.GetImages();
-  //RetrieveImages::Display(images); exit(0);
 
   /*********************/
   /* Sort marks vector */
@@ -1177,7 +1118,6 @@ void Utilities::ExecuteMarksAuxilaryFunction(vector <Marks> &marks, vector <Imag
   SortMarks sortmarks(marks, field);
   sortmarks.arrange();
   marks = sortmarks.GetMarks();
-  //RetrieveMarks::Display(marks); exit(0);
 
   /*********************************/
   /* Iterate through images vector */
@@ -1221,22 +1161,26 @@ void Utilities::ExecuteMarksAuxilaryFunction(vector <Marks> &marks, vector <Imag
       /*********************************************/
       /* Calculate mark diameter in physical units */
       /*********************************************/
-      double r = 0.5*marks[index].GetDiameter();
-      double latitude_high = pt.ComputeTarget2SourceCoordinate_y(x, y+r);
-      double latitude_low = pt.ComputeTarget2SourceCoordinate_y(x, y-r);
-      double angular_change = fabs(latitude_high-latitude_low)*(M_PI/180); // Unit: radian
-      double physical_diameter = EquirectangularProjection::CalculateY(angular_change, 0.0, 1737400.0);
-      //double physical_diameter2 = SphericalLawofCosines::CalculateDistance(latitude_low, latitude_high, longitude, longitude, 1737400.0);
+      double r = 0.5*marks[index].GetDiameter(); // Unit: pixel
+      double latitude_high = pt.ComputeTarget2SourceCoordinate_y(x, y+r); // Unit: degree
+      double latitude_low = pt.ComputeTarget2SourceCoordinate_y(x, y-r); // Unit: degree
+      double longitude_high = pt.ComputeTarget2SourceCoordinate_y(x+r, y); // Unit: degree
+      double longitude_low = pt.ComputeTarget2SourceCoordinate_y(x-r, y); // Unit: degree
+      double angular_change1 = fabs(latitude_high-latitude_low); // Unit: degree
+      double angular_change2 = fabs(longitude_high-longitude_low); // Unit: degree
+      double angular_change = (angular_change1 > angular_change2) ? angular_change1 : angular_change2; // Unit: degree
+      double physical_diameter = EquirectangularProjection::CalculateY(angular_change, 0.0, R_moon); // Unit: meter
+      //double physical_diameter2 = SphericalLawofCosines::CalculateDistance(latitude_low, latitude_high, longitude, longitude, R_moon); // Unit: meter
       
       /*****************************/
       /* Execute auxilary function */
       /*****************************/
-      vector <double> adjustedpixelcoordinate{x, y};
-      vector <double> selenographiccoordinate = pt.ComputeTarget2SourceCoordinates(x, y);
-      double physical_x = EquirectangularProjection::CalculateX(selenographiccoordinate[0]*(M_PI/180), 0.0, 0.0, 1737400.0);
-      double physical_y = EquirectangularProjection::CalculateY(selenographiccoordinate[1]*(M_PI/180), 0.0, 1737400.0);
-      //double physical_x2 = SphericalLawofCosines::CalculateDistance(0.0, 0.0, 0.0, selenographiccoordinate[0], 1737400.0);
-      //double physical_y2 = SphericalLawofCosines::CalculateDistance(0.0, selenographiccoordinate[1], 0.0, 0.0, 1737400.0);
+      vector <double> adjustedpixelcoordinate{x, y}; // Units: pixel
+      vector <double> selenographiccoordinate = pt.ComputeTarget2SourceCoordinates(x, y); // Units: degree
+      double physical_x = EquirectangularProjection::CalculateX(selenographiccoordinate[0], 0.0, 0.0, R_moon); // Unit: meter
+      double physical_y = EquirectangularProjection::CalculateY(selenographiccoordinate[1], 0.0, R_moon); // Unit: meter
+      //double physical_x2 = SphericalLawofCosines::CalculateDistance(0.0, 0.0, 0.0, selenographiccoordinate[0], R_moon); // Unit: meter
+      //double physical_y2 = SphericalLawofCosines::CalculateDistance(0.0, selenographiccoordinate[1], 0.0, 0.0, R_moon); // Unit: meter
       vector <double> cartesiancoordinate{physical_x, physical_y};
       marks[index].AuxilaryFunction(adjustedpixelcoordinate, selenographiccoordinate, cartesiancoordinate, physical_diameter);
       
@@ -1246,4 +1190,159 @@ void Utilities::ExecuteMarksAuxilaryFunction(vector <Marks> &marks, vector <Imag
       index++;
     }
   }
+
+  return;
+}
+
+void Utilities::ObtainData(string dataset_name, vector <ImageSets> &imagesets, vector <Images> &images, vector <Marks> &marks, string auxilarydatafile, vector <IncidenceAngles> &incidenceangles)
+{
+  /****************************************************/
+  /* Declaration/Initialization of function variables */
+  /****************************************************/
+  Connection *conn;
+  int dataset_id;
+  string buffer;
+  string field;
+  string option;
+  string table;
+
+  /*************************/
+  /* Initialize checkpoint */
+  /*************************/
+  Checkpoint myCheckpoint;
+
+  /*****************************************************/
+  /* Establish connection to CosmoQuest MySQL database */
+  /*****************************************************/
+  MySQLConnection myConnection(mysql_url, mysql_user, mysql_password, mysql_database);
+  myConnection.Connect();
+  conn = myConnection.GetConnection();
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to establish connection to CosmoQuest mysql database:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  /************************************************/
+  /* Test connection to CosmoQuest MySQL database */
+  /************************************************/
+  // myConnection.TestConnection();
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to test connection to CosmoQuest mysql database:";
+  // myCheckpoint.ElapsedTime(buffer);
+
+  /*********************************/
+  /* Establish dataset to retrieve */
+  /*********************************/
+  dataset_id = DataSetSelector(dataset_name); 
+
+  /****************************************************************/
+  /* Retrieve image_sets datatable from CosmoQuest MySQL database */
+  /****************************************************************/
+  table = "image_sets";
+  field = "id, name, application_id, upper_left_latitude, upper_left_longitude, upper_right_latitude, upper_right_longitude, lower_right_latitude, lower_right_longitude, lower_left_latitude, lower_left_longitude, pixel_resolution, details";
+  option = "";
+  RetrieveData<ImageSets> ImageSetsData(conn, dataset_id, table, field, option);
+  ImageSetsData.FetchData();
+  imagesets = ImageSetsData.GetData();
+  // RetrieveData<ImageSets>::DisplayData(table, imagesets); exit(0);
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to retrieve image_sets table from CosmoQuest mysql database:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  /************************************************************/
+  /* Retrieve images datatable from CosmoQuest MySQL database */
+  /************************************************************/
+  table = "images";
+  field = "id, image_set_id, application_id, name, details";
+  RetrieveData<Images> ImagesData(conn, dataset_id, table, field, option);
+  ImagesData.FetchData();
+  images = ImagesData.GetData();
+  // RetrieveData<Images>::DisplayData(table, images); exit(0);
+  
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to retrieve images table from CosmoQuest mysql database:";
+  myCheckpoint.ElapsedTime(buffer);
+  
+  /***********************************************************/
+  /* Retrieve marks datatable from CosmoQuest MySQL database */
+  /***********************************************************/
+  table = "marks";
+  field = "id, image_id, application_id, x, y, diameter";
+  RetrieveData<Marks> MarksData(conn, dataset_id, table, field, option);
+  MarksData.FetchData();
+  marks = MarksData.GetData();
+  // RetrieveData<Marks>::DisplayData(table, marks); exit(0);
+  
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to retrieve marks table from CosmoQuest mysql database:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  /***********************************************/
+  /* End connection to CosmoQuest MySQL database */
+  /***********************************************/
+  myConnection.Disconnect();
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to end connection to CosmoQuest mysql database:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  /******************************************************/
+  /* Retrieve auxilary data from user supplied datafile */
+  /******************************************************/
+  ReadAuxilaryData AuxilaryData(auxilarydatafile);
+  AuxilaryData.Read();
+  incidenceangles = AuxilaryData.GetIncidenceAngleData();
+  // ReadAuxilaryData::Display(incidenceangles); exit(0);
+
+  /**************/
+  /* Checkpoint */
+  /**************/
+  buffer = "Elapsed time to retrieve auxilary data:";
+  myCheckpoint.ElapsedTime(buffer);
+
+  return;
+}
+
+void Utilities::union_polys(vector <polygon> In_polys, vector <polygon> &Out_polys)
+{
+    std::vector<polygon> temp_polys;
+    bool *considered = new bool [In_polys.size()];
+    for(unsigned i = 0 ; i < In_polys.size() ; i++) considered[i] = false;
+    for(unsigned i = 0 ; i < In_polys.size()/2; i++)
+    {
+        if(!considered[i])
+        {
+            polygon inetr = In_polys.at(i);
+            for(unsigned j = i + 1 ; j < In_polys.size() ; j++)
+            {
+
+                if(!considered[j])
+                {
+                    temp_polys.clear();
+                    boost::geometry::union_(inetr, In_polys.at(j) , temp_polys);
+                    if(temp_polys.size() == 1)
+                    {
+                        inetr = temp_polys.at(0);
+                        considered[j] = true;
+                        j = i;
+                    }
+                }
+            }
+            Out_polys.push_back(inetr);
+        }
+    }
 }

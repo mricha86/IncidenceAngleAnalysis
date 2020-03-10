@@ -255,24 +255,23 @@ void CheckOverlap::CalculateOverlapArea()
   {
     /******************/
     /* Define corners */
-    /******************/
-    double conv = (M_PI/180); 
-    double upper_left_x = EquirectangularProjection::CalculateX(Polygon_Overlap[0][0]*conv, 0.0, 0.0, 1737400.0);
-    double upper_left_y = EquirectangularProjection::CalculateY(Polygon_Overlap[0][1]*conv, 0.0, 1737400.0);
-    double upper_right_x = EquirectangularProjection::CalculateX(Polygon_Overlap[1][0]*conv, 0.0, 0.0, 1737400.0);
-    double upper_right_y = EquirectangularProjection::CalculateY(Polygon_Overlap[1][1]*conv, 0.0, 1737400.0);
-    double lower_right_x = EquirectangularProjection::CalculateX(Polygon_Overlap[2][0]*conv, 0.0, 0.0, 1737400.0);
-    double lower_right_y = EquirectangularProjection::CalculateY(Polygon_Overlap[2][1]*conv, 0.0, 1737400.0);
-    double lower_left_x = EquirectangularProjection::CalculateX(Polygon_Overlap[3][0]*conv, 0.0, 0.0, 1737400.0);
-    double lower_left_y = EquirectangularProjection::CalculateY(Polygon_Overlap[3][1]*conv, 0.0, 1737400.0);
+    /******************/ 
+    double upper_left_x = Polygon_Overlap[0][0];
+    double upper_left_y = Polygon_Overlap[0][1];
+    double upper_right_x = Polygon_Overlap[1][0];
+    double upper_right_y = Polygon_Overlap[1][1];
+    double lower_right_x = Polygon_Overlap[2][0];
+    double lower_right_y = Polygon_Overlap[2][1];
+    double lower_left_x = Polygon_Overlap[3][0];
+    double lower_left_y = Polygon_Overlap[3][1];
 
     /***************************/
     /* Define lengths of edges */
     /***************************/
-    double length_top_edge = sqrt((upper_left_x-upper_right_x)*(upper_left_x-upper_right_x)+(upper_left_y-upper_right_y)*(upper_left_y-upper_right_y));
+    double length_bottom_edge = sqrt((lower_left_x-lower_right_x)*(lower_left_x-lower_right_x)+(lower_left_y-lower_right_y)*(lower_left_y-lower_right_y));
+    double length_left_edge = sqrt((upper_left_x-lower_left_x)*(upper_left_x-lower_left_x)+(upper_left_y-lower_left_y)*(upper_left_y-lower_left_y));
     double length_right_edge = sqrt((upper_right_x-lower_right_x)*(upper_right_x-lower_right_x)+(upper_right_y-lower_right_y)*(upper_right_y-lower_right_y));
-    double length_bottom_edge = sqrt((lower_right_x-lower_left_x)*(lower_right_x-lower_left_x)+(lower_right_y-lower_left_y)*(lower_right_y-lower_left_y));
-    double length_left_edge = sqrt((lower_left_x-upper_left_x)*(lower_left_x-upper_left_x)+(lower_left_y-upper_left_y)*(lower_left_y-upper_left_y));
+    double length_top_edge = sqrt((upper_left_x-upper_right_x)*(upper_left_x-upper_right_x)+(upper_left_y-upper_right_y)*(upper_left_y-upper_right_y));
     
     /******************************************************/
     /* Calculate interior angle at lower left hand corner */

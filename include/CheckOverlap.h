@@ -7,6 +7,7 @@
 #include <limits>
 #include <set>
 #include <vector>
+#include "Constants.h"
 #include "EquirectangularProjection.h"
 
 class CheckOverlap

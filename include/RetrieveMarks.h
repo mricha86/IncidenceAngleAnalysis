@@ -16,6 +16,7 @@ class RetrieveMarks
   /* Declaration of class variables */
   /**********************************/
   private:
+    int dataset;
     sql::Connection *conn;
     std::string field;
     std::string option;
@@ -26,7 +27,7 @@ class RetrieveMarks
   /* Declaration of class functions */
   /**********************************/
   public:
-    RetrieveMarks(sql::Connection *, std::string, std::string, std::string);
+    RetrieveMarks(sql::Connection *, int, std::string, std::string, std::string);
     std::vector <Marks> GetData();
     void Fetch();
     static void Display(std::vector <Marks> &);

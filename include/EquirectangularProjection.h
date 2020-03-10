@@ -3,6 +3,7 @@
 #ifndef EQUIRECTANGULARPROJECTION_H
 #define EQUIRECTANGULARPROJECTION_H
 #include <math.h>
+#include "Constants.h"
 
 class EquirectangularProjection
 {

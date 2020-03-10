@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string>
+#include "Constants.h"
 #include "EquirectangularProjection.h"
 #include "ProjectiveTransformation.h"
 #include "Quadrilateral.h"
@@ -47,6 +48,8 @@ class Images
     int done;
     int height;
     int id;
+    int image_number;
+    int image_scale;
     int image_set_id;
     int premarked;
     int width;
@@ -57,6 +60,7 @@ class Images
     std::string created_at;
     std::string details;
     std::string file_location;
+    std::string master_image_name;
     std::string name;
     std::string updated_at;
     std::string upper_left_corner_x_status;
@@ -102,6 +106,8 @@ class Images
     int GetDone();
     int GetHeight();
     int GetId();
+    int GetImage_number();
+    int GetImage_scale();
     int GetImage_set_id();
     int GetPremarked();
     int GetWidth();
@@ -112,12 +118,14 @@ class Images
     std::string GetCreated_at();
     std::string GetDetails();
     std::string GetFile_location();
+    std::string GetMaster_image_name();
     std::string GetName();
     std::string GetUpdated_at();
     std::string GetUpper_left_corner_x_status();
     std::string GetUpper_left_corner_y_status();
     std::vector <double> GetPhysical_height();
     std::vector <double> GetPhysical_width();
+    std::vector <std::string> GetFields();
     std::vector < std::vector <double> > GetShape_vector();
     void AuxilaryFunction(std::string, std::string, ProjectiveTransformation, bool = false);
     void CalculateBoundingRegionCartesianCoordinates();
@@ -126,6 +134,9 @@ class Images
     void CalculatePhysical_width();
     void CalculateQuadrilateral();
     void DetermineCoordinateExtrema();
+    void DetermineImageNumber();
+    void DetermineImageScale();
+    void DetermineMasterImageName();
     void RetrieveHeight();
     void RetrieveWidth();
     void RetrieveX_relative();

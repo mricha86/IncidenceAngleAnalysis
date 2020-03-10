@@ -15,24 +15,35 @@ vector <IncidenceAngles> ReadAuxilaryData::GetIncidenceAngleData()
   return incidenceangledata;
 }
 
-void ReadAuxilaryData::Display(vector <IncidenceAngles> &list)
+void ReadAuxilaryData::DisplayData(vector <double> &list)
 {
-  /****************************************************/
-  /* Declaration/Initialization of function variables */
-  /****************************************************/
-  int nelements;
-
   /********************/
   /* Print header row */
   /********************/
-  printf("%-12s %-15s\n", "NAME", "Incidence_Angle");
+  cout << setprecision(0) << setw(15) << left << "Incidence_Angle" << endl;
   
   /********************/
   /* Print data rows */
   /********************/
-  nelements = (int)list.size();
-  for(int i=0; i<nelements; i++)
-    printf("%-12s %-15.2lf\n", list[i].GetName().c_str(), list[i].GetIncidence_angle());
+  for(int i=0; i<(int)list.size(); i++)
+    cout << setprecision(4) << setw(15) << left << list[i] << endl;
+  
+  return;
+}
+
+void ReadAuxilaryData::DisplayData(vector <IncidenceAngles> &list)
+{
+  /********************/
+  /* Print header row */
+  /********************/
+  cout << setprecision(0) << setw(12) << left << "Name" << " ";
+  cout << setprecision(0) << setw(15) << left << "Incidence_Angle" << endl;
+    
+  /********************/
+  /* Print data rows */
+  /********************/
+  for(int i=0; i<(int)list.size(); i++)
+    cout << setprecision(0) << setw(12) << left << list[i].GetName() << " " << setprecision(4) << setw(15) << left << list[i].GetIncidence_angle() << endl;
 
   return;
 }

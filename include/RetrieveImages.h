@@ -16,6 +16,7 @@ class RetrieveImages
   /* Declaration of class variables */
   /**********************************/
   private:
+    int dataset;
     sql::Connection *conn;
     std::string field;
     std::string option;
@@ -26,9 +27,9 @@ class RetrieveImages
   /* Declaration of class functions */
   /**********************************/
   public:
-    RetrieveImages(sql::Connection *, std::string, std::string, std::string);
+    RetrieveImages(sql::Connection *, int, std::string, std::string, std::string);
     std::vector <Images> GetData();
-    static void Display(std::vector <Images> &);
+    static void Display(std::vector <Images> &, bool = false);
     void Fetch();
 };
 

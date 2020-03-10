@@ -3,12 +3,13 @@
 using namespace std;
 using namespace sql;
 
-RetrieveImageSets::RetrieveImageSets(Connection *CONN, string TABLE, string FIELD, string OPTION)
+RetrieveImageSets::RetrieveImageSets(Connection *CONN, int DATASET, string TABLE, string FIELD, string OPTION)
 {
   /*******************************************************************/
   /* Retrieve needed information for database information extraction */
   /*******************************************************************/
   conn = CONN;
+  dataset = DATASET;
   table = TABLE;
   field = FIELD;
   option = OPTION;
@@ -107,7 +108,7 @@ void RetrieveImageSets::Fetch()
     while(rs->next())
     {
       int application_id = rs->getInt("application_id");
-      if(application_id == 1)
+      if(application_id == dataset)
       {
 	ImageSets myImageSet(rs->getInt("id"), rs->getString("name"), application_id, 0, 0, rs->getDouble("upper_left_latitude"), rs->getDouble("upper_left_longitude"), rs->getDouble("upper_right_latitude"), rs->getDouble("upper_right_longitude"), rs->getDouble("lower_right_latitude"), rs->getDouble("lower_right_longitude"), rs->getDouble("lower_left_latitude"), rs->getDouble("lower_left_longitude"), rs->getDouble("pixel_resolution"), "", rs->getString("details"), "", "");
 	data.push_back(myImageSet);
