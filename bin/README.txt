@@ -12,6 +12,8 @@ Step 2. After successfully installing Homebrew, install Cern's Root library by e
 
 Step 3. After successfully installing Root, copy the contents of CosmoQuestTeam/IncidenceAngleAnalysis repository to a directory on your computer. This directory will serve as the top directory for the analysis code.
 
+Note: Access to CosmoQuest's MySQL server or a local copy of CosmoQuest's MySQL database is required to run the analysis code.
+
 ################
 # Run Instructions #
 ################
@@ -20,17 +22,19 @@ Step 1. Navigate to the top directory that holds the Makefile for the analysis c
 
 Step 2. Compile the analysis code by executing the following at the command prompt:
 
-     make 
+     make -j
 
-Step 3. Navigate to /top directory/bin and execute the following command to run the analysis code:
+Step 3. Navigate to /top directory/bin and execute the following command to run the primary analysis:
 
-     ./IncidenceAngleAnalysis LROCAuxilaryData.dat
+     ./IncidenceAngleAnalysis [target dataset] [auxilary data file]
+
+Where the only target dataset for now is "moon" and the auxilary data file is "LROCAuxilaryData_Modified.dat" stored in the bin directory.
 
 ####################
 # Analysis code input(s) #
 ####################
 
-The analysis code only requires 1 input which is the file entitled "LROCAuxilaryData.dat". This data file contains 6 columns which store the following information:
+The analysis code only requires 1 input which is the file entitled "LROCAuxilaryData_Modified.dat". This data file contains 2 columns which store the following information:
 
 Column 1 - LRO NAC image name
 Column 2 - LRO NAC incidence angle
