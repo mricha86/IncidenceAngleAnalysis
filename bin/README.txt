@@ -34,10 +34,6 @@ The analysis code only requires 1 input which is the file entitled "LROCAuxilary
 
 Column 1 - LRO NAC image name
 Column 2 - LRO NAC incidence angle
-Column 3 - Indicates if the upper left hand corner of NAC is the maximum or minimum latitude (Used to establish image orientation)
-Column 4 - Indicates if the upper left hand corner of NAC is the maximum or minimum longitude (Used to establish image orientation)
-Column 5 - Manually calculated NAC vertical resolution (Optional)
-Column 6 - Manually calculated NAC horizontal resolution (Optional)
 
 #####################
 # Analysis main function #
