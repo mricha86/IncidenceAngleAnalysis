@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "AuxilaryFunctions.h"
+
 class IncidenceAngles
 {
   /**********************************/
@@ -20,7 +22,10 @@ class IncidenceAngles
   public:
     IncidenceAngles(std::string, double);
     double GetIncidence_angle();
+    double GetValue_double(std::string);
+    int GetValue_int(std::string);
     std::string GetName();
+    std::string GetValue_string(std::string);
     void * GetValue(std::string);
 };
 

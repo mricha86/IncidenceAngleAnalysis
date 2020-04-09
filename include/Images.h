@@ -3,9 +3,12 @@
 #ifndef IMAGES_H
 #define IMAGES_H
 #include <iostream>
+#include <map>
 #include <math.h>
 #include <stdlib.h>
 #include <string>
+
+#include "AuxilaryFunctions.h"
 #include "Constants.h"
 #include "EquirectangularProjection.h"
 #include "ProjectiveTransformation.h"
@@ -102,6 +105,7 @@ class Images
     double GetUpper_right_longitude();
     double GetUpper_right_x();
     double GetUpper_right_y();
+    double GetValue_double(std::string);
     int GetApplication_id();
     int GetDone();
     int GetHeight();
@@ -110,6 +114,7 @@ class Images
     int GetImage_scale();
     int GetImage_set_id();
     int GetPremarked();
+    int GetValue_int(std::string);
     int GetWidth();
     int GetX_relative();
     int GetY_relative();
@@ -123,6 +128,7 @@ class Images
     std::string GetUpdated_at();
     std::string GetUpper_left_corner_x_status();
     std::string GetUpper_left_corner_y_status();
+    std::string GetValue_string(std::string);
     std::vector <double> GetPhysical_height();
     std::vector <double> GetPhysical_width();
     std::vector <std::string> GetFields();

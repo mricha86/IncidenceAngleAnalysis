@@ -217,6 +217,113 @@ double OverlappedImages::GetOverlap_upper_right_y()
   return overlap_upper_right_y;
 }
 
+double OverlappedImages::GetValue_double(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("image1_area"):
+    return image1_area;
+    break;
+  case str2int("image1_incidence_angle"):
+    return image1_incidence_angle;
+    break;
+  case str2int("image1_lower_left_x"):
+    return image1_lower_left_x;
+    break;
+  case str2int("image1_lower_left_y"):
+    return image1_lower_left_y;
+    break;
+  case str2int("image1_lower_right_x"):
+    return image1_lower_right_x;
+    break;
+  case str2int("image1_lower_right_y"):
+    return image1_lower_right_y;
+    break;
+  case str2int("image1_upper_left_x"):
+    return image1_upper_left_x;
+    break;
+  case str2int("image1_upper_left_y"):
+    return image1_upper_left_y;
+    break;
+  case str2int("image1_upper_right_x"):
+    return image1_upper_right_x;
+    break;
+  case str2int("image1_upper_right_y"):
+    return image1_upper_right_y;
+    break;
+  case str2int("image2_area"):
+    return image2_area;
+    break;
+  case str2int("image2_incidence_angle"):
+    return image2_incidence_angle;
+    break;
+  case str2int("image2_lower_left_x"):
+    return image2_lower_left_x;
+    break;
+  case str2int("image2_lower_left_y"):
+    return image2_lower_left_y;
+    break;
+  case str2int("image2_lower_right_x"):
+    return image2_lower_right_x;
+    break;
+  case str2int("image2_lower_right_y"):
+    return image2_lower_right_y;
+    break;
+  case str2int("image2_upper_left_x"):
+    return image2_upper_left_x;
+    break;
+  case str2int("image2_upper_left_y"):
+    return image2_upper_left_y;
+    break;
+  case str2int("image2_upper_right_x"):
+    return image2_upper_right_x;
+    break;
+  case str2int("image2_upper_right_y"):
+    return image2_upper_right_y;
+    break;
+  case str2int("overlap_area"):
+    return overlap_area;
+    break;
+  case str2int("overlap_lower_left_x"):
+    return overlap_lower_left_x;
+    break;
+  case str2int("overlap_lower_left_y"):
+    return overlap_lower_left_y;
+    break;
+  case str2int("overlap_lower_right_x"):
+    return overlap_lower_right_x;
+    break;
+  case str2int("overlap_lower_right_y"):
+    return overlap_lower_right_y;
+    break;
+  case str2int("overlap_maximum_x"):
+    return overlap_maximum_x;
+    break;
+  case str2int("overlap_maximum_y"):
+    return overlap_maximum_y;
+    break;
+  case str2int("overlap_minimum_x"):
+    return overlap_minimum_x;
+    break;
+  case str2int("overlap_minimum_y"):
+    return overlap_minimum_y;
+    break;
+  case str2int("overlap_upper_right_x"):
+    return overlap_upper_right_x;
+    break;
+  case str2int("overlap_upper_right_y"):
+    return overlap_upper_right_y;
+    break;
+  case str2int("overlap_upper_left_x"):
+    return overlap_upper_left_x;
+    break;
+  case str2int("overlap_upper_left_y"):
+    return overlap_upper_left_y;
+    break;
+  }
+  
+  return 0;
+}
+
 int OverlappedImages::GetId()
 {
   return id;
@@ -232,6 +339,23 @@ int OverlappedImages::GetImage2_id()
   return image2_id;
 }
 
+int OverlappedImages::GetValue_int(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("id"):
+    return id;
+    break;
+  case str2int("image1_id"):
+    return image1_id;
+    break;
+  case str2int("image2_id"):
+    return image2_id;
+    break;
+  }
+  
+  return 0;
+}
+
 string OverlappedImages::GetImage1_name()
 {
   return image1_name;
@@ -240,6 +364,142 @@ string OverlappedImages::GetImage1_name()
 string OverlappedImages::GetImage2_name()
 {
   return image2_name;
+}
+
+string OverlappedImages::GetValue_string(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("image1_name"):
+    return image1_name;
+    break;
+  case str2int("image2_name"):
+    return image2_name;
+    break;
+  }
+  
+  return "";
+}
+
+void * OverlappedImages::GetValue(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("id"):
+    return &id;
+    break;
+  case str2int("image1_area"):
+    return &image1_area;
+    break;
+  case str2int("image1_id"):
+    return &image1_id;
+    break;
+  case str2int("image1_incidence_angle"):
+    return &image1_incidence_angle;
+    break;
+  case str2int("image1_lower_left_x"):
+    return &image1_lower_left_x;
+    break;
+  case str2int("image1_lower_left_y"):
+    return &image1_lower_left_y;
+    break;
+  case str2int("image1_lower_right_x"):
+    return &image1_lower_right_x;
+    break;
+  case str2int("image1_lower_right_y"):
+    return &image1_lower_right_y;
+    break;
+  case str2int("image1_name"):
+    return &image1_name;
+    break;
+  case str2int("image1_upper_left_x"):
+    return &image1_upper_left_x;
+    break;
+  case str2int("image1_upper_left_y"):
+    return &image1_upper_left_y;
+    break;
+  case str2int("image1_upper_right_x"):
+    return &image1_upper_right_x;
+    break;
+  case str2int("image1_upper_right_y"):
+    return &image1_upper_right_y;
+    break;
+  case str2int("image2_area"):
+    return &image2_area;
+    break;
+  case str2int("image2_id"):
+    return &image2_id;
+    break;
+  case str2int("image2_incidence_angle"):
+    return &image2_incidence_angle;
+    break;
+  case str2int("image2_lower_left_x"):
+    return &image2_lower_left_x;
+    break;
+  case str2int("image2_lower_left_y"):
+    return &image2_lower_left_y;
+    break;
+  case str2int("image2_lower_right_x"):
+    return &image2_lower_right_x;
+    break;
+  case str2int("image2_lower_right_y"):
+    return &image2_lower_right_y;
+    break;
+  case str2int("image2_name"):
+    return &image2_name;
+    break;
+  case str2int("image2_upper_left_x"):
+    return &image2_upper_left_x;
+    break;
+  case str2int("image2_upper_left_y"):
+    return &image2_upper_left_y;
+    break;
+  case str2int("image2_upper_right_x"):
+    return &image2_upper_right_x;
+    break;
+  case str2int("image2_upper_right_y"):
+    return &image2_upper_right_y;
+    break;
+  case str2int("overlap_area"):
+    return &overlap_area;
+    break;
+  case str2int("overlap_lower_left_x"):
+    return &overlap_lower_left_x;
+    break;
+  case str2int("overlap_lower_left_y"):
+    return &overlap_lower_left_y;
+    break;
+  case str2int("overlap_lower_right_x"):
+    return &overlap_lower_right_x;
+    break;
+  case str2int("overlap_lower_right_y"):
+    return &overlap_lower_right_y;
+    break;
+  case str2int("overlap_maximum_x"):
+    return &overlap_maximum_x;
+    break;
+  case str2int("overlap_maximum_y"):
+    return &overlap_maximum_y;
+    break;
+  case str2int("overlap_minimum_x"):
+    return &overlap_minimum_x;
+    break;
+  case str2int("overlap_minimum_y"):
+    return &overlap_minimum_y;
+    break;
+  case str2int("overlap_upper_right_x"):
+    return &overlap_upper_right_x;
+    break;
+  case str2int("overlap_upper_right_y"):
+    return &overlap_upper_right_y;
+    break;
+  case str2int("overlap_upper_left_x"):
+    return &overlap_upper_left_x;
+    break;
+  case str2int("overlap_upper_left_y"):
+    return &overlap_upper_left_y;
+    break;
+  }
+  
+  return NULL;
 }
 
 void OverlappedImages::OverlapRectangularBoundingRegion()
@@ -276,14 +536,14 @@ void OverlappedImages::OverlapRectangularBoundingRegion()
   {
     overlap_minimum_y = (overlap_lower_left_y < overlap_lower_right_y) ?
                         overlap_lower_right_y : overlap_lower_right_y;
-    overlap_maximum_x = (overlap_upper_left_y > overlap_upper_right_y) ?
+    overlap_maximum_y = (overlap_upper_left_y > overlap_upper_right_y) ?
                         overlap_upper_left_y : overlap_upper_right_y;
   }
 
   return;
 }
 
-void OverlappedImages::Display(OverlappedImages a)
+void OverlappedImages::DisplayData(OverlappedImages a)
 {
   /********************/
   /* Print header row */
@@ -356,32 +616,18 @@ void OverlappedImages::Display(OverlappedImages a)
   return;
 }
 
-void OverlappedImages::Display(vector <OverlappedImages> &list)
+void OverlappedImages::DisplayData(vector <OverlappedImages> &list)
 {
   /********************/
   /* Print header row */
   /********************/
-  printf("%-5s %-19s %10s %10s %10s %10s %10s %10s %10s %10s %5s %-19s %10s %10s %10s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s %10s %10s %10s %10s\n", 
+  printf("%-5s %-19s %10s %5s %19s %10s %5s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n", 
 	 "ID",
 	 "I1NAME",
-	 "I1ULX",
-	 "I1ULY",
-	 "I1URX",
-	 "I1URY",
-	 "I1LRX",
-	 "I1LRY",
-	 "I1LLX",
-	 "I1LLY",
-	 "I1IA", 
+	 "I1ID",
+	 "I1IA",
 	 "I2NAME",
-	 "I2ULX",
-	 "I2ULY",
-	 "I2URX",
-	 "I2URY",
-	 "I2LRX",
-	 "I2LRY",
-	 "I2LLX",
-	 "I2LLY", 
+	 "I2ID", 
 	 "I2IA", 
 	 "OULX",
 	 "OULY",
@@ -390,42 +636,36 @@ void OverlappedImages::Display(vector <OverlappedImages> &list)
 	 "OLRX",
 	 "OLRY",
 	 "OLLX",
-	 "OLLY");
+	 "OLLY",
+	 "OMINX",
+	 "OMINY",
+	 "OMAXX",
+	 "OMAXY");
   
   /*******************/
   /* Print data rows */
   /*******************/
   for(int i=0; i<(int)list.size(); i++)
-    printf("%-5d %-19s %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %5.2lf %-19s %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %5.2lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf\n",
-	 list[i].GetId(), 
-	 list[i].GetImage1_name().c_str(), 
-	 list[i].GetImage1_upper_left_x(),
-	 list[i].GetImage1_upper_left_y(),
-	 list[i].GetImage1_upper_right_x(),
-	 list[i].GetImage1_upper_right_y(),
-	 list[i].GetImage1_lower_right_x(),
-	 list[i].GetImage1_lower_right_y(),
-	 list[i].GetImage1_lower_left_x(),
-	 list[i].GetImage1_lower_left_y(),
-	 list[i].GetImage1_incidence_angle(),
-	 list[i].GetImage2_name().c_str(),
-	 list[i].GetImage2_upper_left_x(),
-	 list[i].GetImage2_upper_left_y(),
-	 list[i].GetImage2_upper_right_x(),
-	 list[i].GetImage2_upper_right_y(),
-	 list[i].GetImage2_lower_right_x(),
-	 list[i].GetImage2_lower_right_y(),
-	 list[i].GetImage2_lower_left_x(),
-	 list[i].GetImage2_lower_left_y(), 
-	 list[i].GetImage2_incidence_angle(), 
-	 list[i].GetOverlap_upper_left_x(),
-	 list[i].GetOverlap_upper_left_y(),
-	 list[i].GetOverlap_upper_right_x(),
-	 list[i].GetOverlap_upper_right_y(),
-	 list[i].GetOverlap_lower_right_x(),
-	 list[i].GetOverlap_lower_right_y(),
-	 list[i].GetOverlap_lower_left_x(),
-	 list[i].GetOverlap_lower_left_y());
+    printf("%-5d %-19s %10d %5.2lf %19s %10d %5.2lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf %10.4lf\n",
+	   list[i].GetId(), 
+	   list[i].GetImage1_name().c_str(), 
+	   list[i].GetImage1_id(),
+	   list[i].GetImage1_incidence_angle(),
+	   list[i].GetImage2_name().c_str(),
+	   list[i].GetImage2_id(), 
+	   list[i].GetImage2_incidence_angle(), 
+	   list[i].GetOverlap_upper_left_x(),
+	   list[i].GetOverlap_upper_left_y(),
+	   list[i].GetOverlap_upper_right_x(),
+	   list[i].GetOverlap_upper_right_y(),
+	   list[i].GetOverlap_lower_right_x(),
+	   list[i].GetOverlap_lower_right_y(),
+	   list[i].GetOverlap_lower_left_x(),
+	   list[i].GetOverlap_lower_left_y(),
+	   list[i].GetOverlap_minimum_x(),
+	   list[i].GetOverlap_minimum_y(),
+	   list[i].GetOverlap_maximum_x(),
+	   list[i].GetOverlap_maximum_y());
 
   return;
 }

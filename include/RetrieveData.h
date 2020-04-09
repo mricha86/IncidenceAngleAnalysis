@@ -94,6 +94,10 @@ std::vector <std::string> RetrieveData<T>::DisplayData_column_names(std::string 
     columns.push_back("LRY");
     columns.push_back("LLX");
     columns.push_back("LLY");
+    columns.push_back("MINX");
+    columns.push_back("MINY");
+    columns.push_back("MAXX");
+    columns.push_back("MAXY");
   } else if(tab.compare("IMAGE_SETS") == 0) {
     columns.push_back("ID");
     columns.push_back("NAME");
@@ -144,14 +148,18 @@ std::vector < std::vector <int> > RetrieveData<T>::DisplayData_formatting(std::s
     format.push_back(std::vector <int>{0, 4, 2});
     format.push_back(std::vector <int>{0, 3, 2});
     format.push_back(std::vector <int>{0, 19, 1});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
-    format.push_back(std::vector <int>{2, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
+    format.push_back(std::vector <int>{8, 11, 3});
   } else if(tab.compare("IMAGE_SETS") == 0) {
     format.push_back(std::vector <int>{0, 2, 2});
     format.push_back(std::vector <int>{0, 12, 1});
@@ -170,9 +178,9 @@ std::vector < std::vector <int> > RetrieveData<T>::DisplayData_formatting(std::s
     format.push_back(std::vector <int>{0, 10, 2});
     format.push_back(std::vector <int>{0, 10, 2});
     format.push_back(std::vector <int>{0, 3, 2});
-    format.push_back(std::vector <int>{2, 8, 3});
-    format.push_back(std::vector <int>{2, 8, 3});
-    format.push_back(std::vector <int>{2, 8, 3});
+    format.push_back(std::vector <int>{8, 8, 3});
+    format.push_back(std::vector <int>{8, 8, 3});
+    format.push_back(std::vector <int>{8, 8, 3});
   } else {
     std::cout << "Table " << tab.c_str() << " not found." << std::endl;
     exit(EXIT_FAILURE);

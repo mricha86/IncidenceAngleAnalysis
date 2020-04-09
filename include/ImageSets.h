@@ -6,6 +6,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string>
+
+#include "AuxilaryFunctions.h"
 #include "Constants.h"
 #include "EquirectangularProjection.h"
 #include "ProjectiveTransformation.h"
@@ -95,9 +97,11 @@ class ImageSets
     double GetUpper_right_longitude();
     double GetUpper_right_x();
     double GetUpper_right_y();
+    double GetValue_double(std::string);
     int GetApplication_id();
     int GetHeight();
     int GetId();
+    int GetValue_int(std::string);
     int GetWidth();
     ProjectiveTransformation GetProjective_transformation();
     Quadrilateral GetQuadrilateral();
@@ -108,6 +112,7 @@ class ImageSets
     std::string GetUpdated_at();
     std::string GetUpper_left_corner_x_status();
     std::string GetUpper_left_corner_y_status();
+    std::string GetValue_string(std::string);
     std::vector <double> GetPhysical_height();
     std::vector <double> GetPhysical_width();
     std::vector <std::string> GetFields();

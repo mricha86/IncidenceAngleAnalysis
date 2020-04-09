@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+
+#include "AuxilaryFunctions.h"
 #include "Images.h"
 
 class OverlappedImages
@@ -92,14 +94,18 @@ class OverlappedImages
     double GetOverlap_upper_left_y();
     double GetOverlap_upper_right_x();
     double GetOverlap_upper_right_y();
+    double GetValue_double(std::string);
     int GetId();
     int GetImage1_id();
     int GetImage2_id();
+    int GetValue_int(std::string);
     std::string GetImage1_name();
     std::string GetImage2_name();
+    std::string GetValue_string(std::string);
+    void * GetValue(std::string);
     void OverlapRectangularBoundingRegion();
-    static void Display(OverlappedImages);
-    static void Display(std::vector <OverlappedImages> &);
+    static void DisplayData(OverlappedImages);
+    static void DisplayData(std::vector <OverlappedImages> &);
 };
 
 #endif

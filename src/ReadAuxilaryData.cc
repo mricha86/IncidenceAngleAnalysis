@@ -60,7 +60,7 @@ void ReadAuxilaryData::Read()
   /*****************/
   /* Retrieve file */
   /*****************/
-  if(Utilities::FileExists(AuxilaryDataFile))
+  if(FileExists(AuxilaryDataFile))
     InFile.open(AuxilaryDataFile.c_str());
   else
   {

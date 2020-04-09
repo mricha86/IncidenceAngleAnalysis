@@ -60,7 +60,7 @@ void Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string C
   /*******************************/
   /* Open and read-in Filename 1 */
   /*******************************/
-  if(Utilities::FileExists(CraterCatalogue1))
+  if(FileExists(CraterCatalogue1))
     InFile.open(CraterCatalogue1.c_str());
   else
   {
@@ -93,7 +93,7 @@ void Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string C
   /*******************************/
   /* Open and read-in Filename 2 */
   /*******************************/
-  if(Utilities::FileExists(CraterCatalogue2))
+  if(FileExists(CraterCatalogue2))
     InFile.open(CraterCatalogue2.c_str());
   else
   {
@@ -858,7 +858,7 @@ void Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string C
   /*******************************/
   /* Open and read-in Filename 1 */
   /*******************************/
-  if(Utilities::FileExists(CraterCatalogue1))
+  if(FileExists(CraterCatalogue1))
     InFile.open(CraterCatalogue1.c_str());
   else
   {
@@ -891,7 +891,7 @@ void Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string C
   /*******************************/
   /* Open and read-in Filename 2 */
   /*******************************/
-  if(Utilities::FileExists(CraterCatalogue2))
+  if(FileExists(CraterCatalogue2))
     InFile.open(CraterCatalogue2.c_str());
   else
   {
@@ -1505,10 +1505,9 @@ void Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string C
 //   /* Sort overlap vector based on "id" column */
 //   /********************************************/
 //   field = "id";
-//   SortOverlappedImages sortoverlappedimages(OI, field);
+//   SortData <OverlappedImages> sortoverlappedimages(OI, field);
 //   sortoverlappedimages.arrange();
-//   OI = sortoverlappedimages.GetOverlappedimages();
-//   //OverlappedImages::Display(OI); exit(0);
+//   OI = sortoverlappedimages.GetData();
 
 //   /***************/
 //   /* Axis labels */
@@ -1600,10 +1599,9 @@ void Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string C
 //   /* Sort overlap vector based on "id" column */
 //   /********************************************/
 //   field = "id";
-//   SortOverlappedImages sortoverlappedimages(OI, field);
+//   SortData <OverlappedImages> sortoverlappedimages(OI, field);
 //   sortoverlappedimages.arrange();
-//   OI = sortoverlappedimages.GetOverlappedimages();
-//   //OverlappedImages::Display(OI); exit(0);
+//   OI = sortoverlappedimages.GetData();
 
 //   /****************************/
 //   /* Retrieve neccessary data */
@@ -1712,7 +1710,7 @@ void Plot::ImageComparison(double x1, double x2, double y1, double y2, string cr
   /*************************************/
   /* Open and read-in crater catalog 1 */
   /*************************************/
-  if(Utilities::FileExists(cratercatalog1))
+  if(FileExists(cratercatalog1))
     InFile.open(cratercatalog1.c_str());
   else
   {
@@ -1745,7 +1743,7 @@ void Plot::ImageComparison(double x1, double x2, double y1, double y2, string cr
   /*************************************/
   /* Open and read-in crater catalog 2 */
   /*************************************/
-  if(Utilities::FileExists(cratercatalog2))
+  if(FileExists(cratercatalog2))
     InFile.open(cratercatalog2.c_str());
   else
   {
@@ -1778,7 +1776,7 @@ void Plot::ImageComparison(double x1, double x2, double y1, double y2, string cr
   /**********************/
   /* Read-in image data */
   /**********************/
-  if(Utilities::FileExists(imagedirlist))
+  if(FileExists(imagedirlist))
     InFile.open(imagedirlist.c_str());
   else
   {
@@ -1804,19 +1802,17 @@ void Plot::ImageComparison(double x1, double x2, double y1, double y2, string cr
   /* Sort incidenceangles vector by name */
   /***************************************/
   field = "name";
-  SortIncidenceAngles sortincidenceangles(incidenceangles, field);
+  SortData <IncidenceAngles> sortincidenceangles(incidenceangles, field);
   sortincidenceangles.arrange();
-  incidenceangles = sortincidenceangles.GetIncidenceangles();
-  //ReadAuxilaryData::Display(incidenceangles); exit(0);
+  incidenceangles = sortincidenceangles.GetData();
 
   /*********************************/
   /* Sort imagesets vector by name */
   /*********************************/
   field = "name";
-  SortImageSets sortimagesets(imagesets, field);
+  SortData <ImageSets> sortimagesets(imagesets, field);
   sortimagesets.arrange();
-  imagesets = sortimagesets.GetImageSets();
-  //RetrieveImagesets::Display(imagesets); exit(0);
+  imagesets = sortimagesets.GetData();
 
   /*****************************************************************/
   /* Retrieve master image names and corresponding incidence angle */
@@ -1893,10 +1889,9 @@ void Plot::ImageComparison(double x1, double x2, double y1, double y2, string cr
   /* Sort images vector */
   /**********************/
   field = "image_set_id";
-  SortImages sortimages(images, field);
+  SortData <Images> sortimages(images, field);
   sortimages.arrange();
-  images = sortimages.GetImages();
-  //RetrieveImages::Display(images); exit(0);
+  images = sortimages.GetData();
 
   /*********************/
   /* Initialize Canvas */
@@ -2200,7 +2195,7 @@ void Plot::ImageMosaic(string imagedirlist, vector <ImageSets> &imagesets, vecto
   /**********************/
   /* Read-in image data */
   /**********************/
-  if(Utilities::FileExists(imagedirlist))
+  if(FileExists(imagedirlist))
     InFile.open(imagedirlist.c_str());
   else
   {
@@ -2226,19 +2221,17 @@ void Plot::ImageMosaic(string imagedirlist, vector <ImageSets> &imagesets, vecto
   /* Sort incidenceangles vector by name */
   /***************************************/
   field = "name";
-  SortIncidenceAngles sortincidenceangles(incidenceangles, field);
+  SortData <IncidenceAngles> sortincidenceangles(incidenceangles, field);
   sortincidenceangles.arrange();
-  incidenceangles = sortincidenceangles.GetIncidenceangles();
-  //ReadAuxilaryData::Display(incidenceangles); exit(0);
+  incidenceangles = sortincidenceangles.GetData();
 
   /*********************************/
   /* Sort imagesets vector by name */
   /*********************************/
   field = "name";
-  SortImageSets sortimagesets(imagesets, field);
+  SortData <ImageSets> sortimagesets(imagesets, field);
   sortimagesets.arrange();
-  imagesets = sortimagesets.GetImageSets();
-  //RetrieveImagesets::Display(imagesets); exit(0);
+  imagesets = sortimagesets.GetData();
 
   /*****************************************************************/
   /* Retrieve master image names and corresponding incidence angle */
@@ -2358,10 +2351,9 @@ void Plot::ImageMosaic(string imagedirlist, vector <ImageSets> &imagesets, vecto
   /* Sort images vector */
   /**********************/
   field = "image_set_id";
-  SortImages sortimages(images, field);
+  SortData <Images> sortimages(images, field);
   sortimages.arrange();
-  images = sortimages.GetImages();
-  //RetrieveImages::Display(images); exit(0);
+  images = sortimages.GetData();
 
   /*********************/
   /* Initialize Canvas */
@@ -3135,10 +3127,9 @@ void Plot::MasterImage_w_SubImages(ImageSets a, vector <Images> &b, bool selenog
   /* Sort images (b) vector */
   /**************************/
   field = "image_set_id";
-  SortImages sortimages(b, field);
+  SortData <Images> sortimages(b, field);
   sortimages.arrange();
-  b = sortimages.GetImages();
-  //RetrieveImages::Display(b); exit(0);
+  b = sortimages.GetData();
 
   /***********************************************************************/
   /* Find first and last occurrence of image_set_id in images (b) vector */
@@ -3607,10 +3598,9 @@ void Plot::MasterImages_w_OverlapData(double incidence_angle_1, double incidence
   /* Sort marks vector */
   /*********************/
   field = "image_id";
-  SortMarks sortmarks(marks, field);
+  SortData <Marks> sortmarks(marks, field);
   sortmarks.arrange();
-  marks = sortmarks.GetMarks();
-  //RetrieveMarks::Display(marks); exit(0);
+  marks = sortmarks.GetData();
   
   /****************************/
   /* Draw overlapping regions */
@@ -3803,7 +3793,7 @@ void Plot::PaperPlots(string list)
   /*****************************************************/
   /* Verify reduced crater catalog list file existence */
   /*****************************************************/
-  if(Utilities::FileExists(list))
+  if(FileExists(list))
     InFile.open(list.c_str());
   else
   {
@@ -4164,9 +4154,9 @@ void Plot::PlotRealMasterImage(string imdir, double incidence_angle, vector <Inc
   /* Sort Incidence Angle vector */
   /*******************************/
   field = "incidence_angle";
-  SortIncidenceAngles iasort(incidenceangles, field);
+  SortData <IncidenceAngles> iasort(incidenceangles, field);
   iasort.arrange();
-  incidenceangles = iasort.GetIncidenceangles();
+  incidenceangles = iasort.GetData();
   
   /**********************************/
   /* Determine master image name(s) */
@@ -4201,9 +4191,9 @@ void Plot::PlotRealMasterImage(string imdir, double incidence_angle, vector <Inc
   /* Sort imagesets vector */
   /*************************/
   field = "name";
-  SortImageSets imssort(imagesets, field);
+  SortData <ImageSets> imssort(imagesets, field);
   imssort.arrange();
-  imagesets = imssort.GetImageSets();
+  imagesets = imssort.GetData();
   
   /***************************************/
   /* Determine ids for each master image */
@@ -4234,9 +4224,9 @@ void Plot::PlotRealMasterImage(string imdir, double incidence_angle, vector <Inc
   /* Sort images vector */
   /**********************/
   field = "image_set_id";
-  SortImages imsort(images, field);
+  SortData <Images> imsort(images, field);
   imsort.arrange();
-  images = imsort.GetImages();
+  images = imsort.GetData();
   
   /*******************************************************************************************/
   /* Determine number of sub-images for each master image (Only using zero scale sub-images) */
@@ -4257,9 +4247,9 @@ void Plot::PlotRealMasterImage(string imdir, double incidence_angle, vector <Inc
     /* Sort images vector */
     /**********************/
     field = "id";
-    SortImages temp_imsort(temp_images, field);
+    SortData <Images> temp_imsort(temp_images, field);
     temp_imsort.arrange();
-    temp_images = temp_imsort.GetImages();
+    temp_images = temp_imsort.GetData();
 
     for (int j = (int)temp_images.size()-1; j >= 0; j--) {
       string imname = temp_images[j].GetName();
@@ -4295,9 +4285,9 @@ void Plot::PlotRealMasterImage(string imdir, double incidence_angle, vector <Inc
       /* Sort images vector */
       /**********************/
       field = "id";
-      SortImages temp_imsort(temp_images, field);
+      SortData <Images> temp_imsort(temp_images, field);
       temp_imsort.arrange();
-      temp_images = temp_imsort.GetImages();
+      temp_images = temp_imsort.GetData();
       
       for (int j = (int)temp_images.size()-1; j >= 0; j--) {
 	string imname = temp_images[j].GetName();
@@ -4348,9 +4338,9 @@ void Plot::PlotRealMasterImage(string imdir, double incidence_angle, vector <Inc
   /* Sort images vector */
   /**********************/
   field = "name";
-  SortImages sortimages(images, field);
+  SortData <Images> sortimages(images, field);
   sortimages.arrange();
-  images = sortimages.GetImages();
+  images = sortimages.GetData();
   
   /******************/
   /* Sub-image data */
@@ -5609,10 +5599,9 @@ void Plot::TestOverlap(string imagename1, string imagename2, vector <ImageSets> 
   /* Sort imagesets vector by name */
   /*********************************/
   field = "name";
-  SortImageSets sortimagesets(imagesets, field);
+  SortData <ImageSets> sortimagesets(imagesets, field);
   sortimagesets.arrange();
-  imagesets = sortimagesets.GetImageSets();
-  //RetrieveImagesets::Display(imagesets); exit(0);
+  imagesets = sortimagesets.GetData();
 
   /**************************/
   /* Retrieve master images */
@@ -5700,10 +5689,9 @@ void Plot::TestOverlap(string imagename1, string imagename2, vector <ImageSets> 
   /* Sort images vector */
   /**********************/
   field = "image_set_id";
-  SortImages sortimages(images, field);
+  SortData <Images> sortimages(images, field);
   sortimages.arrange();
-  images = sortimages.GetImages();
-  //RetrieveImages::Display(images); exit(0);
+  images = sortimages.GetData();
 
   /*********************/
   /* Initialize Canvas */
@@ -5767,7 +5755,7 @@ void Plot::TestOverlap(string imagename1, string imagename2, vector <ImageSets> 
 	string isn = sub_image_name.substr(p2, length);
 	isn = string(5-length, '0').append(isn);
 	filename = dir+"images_"+master_image_names[i]+"/"+master_image_names[i]+"_0_"+isn+".png";
-	if(!Utilities::FileExists(filename))
+	if(!FileExists(filename))
 	{
 	  printf("Image file %s does not exist!\n", filename.c_str());
 	  continue;

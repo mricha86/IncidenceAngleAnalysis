@@ -31,6 +31,7 @@
 #include <TROOT.h>
 #include <TStyle.h>
 #include <vector>
+
 #include "AuxilaryFunctions.h"
 #include "Constants.h"
 #include "Images.h"
@@ -44,9 +45,7 @@
 #include "SearchImageSets.h"
 #include "SearchIncidenceAngles.h"
 #include "SearchMarks.h"
-/* #include "SortIncidenceAngles.h" */
-#include "SortImages.h"
-/* #include "SortMarks.h" */
+#include "SortData.h"
 #include "Utilities.h"
 
 class Plot

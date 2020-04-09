@@ -189,6 +189,95 @@ double ImageSets::GetUpper_right_y()
   return upper_right_y;
 }
 
+double ImageSets::GetValue_double(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("lower_left_latitude"):
+    return lower_left_latitude;
+    break;
+  case str2int("lower_left_longitude"):
+    return lower_left_longitude;
+    break;
+  case str2int("lower_left_x"):
+    return lower_left_x;
+    break;
+  case str2int("lower_left_y"):
+    return lower_left_y;
+    break;
+  case str2int("lower_right_latitude"):
+    return lower_right_latitude;
+    break;
+  case str2int("lower_right_longitude"):
+    return lower_right_longitude;
+    break;
+  case str2int("lower_right_x"):
+    return lower_right_x;
+    break;
+  case str2int("lower_right_y"):
+    return lower_right_y;
+    break;
+  case str2int("maximum_latitude"):
+    return maximum_latitude;
+    break;
+  case str2int("maximum_longitude"):
+    return maximum_longitude;
+    break;
+  case str2int("maximum_x"):
+    return maximum_x;
+    break;
+  case str2int("maximum_y"):
+    return maximum_y;
+    break;
+  case str2int("minimum_latitude"):
+    return minimum_latitude;
+    break;
+  case str2int("minimum_longitude"):
+    return minimum_longitude;
+    break;
+  case str2int("minimum_x"):
+    return minimum_x;
+    break;
+  case str2int("minimum_y"):
+    return minimum_y;
+    break;
+  case str2int("pixel_resolution"):
+    return pixel_resolution;
+    break;
+  case str2int("priority"):
+    return priority;
+    break;
+  case str2int("sun_angle"):
+    return sun_angle;
+    break;
+  case str2int("upper_left_latitude"):
+    return upper_left_latitude;
+    break;
+  case str2int("upper_left_longitude"):
+    return upper_left_longitude;
+    break;
+  case str2int("upper_left_x"):
+    return upper_left_x;
+    break;
+  case str2int("upper_left_y"):
+    return upper_left_y;
+    break;
+  case str2int("upper_right_latitude"):
+    return upper_right_latitude;
+    break;
+  case str2int("upper_right_longitude"):
+    return upper_right_longitude;
+    break;
+  case str2int("upper_right_x"):
+    return upper_right_x;
+    break;
+  case str2int("upper_right_y"):
+    return upper_right_y;
+    break;
+  }
+  
+  return 0;
+}
+
 int ImageSets::GetApplication_id()
 {
   return application_id;
@@ -202,6 +291,26 @@ int ImageSets::GetHeight()
 int ImageSets::GetId()
 {
   return id;
+}
+
+int ImageSets::GetValue_int(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("application_id"):
+    return application_id;
+    break;
+  case str2int("height"):
+    return height;
+    break;
+  case str2int("id"):
+    return id;
+    break;
+  case str2int("width"):
+    return width;
+    break;
+  }
+  
+  return 0;
 }
 
 int ImageSets::GetWidth()
@@ -252,6 +361,35 @@ string ImageSets::GetUpper_left_corner_x_status()
 string ImageSets::GetUpper_left_corner_y_status()
 {
   return upper_left_corner_y_status;
+}
+
+string ImageSets::GetValue_string(string field)
+{
+  switch(str2int(field.c_str())) {
+  case str2int("created_at"):
+    return created_at;
+    break;
+  case str2int("description"):
+    return description;
+    break;
+  case str2int("details"):
+    return details;
+    break;
+  case str2int("name"):
+    return name;
+    break;
+  case str2int("updated_at"):
+    return updated_at;
+    break;
+  case str2int("upper_left_corner_x_status"):
+    return upper_left_corner_x_status;
+    break;
+  case str2int("upper_left_corner_y_status"):
+    return upper_left_corner_y_status;
+    break;
+  }
+  
+  return "";
 }
 
 vector <double> ImageSets::GetPhysical_height()
@@ -572,157 +710,121 @@ void ImageSets::RetrieveWidth()
 
 void * ImageSets::GetValue(string field)
 {
-  if(field.compare("application_id") == 0)
-  {
+  switch(str2int(field.c_str())) {
+  case str2int("application_id"):
     return &application_id;
-  }
-  if(field.compare("created_at") == 0)
-  {
+    break;
+  case str2int("created_at"):
     return &created_at;
-  }
-  if(field.compare("description") == 0)
-  {
+    break;
+  case str2int("description"):
     return &description;
-  }
-  if(field.compare("details") == 0)
-  {
+    break;
+  case str2int("details"):
     return &details;
-  }
-  if(field.compare("height") == 0)
-  {
+    break;
+  case str2int("height"):
     return &height;
-  }
-  if(field.compare("id") == 0)
-  {
+    break;
+  case str2int("id"):
     return &id;
-  }
-  if(field.compare("lower_left_latitude") == 0)
-  {
+    break;
+  case str2int("lower_left_latitude"):
     return &lower_left_latitude;
-  }
-  if(field.compare("lower_left_longitude") == 0)
-  {
+    break;
+  case str2int("lower_left_longitude"):
     return &lower_left_longitude;
-  }
-  if(field.compare("lower_left_x") == 0)
-  {
+    break;
+  case str2int("lower_left_x"):
     return &lower_left_x;
-  }
-  if(field.compare("lower_left_y") == 0)
-  {
+    break;
+  case str2int("lower_left_y"):
     return &lower_left_y;
-  }
-  if(field.compare("lower_right_latitude") == 0)
-  {
+    break;
+  case str2int("lower_right_latitude"):
     return &lower_right_latitude;
-  }
-  if(field.compare("lower_right_longitude") == 0)
-  {
+    break;
+  case str2int("lower_right_longitude"):
     return &lower_right_longitude;
-  }
-  if(field.compare("lower_right_x") == 0)
-  {
+    break;
+  case str2int("lower_right_x"):
     return &lower_right_x;
-  }
-  if(field.compare("lower_right_y") == 0)
-  {
+    break;
+  case str2int("lower_right_y"):
     return &lower_right_y;
-  }
-  if(field.compare("maximum_latitude") == 0)
-  {
+    break;
+  case str2int("maximum_latitude"):
     return &maximum_latitude;
-  }
-  if(field.compare("maximum_longitude") == 0)
-  {
+    break;
+  case str2int("maximum_longitude"):
     return &maximum_longitude;
-  }
-  if(field.compare("maximum_x") == 0)
-  {
+    break;
+  case str2int("maximum_x"):
     return &maximum_x;
-  }
-  if(field.compare("maximum_y") == 0)
-  {
+    break;
+  case str2int("maximum_y"):
     return &maximum_y;
-  }
-  if(field.compare("minimum_latitude") == 0)
-  {
+    break;
+  case str2int("minimum_latitude"):
     return &minimum_latitude;
-  }
-  if(field.compare("minimum_longitude") == 0)
-  {
+    break;
+  case str2int("minimum_longitude"):
     return &minimum_longitude;
-  }
-  if(field.compare("minimum_x") == 0)
-  {
+    break;
+  case str2int("minimum_x"):
     return &minimum_x;
-  }
-  if(field.compare("minimum_y") == 0)
-  {
+    break;
+  case str2int("minimum_y"):
     return &minimum_y;
-  }
-  if(field.compare("name") == 0)
-  {
+    break;
+  case str2int("name"):
     return &name;
-  }
-  if(field.compare("pixel_resolution") == 0)
-  {
+    break;
+  case str2int("pixel_resolution"):
     return &pixel_resolution;
-  }
-  if(field.compare("priority") == 0)
-  {
+    break;
+  case str2int("priority"):
     return &priority;
-  }
-  if(field.compare("sun_angle") == 0)
-  {
+    break;
+  case str2int("sun_angle"):
     return &sun_angle;
-  }  
-  if(field.compare("updated_at") == 0)
-  {
+    break;
+  case str2int("updated_at"):
     return &updated_at;
-  }
-  if(field.compare("upper_left_corner_x_status") == 0)
-  {
+    break;
+  case str2int("upper_left_corner_x_status"):
     return &upper_left_corner_x_status;
-  }
-  if(field.compare("upper_left_corner_y_status") == 0)
-  {
+    break;
+  case str2int("upper_left_corner_y_status"):
     return &upper_left_corner_y_status;
-  }
-  if(field.compare("upper_left_latitude") == 0)
-  {
+    break;
+  case str2int("upper_left_latitude"):
     return &upper_left_latitude;
-  }
-  if(field.compare("upper_left_longitude") == 0)
-  {
+    break;
+  case str2int("upper_left_longitude"):
     return &upper_left_longitude;
-  }
-  if(field.compare("upper_left_x") == 0)
-  {
+    break;
+  case str2int("upper_left_x"):
     return &upper_left_x;
-  }
-  if(field.compare("upper_left_y") == 0)
-  {
+    break;
+  case str2int("upper_left_y"):
     return &upper_left_y;
-  }
-  if(field.compare("upper_right_latitude") == 0)
-  {
+    break;
+  case str2int("upper_right_latitude"):
     return &upper_right_latitude;
-  }
-  if(field.compare("upper_right_longitude") == 0)
-  {
+    break;
+  case str2int("upper_right_longitude"):
     return &upper_right_longitude;
-  }
-  if(field.compare("upper_right_x") == 0)
-  {
+    break;
+  case str2int("upper_right_x"):
     return &upper_right_x;
-  }
-  if(field.compare("upper_right_y") == 0)
-  {
+    break;
+  case str2int("upper_right_y"):
     return &upper_right_y;
-  }
-  if(field.compare("width") == 0)
-  {
+    break;
+  case str2int("width"):
     return &width;
+    break;
   }
   
   return NULL;

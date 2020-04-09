@@ -3,11 +3,52 @@
 #ifndef AUXILARYFUNCTIONS_H
 #define AUXILARYFUNCTIONS_H
 #include <cmath>
+#include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
 
 /*********************/
 /* Generic functions */
 /*********************/
+inline constexpr unsigned int str2int(const char* str, int h = 0)
+{
+    return !str[h] ? 5381 : (str2int(str, h+1) * 33) ^ str[h];
+}
+
+inline bool FileExists(string Filename) { 
+  /***************************/
+  /* Check existance of file */
+  /***************************/
+  ifstream InFile(Filename.c_str());
+  if(InFile)
+  { 
+    InFile.close();
+    return true; // If file exists
+  }
+  InFile.close();
+
+  return false; // If file does not exist
+}
+
+inline bool FileExists(vector <string> Filenames) { 
+  /*********************************************/
+  /* Checks existance of filename in a vector. */
+  /* If all files exists, return true else     */
+  /* false.                                    */
+  /*********************************************/
+  for(int i = 0; i<(int)Filenames.size(); i++ ) {
+    if(FileExists(Filenames[i]))
+      continue;
+    else
+      return false; // One file does not exist
+  }
+
+  return true; // All files exist
+}
+
 template <typename T>
 inline T Max(T a, T b) { return (a > b) ? a : b; }
 
@@ -68,6 +109,25 @@ inline double MaxNearestMultiple(double n, double multiple) {
     return n;
 
   return (remainder < 0) ? n+remainder : n+multiple-remainder;
+}
+
+template<typename T>
+inline void printVector(std::vector<T> const &v)
+{
+    for (auto i: v) {
+        std::cout << i << ' ';
+    }
+    std::cout << '\n';
+}
+
+template<typename T>
+inline std::vector<T> vectorSlice(std::vector<T> const &v, int m, int n)
+{
+    auto first = v.cbegin() + m;
+    auto last = v.cbegin() + n + 1;
+
+    std::vector<T> vec(first, last);
+    return vec;
 }
 
 #endif

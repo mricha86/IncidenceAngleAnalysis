@@ -1,7 +1,6 @@
 #include "Utilities.h"
 
 using namespace boost;
-using namespace sql;
 using namespace std;
 
 bool Utilities::do_LinesIntersect(double x, double y, double x1, double y1, double x2, double y2)
@@ -99,27 +98,6 @@ bool Utilities::do_LinesIntersect(double x, double y, double x1, double y1, doub
     }
 }
 
-bool Utilities::FileExists(string Filename)
-{ 
-  /*******************************************/
-  /* Declaration/Initialization of Variables */
-  /*******************************************/
-  ifstream InFile;
-
-  /***************************/
-  /* Check existance of file */
-  /***************************/
-  InFile.open(Filename.c_str());
-  if(InFile)
-  { 
-    InFile.close();
-    return true; // If file exists
-  }
-  InFile.close();
-
-  return false; // If file does not exist
-}
-
 bool Utilities::is_PointContained(double x, double y, vector < vector <double> > &Polygon)
 {
   /*************************************/
@@ -166,10 +144,9 @@ double Utilities::ImageTotalArea(vector <double> &selected_incidence_angles, vec
   /* Sort incidence angle (ia) vector based on name column */
   /*********************************************************/
   field = "name";
-  SortIncidenceAngles sortincidenceangles(ia, field);
+  SortData <IncidenceAngles> sortincidenceangles(ia, field);
   sortincidenceangles.arrange();
-  ia = sortincidenceangles.GetIncidenceangles();
-  //ReadAuxilaryData::Display(ia); exit(0);
+  ia = sortincidenceangles.GetData();
 
   /************************************************************/
   /* Calculate total area by iterating through the image sets */
@@ -187,7 +164,7 @@ double Utilities::ImageTotalArea(vector <double> &selected_incidence_angles, vec
     /**********************************************/
     /* Retrieve incidence angle for current image */
     /**********************************************/
-    int nth_element = SearchIncidenceAngles::BinarySearch(ia, 0, n-1, field, &image_name);
+    int nth_element = SearchData<IncidenceAngles>::BinarySearch(ia, 0, n-1, field, &image_name);
     double angle = ia[nth_element].GetIncidence_angle();
     
     /********************************************************/
@@ -262,9 +239,9 @@ vector <double> Utilities::RetrieveUniqueIncidenceAngles(vector <IncidenceAngles
   /**************************************************************/
   /* Sort incidenceangles vector based on incidenceangle column */
   /**************************************************************/
-  SortIncidenceAngles sortincidenceangles(incidenceangles, "incidence_angle");
+  SortData <IncidenceAngles> sortincidenceangles(incidenceangles, "incidence_angle");
   sortincidenceangles.arrange();
-  incidenceangles = sortincidenceangles.GetIncidenceangles();
+  incidenceangles = sortincidenceangles.GetData();
 
   /******************************************/
   /* Retrieve unique incidence angle values */
@@ -316,18 +293,17 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
   /* Sort overlap vector */
   /***********************/
   field = "overlap_minimum_x";
-  SortOverlappedImages sortoverlap(OI, field);
+  SortData <OverlappedImages> sortoverlap(OI, field);
   sortoverlap.arrange();
-  OI = sortoverlap.GetOverlappedimages();
-  // OverlappedImages::Display(OI); exit(0);
-
+  OI = sortoverlap.GetData();
+  
   /*********************/
   /* Sort marks vector */
   /*********************/
   field = "image_id";
-  SortMarks sortmarks(marks, field);
+  SortData <Marks> sortmarks(marks, field);
   sortmarks.arrange();
-  marks = sortmarks.GetMarks();
+  marks = sortmarks.GetData();
 
   /******************************************************/
   /* Used as rejection criterion for overlapping images */
@@ -354,7 +330,7 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
       continue;
     if((incidence_angle_1 != OI[i].GetImage1_incidence_angle()) && (incidence_angle_1 != OI[i].GetImage2_incidence_angle()))
       continue;
-
+    
     /*************/
     /* Image ids */
     /*************/
@@ -398,8 +374,8 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
     /*********************************************************************/
     /* Isolate marks that are associated with current overlapping images */
     /*********************************************************************/
-    int index1 = SearchMarks::FirstOccurence(marks, 0, n-1, field, &image1_id);
-    int index2 = SearchMarks::LastOccurence(marks, 0, n-1, field, &image1_id);
+    int index1 = SearchData<Marks>::FirstOccurence(marks, 0, n-1, field, &image1_id);
+    int index2 = SearchData<Marks>::LastOccurence(marks, 0, n-1, field, &image1_id);
 
     /***********************************************************************/
     /* Determine which marks are in overlap region and record unique marks */
@@ -431,8 +407,8 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
     /*********************************************************************/
     /* Isolate marks that are associated with current overlapping images */
     /*********************************************************************/
-    index1 = SearchMarks::FirstOccurence(marks, 0, n-1, field, &image2_id);
-    index2 = SearchMarks::LastOccurence(marks, 0, n-1, field, &image2_id);
+    index1 = SearchData<Marks>::FirstOccurence(marks, 0, n-1, field, &image2_id);
+    index2 = SearchData<Marks>::LastOccurence(marks, 0, n-1, field, &image2_id);
 
     /***********************************************************************/
     /* Determine which marks are in overlap region and record unique marks */
@@ -578,19 +554,17 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
   /***********************************************/
   /* Sort images vector based on "field1" column */
   /***********************************************/
-  SortImages sortimages(images, field1);
+  SortData <Images> sortimages(images, field1);
   sortimages.arrange();
-  images = sortimages.GetImages();
-  //RetrieveImages::Display(images); exit(0);
+  images = sortimages.GetData();
   
   /********************************************************/
   /* Sort incidenceangles vector based on "field2" column */
   /********************************************************/
-  SortIncidenceAngles sortincidenceangles(incidenceangles, field2);
+  SortData <IncidenceAngles> sortincidenceangles(incidenceangles, field2);
   sortincidenceangles.arrange();
-  incidenceangles = sortincidenceangles.GetIncidenceangles();
-  //ReadAuxilaryData::Display(incidenceangles); exit(0);
-
+  incidenceangles = sortincidenceangles.GetData();
+  
   /*******************************/
   /* Iterate over all sub-images */
   /*******************************/
@@ -619,15 +593,15 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
     double image1_area = images[i].GetArea();
     vector < vector <double> > image1_shape_vector = images[i].GetShape_vector();
     int length = image1_name.find_first_of("_");
-    string basename = image1_name.substr(0, length); 
-    int nth_element = SearchIncidenceAngles::BinarySearch(incidenceangles, 0, n2-1, field2, &basename);
+    string basename = image1_name.substr(0, length);
+    int nth_element = SearchData<IncidenceAngles>::BinarySearch(incidenceangles, 0, n2-1, field2, &basename);
     double image1_incidence_angle = incidenceangles[nth_element].GetIncidence_angle();
     
     /**************************************************/
     /* Determine ending index of optimal search range */
     /**************************************************/
-    int index = SearchImages::LastNearestValue(images, i+1, n1-1, field1, &image1_maximum_x);
-
+    int index = SearchData<Images>::LastNearestValue(images, i+1, n1-1, field1, &image1_maximum_x);
+    
     /************************************/
     /* Ensure index is not out of range */
     /************************************/
@@ -678,7 +652,7 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
 	double image2_lower_left_y = images[j].GetLower_left_y();
         length = image2_name.find_first_of("_");
 	basename = image2_name.substr(0, length);
-	nth_element = SearchIncidenceAngles::BinarySearch(incidenceangles, 0, n2-1, field2, &basename);
+	nth_element = SearchData<IncidenceAngles>::BinarySearch(incidenceangles, 0, n2-1, field2, &basename);
 	double image2_incidence_angle = incidenceangles[nth_element].GetIncidence_angle();
 	
 	/**********************************************/
@@ -849,10 +823,10 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
     master_image_1_name = imagenames[0][0].substr(0, 10)+"LERE";
   else
   {
-    printf("Error: Invalid number of imagenames (%d).\nNow terminating program...\n", (int)imagenames[0].size());
+    printf("Error in PrintCraterCatalog: Invalid number of imagenames (%d).\nNow terminating program...\n", (int)imagenames[0].size());
     for(int i=0; i<(int)imagenames[0].size(); i++)
       cout << imagenames[0][i] << endl;
-    exit(1);
+    exit(EXIT_FAILURE);
   }
   if(imagenames[1].size() == 1)
     master_image_2_name = imagenames[1][0];
@@ -860,10 +834,10 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
     master_image_2_name = imagenames[1][0].substr(0, 10)+"LERE";
   else
   {
-    printf("Error: Invalid number of imagenames (%d).\nNow terminating program...\n", (int)imagenames[1].size());
+    printf("Error in PrintCraterCatalog: Invalid number of imagenames (%d).\nNow terminating program...\n", (int)imagenames[1].size());
     for(int i=0; i<(int)imagenames[1].size(); i++)
       cout << imagenames[0][i] << endl;
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   /**************************/
@@ -944,376 +918,6 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
 	   << endl;
   }
   
-  return;
-}
-
-int Utilities::DataSetSelector(string dsn)
-{
-  to_upper(dsn);
-  if(dsn.compare("MARS") == 0) return 18;
-  else if(dsn.compare("MERCURY") == 0) return 5;
-  else if(dsn.compare("MOON") == 0) return 1;
-  else if(dsn.compare("VESTA") == 0) return 4;
-  else
-  {
-    printf("Invalid data set (%s) request. Terminating program ...\n", dsn.c_str());
-    exit(EXIT_FAILURE);
-  }
-
-  return 0;
-}
-
-void Utilities::ExecuteAuxilaryFunctions(std::vector <ImageSets> &imagesets, std::vector <Images> &images, std::vector <Marks> &marks)
-{
-  /***************************************/
-  /* Declaration of function variable(s) */
-  /***************************************/
-  string buffer;
-  
-  /*************************/
-  /* Initialize checkpoint */
-  /*************************/
-  Checkpoint myCheckpoint;
-  
-  /****************************************/
-  /* Execute imagesets auxilary functions */
-  /****************************************/
-  ExecuteImageSetsAuxilaryFunction(imagesets);
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to execute imagesets auxilary function:";
-  myCheckpoint.ElapsedTime(buffer);
-
-  /*************************************/
-  /* Execute images auxilary functions */
-  /*************************************/
-  ExecuteImagesAuxilaryFunction(images, imagesets);
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to execute images auxilary function:";
-  myCheckpoint.ElapsedTime(buffer);
-
-  /************************************/
-  /* Execute marks auxilary functions */
-  /************************************/
-  ExecuteMarksAuxilaryFunction(marks, images);
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to execute marks auxilary function:";
-  myCheckpoint.ElapsedTime(buffer);
-  
-  return;
-}
-
-void Utilities::ExecuteImagesAuxilaryFunction(vector <Images> &images, vector <ImageSets> &imagesets)
-{
-  /**********************************************/
-  /* Sort imagesets vector based on name column */
-  /**********************************************/
-  SortImageSets sortimagesets(imagesets, "name");
-  sortimagesets.arrange();
-  imagesets = sortimagesets.GetImageSets();
-  
-  /*******************************************/
-  /* Sort images vector based on name column */
-  /*******************************************/
-  SortImages sortimages(images, "name");
-  sortimages.arrange();
-  images = sortimages.GetImages();
-
-  /****************/
-  /* Images index */
-  /****************/
-  int index = 0;
-
-  /************************************/
-  /* Iterate through imagesets vector */
-  /************************************/
-  for(int i=0; i<(int)imagesets.size(); i++)
-  {
-    /**************************************/
-    /* Retrieve current master image name */
-    /**************************************/
-    string master_image_name = imagesets[i].GetName();
-   
-    /************************************************************************************/
-    /* Retrieve x and y conditions for master image upper left corner as viewed by user */
-    /************************************************************************************/
-    string upper_left_x = imagesets[i].GetUpper_left_corner_x_status();
-    string upper_left_y = imagesets[i].GetUpper_left_corner_y_status();
-
-    /*************************************/
-    /* Retrieve transformation matricies */
-    /*************************************/
-    ProjectiveTransformation pt = imagesets[i].GetProjective_transformation();
-    
-    /**************************************************/
-    /* Determine length of current sub-image basename */
-    /**************************************************/
-    int p1 = images[index].GetName().find("_");
-    
-    /*********************************/
-    /* Iterate through images vector */
-    /*********************************/
-    while(master_image_name.compare(images[index].GetName().substr(0, p1)) == 0)
-    {
-      /****************************/
-      /* Execute AuxilaryFunction */
-      /****************************/
-      images[index].AuxilaryFunction(upper_left_x, upper_left_y, pt);
-      
-      /**************************/
-      /* Increment images index */
-      /**************************/
-      index++;
-    }
-  }
-  
-  if((int)imagesets.size() == 0)
-  {
-    cout << "Error in \"ExecuteImagesAuxilaryFunction\". ImageSets array has zero elements!\n Now terminating program ..." << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  return;
-}
-
-void Utilities::ExecuteImageSetsAuxilaryFunction(vector <ImageSets> &imagesets)
-{  
-  /*****************************************************************/
-  /* Iterate through imagesets vector and execute AuxilaryFunction */
-  /*****************************************************************/
-  for(int i=0; i<(int)imagesets.size(); i++)
-    imagesets[i].AuxilaryFunction();
-  
-  return;
-}
-
-void Utilities::ExecuteMarksAuxilaryFunction(vector <Marks> &marks, vector <Images> &images)
-{
-  /*************************************/
-  /* Declaration of function variables */
-  /*************************************/
-  int index;
-  string field;
-  
-  /**********************************/
-  /* Sort images vector based on id */
-  /**********************************/
-  field = "id";
-  SortImages sortimages(images, field);
-  sortimages.arrange();
-  images = sortimages.GetImages();
-
-  /*********************/
-  /* Sort marks vector */
-  /*********************/
-  field = "image_id";
-  SortMarks sortmarks(marks, field);
-  sortmarks.arrange();
-  marks = sortmarks.GetMarks();
-
-  /*********************************/
-  /* Iterate through images vector */
-  /*********************************/
-  index = 0;
-  for(int i=0; i<(int)images.size(); i++)
-  {
-    /********************/
-    /* Current image id */
-    /********************/
-    int image_id = images[i].GetId();
-
-    /****************************************************/
-    /* Current image upper left corner pixel coordinate */
-    /****************************************************/
-    double x_offset = images[i].GetX_relative();
-    double y_offset = images[i].GetY_relative();
-    
-    /************************************************/
-    /* Retrieve current coordinate transform matrix */
-    /************************************************/
-    ProjectiveTransformation pt = images[i].GetProjective_transformation();
-
-    /****************************************/
-    /* Reject moon_mappers_tutorial_4 image */
-    /****************************************/
-    if(image_id == 60639)
-      continue;
-    
-    /***************************************************************************************/
-    /* Calculate selenographic coordinates for all marks associated with current sub-image */
-    /***************************************************************************************/
-    while(image_id == marks[index].GetImage_id())
-    {
-      /*****************************************************************************/
-      /* Global pixel coordinates (Mark pixel coordinate relative to master image) */
-      /*****************************************************************************/
-      double x = static_cast<int>(x_offset+marks[index].GetX());
-      double y = static_cast<int>(y_offset+marks[index].GetY());
-      
-      /*********************************************/
-      /* Calculate mark diameter in physical units */
-      /*********************************************/
-      double r = 0.5*marks[index].GetDiameter(); // Unit: pixel
-      double latitude_high = pt.ComputeTarget2SourceCoordinate_y(x, y+r); // Unit: degree
-      double latitude_low = pt.ComputeTarget2SourceCoordinate_y(x, y-r); // Unit: degree
-      double longitude_high = pt.ComputeTarget2SourceCoordinate_y(x+r, y); // Unit: degree
-      double longitude_low = pt.ComputeTarget2SourceCoordinate_y(x-r, y); // Unit: degree
-      double angular_change1 = fabs(latitude_high-latitude_low); // Unit: degree
-      double angular_change2 = fabs(longitude_high-longitude_low); // Unit: degree
-      double angular_change = (angular_change1 > angular_change2) ? angular_change1 : angular_change2; // Unit: degree
-      double physical_diameter = EquirectangularProjection::CalculateY(angular_change, 0.0, R_moon); // Unit: meter
-      //double physical_diameter2 = SphericalLawofCosines::CalculateDistance(latitude_low, latitude_high, longitude, longitude, R_moon); // Unit: meter
-      
-      /*****************************/
-      /* Execute auxilary function */
-      /*****************************/
-      vector <double> adjustedpixelcoordinate{x, y}; // Units: pixel
-      vector <double> selenographiccoordinate = pt.ComputeTarget2SourceCoordinates(x, y); // Units: degree
-      double physical_x = EquirectangularProjection::CalculateX(selenographiccoordinate[0], 0.0, 0.0, R_moon); // Unit: meter
-      double physical_y = EquirectangularProjection::CalculateY(selenographiccoordinate[1], 0.0, R_moon); // Unit: meter
-      //double physical_x2 = SphericalLawofCosines::CalculateDistance(0.0, 0.0, 0.0, selenographiccoordinate[0], R_moon); // Unit: meter
-      //double physical_y2 = SphericalLawofCosines::CalculateDistance(0.0, selenographiccoordinate[1], 0.0, 0.0, R_moon); // Unit: meter
-      vector <double> cartesiancoordinate{physical_x, physical_y};
-      marks[index].AuxilaryFunction(adjustedpixelcoordinate, selenographiccoordinate, cartesiancoordinate, physical_diameter);
-      
-      /****************/
-      /* Update index */
-      /****************/
-      index++;
-    }
-  }
-
-  return;
-}
-
-void Utilities::ObtainData(string dataset_name, vector <ImageSets> &imagesets, vector <Images> &images, vector <Marks> &marks, string auxilarydatafile, vector <IncidenceAngles> &incidenceangles)
-{
-  /****************************************************/
-  /* Declaration/Initialization of function variables */
-  /****************************************************/
-  Connection *conn;
-  int dataset_id;
-  string buffer;
-  string field;
-  string option;
-  string table;
-
-  /*************************/
-  /* Initialize checkpoint */
-  /*************************/
-  Checkpoint myCheckpoint;
-
-  /*****************************************************/
-  /* Establish connection to CosmoQuest MySQL database */
-  /*****************************************************/
-  MySQLConnection myConnection(mysql_url, mysql_user, mysql_password, mysql_database);
-  myConnection.Connect();
-  conn = myConnection.GetConnection();
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to establish connection to CosmoQuest mysql database:";
-  myCheckpoint.ElapsedTime(buffer);
-
-  /************************************************/
-  /* Test connection to CosmoQuest MySQL database */
-  /************************************************/
-  // myConnection.TestConnection();
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to test connection to CosmoQuest mysql database:";
-  // myCheckpoint.ElapsedTime(buffer);
-
-  /*********************************/
-  /* Establish dataset to retrieve */
-  /*********************************/
-  dataset_id = DataSetSelector(dataset_name); 
-
-  /****************************************************************/
-  /* Retrieve image_sets datatable from CosmoQuest MySQL database */
-  /****************************************************************/
-  table = "image_sets";
-  field = "id, name, application_id, upper_left_latitude, upper_left_longitude, upper_right_latitude, upper_right_longitude, lower_right_latitude, lower_right_longitude, lower_left_latitude, lower_left_longitude, pixel_resolution, details";
-  option = "";
-  RetrieveData<ImageSets> ImageSetsData(conn, dataset_id, table, field, option);
-  ImageSetsData.FetchData();
-  imagesets = ImageSetsData.GetData();
-  // RetrieveData<ImageSets>::DisplayData(table, imagesets); exit(0);
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to retrieve image_sets table from CosmoQuest mysql database:";
-  myCheckpoint.ElapsedTime(buffer);
-
-  /************************************************************/
-  /* Retrieve images datatable from CosmoQuest MySQL database */
-  /************************************************************/
-  table = "images";
-  field = "id, image_set_id, application_id, name, details";
-  RetrieveData<Images> ImagesData(conn, dataset_id, table, field, option);
-  ImagesData.FetchData();
-  images = ImagesData.GetData();
-  // RetrieveData<Images>::DisplayData(table, images); exit(0);
-  
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to retrieve images table from CosmoQuest mysql database:";
-  myCheckpoint.ElapsedTime(buffer);
-  
-  /***********************************************************/
-  /* Retrieve marks datatable from CosmoQuest MySQL database */
-  /***********************************************************/
-  table = "marks";
-  field = "id, image_id, application_id, x, y, diameter";
-  RetrieveData<Marks> MarksData(conn, dataset_id, table, field, option);
-  MarksData.FetchData();
-  marks = MarksData.GetData();
-  // RetrieveData<Marks>::DisplayData(table, marks); exit(0);
-  
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to retrieve marks table from CosmoQuest mysql database:";
-  myCheckpoint.ElapsedTime(buffer);
-
-  /***********************************************/
-  /* End connection to CosmoQuest MySQL database */
-  /***********************************************/
-  myConnection.Disconnect();
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to end connection to CosmoQuest mysql database:";
-  myCheckpoint.ElapsedTime(buffer);
-
-  /******************************************************/
-  /* Retrieve auxilary data from user supplied datafile */
-  /******************************************************/
-  ReadAuxilaryData AuxilaryData(auxilarydatafile);
-  AuxilaryData.Read();
-  incidenceangles = AuxilaryData.GetIncidenceAngleData();
-  // ReadAuxilaryData::Display(incidenceangles); exit(0);
-
-  /**************/
-  /* Checkpoint */
-  /**************/
-  buffer = "Elapsed time to retrieve auxilary data:";
-  myCheckpoint.ElapsedTime(buffer);
-
   return;
 }
 

@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "AuxilaryFunctions.h"
 #include "IncidenceAngles.h"
 #include "Utilities.h"
 

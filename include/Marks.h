@@ -50,6 +50,7 @@ class Marks
     double GetPhysical_x();
     double GetPhysical_y();
     double GetScore();
+    double GetValue_double(std::string);
     double GetX();
     double GetX_adjusted();
     double GetY();
@@ -63,11 +64,13 @@ class Marks
     int GetShared_mark_id();
     int GetSubmit_time();
     int GetUser_id();
+    int GetValue_int(std::string);
     std::string GetCreated_at();
     std::string GetDetails();
     std::string GetSub_type();
     std::string GetType();
     std::string GetUpdated_at();
+    std::string GetValue_string(std::string);
     std::vector <std::string> GetFields();
     void AuxilaryFunction(std::vector <double> &, std::vector <double> &, std::vector <double> &, double);
     void * GetValue(std::string);

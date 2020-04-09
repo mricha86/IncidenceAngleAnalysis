@@ -70,6 +70,52 @@ double Marks::GetScore()
   return score;
 }
 
+double Marks::GetValue_double(string field)
+{
+  if(field.compare("diameter") == 0)
+  {
+    return diameter;
+  }
+  if(field.compare("latitude") == 0)
+  {
+    return latitude;
+  }
+  if(field.compare("longitude") == 0)
+  {
+    return longitude;
+  }
+  if(field.compare("physical_diameter") == 0)
+  {
+    return physical_diameter;
+  }
+  if(field.compare("physical_x") == 0)
+  {
+    return physical_x;
+  }
+  if(field.compare("physical_y") == 0)
+  {
+    return physical_y;
+  }
+  if(field.compare("score") == 0)
+  {
+    return score;
+  }
+  if(field.compare("x") == 0)
+  {
+    return x;
+  }
+  if(field.compare("x_adjusted") == 0)
+  {
+    return x_adjusted;
+  }
+  if(field.compare("y") == 0)
+  {
+    return y;
+  }
+ 
+  return 0;
+}
+
 double Marks::GetX()
 {
   return x;
@@ -136,6 +182,44 @@ int Marks::GetUser_id()
   return user_id;
 }
 
+int Marks::GetValue_int(string field)
+{
+  if(field.compare("application_id") == 0)
+  {
+    return application_id;
+  }
+  if(field.compare("id") == 0)
+  {
+    return id;
+  }
+  if(field.compare("image_id") == 0)
+  {
+    return image_id;
+  }
+  if(field.compare("image_user_id") == 0)
+  {
+    return image_user_id;
+  }
+  if(field.compare("machine_mark_id") == 0)
+  {
+    return machine_mark_id;
+  }
+  if(field.compare("shared_mark_id") == 0)
+  {
+    return shared_mark_id;
+  }
+  if(field.compare("submit_time") == 0)
+  {
+    return submit_time;
+  }
+  if(field.compare("user_id") == 0)
+  {
+    return user_id;
+  }  
+
+  return 0;
+}
+
 string Marks::GetCreated_at()
 {
   return created_at;
@@ -159,6 +243,32 @@ string Marks::GetType()
 string Marks::GetUpdated_at()
 {
   return updated_at;
+}
+
+string Marks::GetValue_string(string field)
+{
+  if(field.compare("created_at") == 0)
+  {
+    return created_at;
+  }
+  if(field.compare("details") == 0)
+  {
+    return details;
+  }
+  if(field.compare("sub_type") == 0)
+  {
+    return sub_type;
+  }
+  if(field.compare("type") == 0)
+  {
+    return type;
+  }
+  if(field.compare("updated_at") == 0)
+  {
+    return updated_at;
+  }
+
+  return NULL;
 }
 
 vector <string> Marks::GetFields()
@@ -201,21 +311,33 @@ void Marks::AuxilaryFunction(vector <double> &adjustedpixelcoordinate, vector <d
 
 void * Marks::GetValue(string field)
 {
+  if(field.compare("application_id") == 0)
+  {
+    return &application_id;
+  }
+  if(field.compare("confirmed") == 0)
+  {
+    return &confirmed;
+  }
+  if(field.compare("created_at") == 0)
+  {
+    return &created_at;
+  }
+  if(field.compare("details") == 0)
+  {
+    return &details;
+  }
+  if(field.compare("diameter") == 0)
+  {
+    return &diameter;
+  }
   if(field.compare("id") == 0)
   {
     return &id;
   }
-  if(field.compare("user_id") == 0)
-  {
-    return &user_id;
-  }
   if(field.compare("image_id") == 0)
   {
     return &image_id;
-  }
-  if(field.compare("application_id") == 0)
-  {
-    return &application_id;
   }
   if(field.compare("image_user_id") == 0)
   {
@@ -225,9 +347,33 @@ void * Marks::GetValue(string field)
   {
     return &machine_mark_id;
   }
+  if(field.compare("score") == 0)
+  {
+    return &score;
+  }
   if(field.compare("shared_mark_id") == 0)
   {
     return &shared_mark_id;
+  }
+  if(field.compare("sub_type") == 0)
+  {
+    return &sub_type;
+  }
+  if(field.compare("submit_time") == 0)
+  {
+    return &submit_time;
+  }
+  if(field.compare("type") == 0)
+  {
+    return &type;
+  }
+  if(field.compare("updated_at") == 0)
+  {
+    return &updated_at;
+  }
+  if(field.compare("user_id") == 0)
+  {
+    return &user_id;
   }
   if(field.compare("x") == 0)
   {
@@ -236,42 +382,6 @@ void * Marks::GetValue(string field)
   if(field.compare("y") == 0)
   {
     return &y;
-  }
-  if(field.compare("diameter") == 0)
-  {
-    return &diameter;
-  }
-  if(field.compare("submit_time") == 0)
-  {
-    return &submit_time;
-  }
-  if(field.compare("confirmed") == 0)
-  {
-    return &confirmed;
-  }
-  if(field.compare("score") == 0)
-  {
-    return &score;
-  }
-  if(field.compare("type") == 0)
-  {
-    return &type;
-  }
-  if(field.compare("sub_type") == 0)
-  {
-    return &sub_type;
-  }
-  if(field.compare("details") == 0)
-  {
-    return &details;
-  }
-  if(field.compare("created_at") == 0)
-  {
-    return &created_at;
-  }
-  if(field.compare("updated_at") == 0)
-  {
-    return &updated_at;
   }
 
   return NULL;
