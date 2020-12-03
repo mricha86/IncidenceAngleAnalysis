@@ -20,6 +20,7 @@ class DataRetrieval
   /* Declaration of class members/functions */
   /******************************************/
   public:
+    DataRetrieval(std::string, std::vector <ImageSets> &, std::vector <Images> &, std::vector <Marks> &);
     DataRetrieval(std::string, std::string, std::vector <ImageSets> &, std::vector <Images> &, std::vector <Marks> &, std::vector <IncidenceAngles> &);
     static int DataSetSelector(std::string);
 };

@@ -2,14 +2,6 @@
 
 #ifndef PLOT_H
 #define PLOT_H
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <map>
-#include <math.h>
-#include <numeric>
-#include <sstream>
 #include <string>
 #include <TASImage.h>
 #include <TBox.h>
@@ -32,42 +24,17 @@
 #include <TStyle.h>
 #include <vector>
 
-#include "AuxilaryFunctions.h"
-#include "Constants.h"
-#include "Images.h"
-#include "ImageSets.h"
-#include "IncidenceAngles.h"
-#include "LeastSquares.h"
-#include "Marks.h"
-#include "OverlappedImages.h"
-#include "RetrieveData.h"
-#include "SearchImages.h"
-#include "SearchImageSets.h"
-#include "SearchIncidenceAngles.h"
-#include "SearchMarks.h"
-#include "SortData.h"
-#include "Utilities.h"
-
 class Plot
 {
   /**********************************/
   /* Declaration of class functions */
   /**********************************/
   public:
-    static void CumulativeFrequencySizeDistribution(std::string, std::string);
-    static void CumulativeFrequencySizeDistribution(std::string, std::string, TGraphErrors **, TGraphErrors **, TGraph **, TGraph **, TGraphErrors **, TGraphErrors **, TLegend **);
-    static void ImageComparison(double, double, double, double, std::string, std::string, std::string, std::vector <ImageSets> &, std::vector <Images> &, std::vector <IncidenceAngles> &, bool = true);
-    static void ImageMosaic(std::string, std::vector <ImageSets> &, std::vector <Images> &, std::vector <IncidenceAngles> &, bool = true);
-    static void MasterImage(ImageSets, bool = true);
-    static void MasterImages(ImageSets, ImageSets, bool = true);
-    static void MasterImage_w_SubImages(ImageSets, std::vector <Images> &, bool = true);
-    static void MasterImages_w_OverlapData(double, double, std::vector <IncidenceAngles> &, std::vector <ImageSets> &, std::vector <OverlappedImages> &, std::vector <Marks> &);
-    static void PaperPlots(std::string);
-    static void PlotRealMasterImage(std::string, double, std::vector <IncidenceAngles> &, std::vector <ImageSets> &, std::vector <Images> &, double = 0);
-    static void PlotOverlap(OverlappedImages, bool = false);
-    static void SubImage(Images, bool = true, bool = false);
-    static void SubImages(Images, Images, bool = true, bool = false);
-    static void TestOverlap(std::string, std::string, std::vector <ImageSets> &, std::vector <Images> &, bool = true);
+    static TCanvas * CreateCanvas(std::string, std::string = "", int = 800, int = 1000, bool = false, bool = false, bool = false, bool = false);
+    static TH1F * CreateFrame(TCanvas *, std::string, double, double, double, double, double, double, int, int);
+    static TH1F * Histogram(std::vector <double> const &, int, double, double, std::string, std::string = "", std::string = "", std::string = "");
+    static TGraph * ScatterPlot(std::vector <double> const &, std::vector <double> const &, std::string = "", std::string = "", std::string = "", Color_t = kBlack, Size_t = 1, Style_t = 1);
+    static TGraphErrors * ScatterPlot(std::vector <double> const &, std::vector <double> const &, std::vector <double> const &, std::vector <double> const &, std::string = "", std::string = "", std::string = "", Color_t = kBlack, Size_t = 1, Style_t = 1);
 };
 
 #endif

@@ -27,7 +27,7 @@ map <int, vector <string> > AnalysisSelection::Selector(int argc, char *argv[]) 
     else
       Usage(command);
   }
-  if(nparams == 2) {
+  else if(nparams == 2) {
     dataset_name = argv[1];
     auxilarydatafile = argv[2];
     vector <string> params{dataset_name, auxilarydatafile};
@@ -75,13 +75,13 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
   /*************************/
   Checkpoint myCheckpoint;
   
-  // Run selected analysis
+  // Analysis selection
   if(sel.count(1) == 1) {
     
     /**************************************************************/
     /* Cumulative Frequency versus Size Distributions and R-plots */
     /**************************************************************/ 
-    Plot::PaperPlots(sel[1][0]);
+    IncidenceAngleAnalysis_Plot::PaperPlots(sel[1][0]);
 
     /**************/
     /* Checkpoint */
@@ -104,12 +104,6 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
     /****************************************************/
     if(sel.count(2) == 1) {
 
-      /******************/
-      /* Ready the data */
-      /******************/
-      vector <string> params{sel[2][0], sel[2][1]};
-      ReadyData(myCheckpoint, params, imagesets, images, marks, incidenceangles);
-      
       /****************************/
       /* Declaration of variables */
       /****************************/
@@ -118,7 +112,13 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       vector <OverlappedImages> overlappedimages;
       vector <OverlappedImages> TotalOverlapImages;
       vector <OverlappedImages> scale_0_different_incidence_angle_overlappedimages;
-  
+
+      /******************/
+      /* Ready the data */
+      /******************/
+      vector <string> params{sel[2][0], sel[2][1]};
+      ReadyData(myCheckpoint, params, imagesets, images, marks, incidenceangles);
+      
       /**********************************************************/
       /* Calculate and display area of region used for analysis */
       /**********************************************************/
@@ -131,30 +131,11 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /**************/
       buffer = "Elapsed time to calculate area of region used for analysis:";
       myCheckpoint.ElapsedTime(buffer);
-
-      /*******************************************************************/
-      /* Visualization of region imaged at each selected incidence angle */
-      /*******************************************************************/
-      // string imdir = "/Users/MRichardson/Desktop/Incidence_Angle_Analysis/images/";
-      // for (int i = 0; i < (int)selected_angles.size(); i++) {
-      // 	Plot::PlotRealMasterImage(imdir, selected_angles[i], incidenceangles, imagesets, images);
-      // 	for (int j = 0; j < (int)selected_angles.size(); j++) {
-      // 	  if(i == j)
-      // 	    continue;
-      // 	  Plot::PlotRealMasterImage(imdir, selected_angles[i], incidenceangles, imagesets, images, selected_angles[j]);
-      // 	}
-      // }
-  
-      /**************/
-      /* Checkpoint */
-      /**************/
-      buffer = "Elapsed time to plot each region per selected incidence angle:";
-      // myCheckpoint.ElapsedTime(buffer); exit(0);
       
       /***********************************/
       /* Identify overlapping sub-images */
       /***********************************/
-      overlappedimages = Utilities::FindOverlappingImages(images, incidenceangles);
+      //overlappedimages = Utilities::FindOverlappingImages(images, incidenceangles);
 
       /**************/
       /* Checkpoint */
@@ -165,7 +146,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /*******************************************************************/
       /* Identify overlapping sub-images with different incidence angles */
       /*******************************************************************/
-      different_incidence_angle_overlappedimages = Utilities::FindDifferentIncidenceAngleOverlappingImages(overlappedimages);
+      //different_incidence_angle_overlappedimages = Utilities::FindDifferentIncidenceAngleOverlappingImages(overlappedimages);
 
       /**************/
       /* Checkpoint */
@@ -176,7 +157,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /***************************************************************************************/
       /* Identify overlapping sub-images with different incidence angles at the same "scale" */
       /***************************************************************************************/
-      scale_0_different_incidence_angle_overlappedimages = Utilities::FindSameScaleOverlappingImages(different_incidence_angle_overlappedimages, 0);
+      //scale_0_different_incidence_angle_overlappedimages = Utilities::FindSameScaleOverlappingImages(different_incidence_angle_overlappedimages, 0);
       
       /**************/
       /* Checkpoint */
@@ -190,11 +171,12 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /***************************************************************/
       int n = (int)selected_angles.size();
       int run = 0;
-      for(int i=0; i<n; i++) {
+      for(int i = 0; i < n; i++) {
 	double incidence_angle_1 = selected_angles[i];
-	for(int j=i+1; j<n; j++) {
+	for(int j = i+1; j < n; j++) {
 	  double incidence_angle_2 = selected_angles[j];
-	  Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, scale_0_different_incidence_angle_overlappedimages, marks, run, true);
+	  // Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, scale_0_different_incidence_angle_overlappedimages, marks, run, true);
+	  //Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, different_incidence_angle_overlappedimages, marks, run, true);
 	  run++;
 	}
       }
@@ -203,6 +185,17 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /* Checkpoint */
       /**************/
       buffer = "Elapsed time to retrieve marks contained within wanted overlapping images:";
+      myCheckpoint.ElapsedTime(buffer);
+
+      /*******************************************************************/
+      /* Visualization of region imaged at each selected incidence angle */
+      /*******************************************************************/
+      IncidenceAngleAnalysis_Plot::Visualization1(selected_angles, imagesets, images, incidenceangles);
+  
+      /**************/
+      /* Checkpoint */
+      /**************/
+      buffer = "Elapsed time to plot each region per selected incidence angle:";
       myCheckpoint.ElapsedTime(buffer);
     }
 
@@ -221,7 +214,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /* Plot image mosaic */
       /*********************/
       string imgdirlist = sel[3][2];
-      Plot::ImageMosaic(imgdirlist, imagesets, images, incidenceangles);
+      IncidenceAngleAnalysis_Plot::ImageMosaic(imgdirlist, imagesets, images, incidenceangles);
 
       /**************/
       /* Checkpoint */
@@ -234,20 +227,20 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
     /* If enabled, creation of image comparison */
     /********************************************/
     if(sel.count(4) == 1) {
-
+      
       /******************/
       /* Ready the data */
       /******************/
       vector <string> params{sel[4][0], sel[4][1]};
       ReadyData(myCheckpoint, params, imagesets, images, marks, incidenceangles);
-
+      
       /*************************/
       /* Plot image comparison */
       /*************************/
-      string imgdirlist = sel[3][2];
-      string cratercatalog1 = sel[3][3];
-      string cratercatalog2 = sel[3][4];
-      Plot::ImageComparison(3.64, 3.66, 26.14, 26.16, cratercatalog1, cratercatalog2, imgdirlist, imagesets, images, incidenceangles);
+      string cratercatalog1 = sel[4][2];
+      string cratercatalog2 = sel[4][3];
+      string imgdirlist = sel[4][4];
+      IncidenceAngleAnalysis_Plot::ImageComparison(3.64, 3.66, 26.14, 26.16, cratercatalog1, cratercatalog2, imgdirlist, imagesets, images, incidenceangles);
 
       /**************/
       /* Checkpoint */

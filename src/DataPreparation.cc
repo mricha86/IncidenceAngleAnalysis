@@ -54,7 +54,7 @@ void DataPreparation::ExecuteAuxilaryFunctions(vector <ImageSets> &imagesets, ve
   /* Execute images auxilary functions */
   /*************************************/
   ExecuteImagesAuxilaryFunction(images, imagesets);
-
+  
   /**************/
   /* Checkpoint */
   /**************/

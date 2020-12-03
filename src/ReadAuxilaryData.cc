@@ -54,34 +54,23 @@ void ReadAuxilaryData::Read()
   /* Declaration/Initialization of function variables */
   /****************************************************/
   ifstream InFile;
-  string buffer;
+  int n;
   string format;
 
-  /*****************/
-  /* Retrieve file */
-  /*****************/
-  if(FileExists(AuxilaryDataFile))
-    InFile.open(AuxilaryDataFile.c_str());
-  else
-  {
-    printf("Error in function ReadAuxilaryData::Read(): File %s does not exist! Now terminating simulation ...\n", AuxilaryDataFile.c_str());
-    exit(EXIT_FAILURE);
-  }
+  /***********************************/
+  /* Request memory for data vectors */
+  /***********************************/
+  n = 26;
+  vector <double> incidenceangles_value(n);
+  vector <string> incidenceangles_name(n);
 
-  /*********************/
-  /* Read-in data file */
-  /*********************/
+  /****************/
+  /* Read in data */
+  /****************/
   format = "%s %lf";
-  while(getline(InFile, buffer))
-  {
-    char str[250];
-    double d1;
-    int nelements = sscanf(buffer.c_str(), format.c_str(), str, &d1);
-    if(nelements == 2)
-    { 
-      IncidenceAngles myDatapoint1(static_cast<string>(str), d1);
-      incidenceangledata.push_back(myDatapoint1);
-    }
+  Readcol::Read(AuxilaryDataFile, format, incidenceangles_name.data(), incidenceangles_value.data());
+  for(int i = 0; i < n; i++) {
+    IncidenceAngles myDatapoint1(incidenceangles_name[i], incidenceangles_value[i]);
+    incidenceangledata.push_back(myDatapoint1);
   }
-  InFile.close();
 }

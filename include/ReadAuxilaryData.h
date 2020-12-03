@@ -10,6 +10,7 @@
 
 #include "AuxilaryFunctions.h"
 #include "IncidenceAngles.h"
+#include "Readcol.h"
 #include "Utilities.h"
 
 class ReadAuxilaryData

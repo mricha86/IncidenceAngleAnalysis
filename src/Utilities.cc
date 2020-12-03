@@ -1,3 +1,8 @@
+/* Purpose: */
+
+/***********************/
+/* Include header file */
+/***********************/
 #include "Utilities.h"
 
 using namespace boost;
@@ -450,10 +455,11 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
 	                          to_string(Polygon_Overlap[2][0])+" "+to_string(Polygon_Overlap[2][1])+","+
 	                          to_string(Polygon_Overlap[3][0])+" "+to_string(Polygon_Overlap[3][1])+","+
 	                          to_string(Polygon_Overlap[0][0])+" "+to_string(Polygon_Overlap[0][1])+"))";
+ 
       polygon current_polygon;
       boost::geometry::read_wkt(buffer.c_str(), current_polygon);
       boost::geometry::correct(current_polygon);
-      input.push_back(current_polygon);
+      input.push_back(current_polygon); 
 
       /***********************************/
       /* Update number of polygons added */
@@ -461,7 +467,7 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
       npolygons++;
     }
   }
-
+  
   /*******************************/
   /* Retrieve master image names */
   /*******************************/
@@ -476,13 +482,13 @@ void Utilities::RetrieveCraterCatalog(double incidence_angle_1, double incidence
   union_polys(input, output);
   BOOST_FOREACH(polygon const& p, output)
   {
-    //cout << i++ << ": " << boost::geometry::area(p) << endl;
     i++;
     total_area += boost::geometry::area(p);
+    // cout << i << " " << boost::geometry::area(p) << " " << total_area << endl;
   }
 
-  //cout << "True total area: " << total_area*(m2km*m2km) << " km^2" << endl;
-  //cout << "Number of polygons used: " << npolygons << " : " << output.size() << endl;
+  // cout << "True total area: " << total_area*(m2km*m2km) << " km^2" << endl;
+  // cout << "Number of polygons used: " << npolygons << " : " << output.size() << endl; exit(0);
 
   /****************************/
   /* Record surviving craters */
@@ -725,7 +731,7 @@ vector <OverlappedImages> Utilities::FindOverlappingImages(vector <Images> &imag
   return OLImages;
 }
 
-vector <OverlappedImages> Utilities::FindSameScaleOverlappingImages(vector <OverlappedImages> &OI, int scale)
+vector <OverlappedImages> Utilities::FindSameScaleOverlappingImages(vector <OverlappedImages> &OI, int scale = 0)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
@@ -921,32 +927,64 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
   return;
 }
 
-void Utilities::union_polys(vector <polygon> In_polys, vector <polygon> &Out_polys)
+void Utilities::PrintCraterPopulationData(string catalog, string imagename, double incidenceangle, double area, TH1F *hist, vector <double> &density, vector <double> &density_err, vector <double> &R, vector <double> &R_err)
 {
-    std::vector<polygon> temp_polys;
-    bool *considered = new bool [In_polys.size()];
-    for(unsigned i = 0 ; i < In_polys.size() ; i++) considered[i] = false;
-    for(unsigned i = 0 ; i < In_polys.size()/2; i++)
-    {
-        if(!considered[i])
-        {
-            polygon inetr = In_polys.at(i);
-            for(unsigned j = i + 1 ; j < In_polys.size() ; j++)
-            {
+  int p1 = catalog.find("g_")+2;
+  int p2 = catalog.find("_M");
+  int len = p2-p1;
+  int obs_num = stoi(catalog.substr(p1, len));
+  string filename = "Crater_population_data_"+to_string(obs_num)+"_"+imagename+"_"+to_string(incidenceangle)+".txt";
+  ofstream outfile(filename.c_str());
+  outfile << setprecision(7) << setw(10) << left << "D (km)" << "\t"
+	  << setprecision(7) << setw(10) << left << "Area (km^2)" << "\t"
+	  << setprecision(7) << setw(10) << left << "N_cum" << "\t"
+	  << setprecision(7) << setw(10) << left << "Density" << "\t"
+	  << setprecision(7) << setw(10) << left << "Den. Error" << "\t"
+	  << setprecision(7) << setw(10) << left << "N" << "\t"
+	  << setprecision(7) << setw(10) << left << "Relative" << "\t"
+	  << setprecision(7) << setw(10) << left << "Rel. Error" << endl;
+  int counter = int(RoundtoNearest(density.front()*area, "ones"));
+  for(int i = 0; i < hist->GetNbinsX(); i++) {
+    outfile << setprecision(7) << setw(10) << left << pow(10, hist->GetXaxis()->GetBinLowEdge(i+1)) << "\t"
+	    << setprecision(7) << setw(10) << left << area << "\t"
+	    << setprecision(7) << setw(10) << left << counter << "\t"
+	    << setprecision(7) << setw(10) << left << density[i] << "\t"
+	    << setprecision(7) << setw(10) << left << density_err[i] << "\t"
+	    << setprecision(7) << setw(10) << left << hist->GetBinContent(i+1) << "\t"
+	    << setprecision(7) << setw(10) << left << R[i] << "\t"
+	    << setprecision(7) << setw(10) << left << R_err[i]
+	    << endl;
+    counter -= hist->GetBinContent(i+1);
+  }
+  outfile.close();
+}
 
-                if(!considered[j])
-                {
-                    temp_polys.clear();
-                    boost::geometry::union_(inetr, In_polys.at(j) , temp_polys);
-                    if(temp_polys.size() == 1)
-                    {
-                        inetr = temp_polys.at(0);
-                        considered[j] = true;
-                        j = i;
-                    }
-                }
-            }
-            Out_polys.push_back(inetr);
-        }
+void Utilities::union_polys(vector <polygon> &In_polys, vector <polygon> &Out_polys)
+{
+  /******************************/
+  /* Merge overlapping polygons */
+  /******************************/
+  int n = In_polys.size();
+  vector <bool> considered(n, false);
+  for(int i = 0; i < n; i++) {
+    if(!considered[i]) {
+      polygon inetr = In_polys[i];
+      for(int j = i + 1; j < n; j++) {
+	if(!considered[j]) {
+	  vector <polygon> temp_polys;
+	  boost::geometry::union_(inetr, In_polys[j], temp_polys);
+	  if(temp_polys.size() == 1) {
+	    inetr = (boost::geometry::area(temp_polys[0]) > boost::geometry::area(inetr)) ? temp_polys[0] : inetr;
+	    considered[j] = true;
+	    j = i;
+	  }
+	}
+      }
+
+      /*************************/
+      /* Record merged polygon */
+      /*************************/
+      Out_polys.push_back(inetr);
     }
+  }
 }

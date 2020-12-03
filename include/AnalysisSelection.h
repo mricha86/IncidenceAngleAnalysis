@@ -14,6 +14,7 @@
 #include "Images.h"
 #include "ImageSets.h"
 #include "IncidenceAngles.h"
+#include "IncidenceAngleAnalysis_Plot.h"
 #include "Marks.h"
 #include "OverlappedImages.h"
 #include "Plot.h"

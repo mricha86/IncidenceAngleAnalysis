@@ -4,7 +4,7 @@
 # Declaration/Initialization of needed varables #
 #################################################
 CRATERCATALOGS="CraterCatalogList.txt"
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/"
 MAKEFILE="/Users/mrichardson/Desktop/Incidence_Angle_Analysis/Makefile"
 DATASET="Moon"
 REDUCEDCRATERCATALOGSLIST="ReducedCraterCatalogList.txt"
@@ -40,16 +40,18 @@ eval ${arg}
 # Produce raw marks catalog(s) #
 ################################
 arg="${EXE1_DIR}${EXE1} ${DATASET} ${EXE1_DIR}${EXE1_AUXILARYFILE}"
-eval ${arg}
+# eval ${arg}
 
-#exit
+# exit
 
 ##################################
 # Copy crater catalogs into list #
 ##################################
 arg="ls Crater_* > ${CRATERCATALOGS}"
-eval ${arg}
-    
+# eval ${arg}
+
+# exit
+
 ####################################################
 # Initialize array for reduced crater catalog list #
 ####################################################
@@ -66,48 +68,52 @@ do
 	REDUCEDCRATERCATALOGS+=("${filename}")
 	continue
     fi
-    arg="$EXE2 ${CRATERCATALOG} ${EXE2_MIN_MARKS_PER_CLUSTER} ${EXE2_MAP_GRID_SPACING} ${EXE2_SEARCH_RADIUS}"
-    eval ${arg}
+    arg="${EXE2} ${CRATERCATALOG} ${EXE2_MIN_MARKS_PER_CLUSTER} ${EXE2_MAP_GRID_SPACING} ${EXE2_SEARCH_RADIUS}"
+    # eval ${arg}
     arg="cp out_short_1.txt ${filename}"
-    eval ${arg}
+    # eval ${arg}
     arg="rm -rf out_*.txt log.txt"
-    eval ${arg}
+    # eval ${arg}
     if [[ -f ${filename} ]]
     then
 	REDUCEDCRATERCATALOGS+=("${filename}")
     fi
 done < "${CRATERCATALOGS}"
 
+# exit
+
 ###########################################
 # Create reduced crater catalog list file #
 ###########################################
 nelements=${#REDUCEDCRATERCATALOGS[@]}
 arg="echo -n >| ${REDUCEDCRATERCATALOGSLIST}"
-eval ${arg}
+# eval ${arg}
 column=1
 for(( i=0; i<${nelements}; i++ ))
 do
     arg="printf ${REDUCEDCRATERCATALOGS[i]} >> ${REDUCEDCRATERCATALOGSLIST}"
-    eval ${arg}
+    # eval ${arg}
     if [[ ${column} -eq 1 ]]
     then
 	arg="printf \"\t\" >> ${REDUCEDCRATERCATALOGSLIST}"
-	eval ${arg}
+	# eval ${arg}
 	((column++))
     else
 	arg="printf \"\n\" >> ${REDUCEDCRATERCATALOGSLIST}"
-	eval ${arg}
+	# eval ${arg}
 	column=1
     fi
 done
 
+# exit
+
 ##################################################
 # Create cumulative size-frequency distributions #
 ##################################################
-arg="${EXE1_DIR}${EXE1} ${REDUCEDCRATERCATALOGSLIST} 1"
+arg="${EXE1_DIR}${EXE1} ${DIR}${REDUCEDCRATERCATALOGSLIST}"
 eval ${arg}
 
-#exit
+exit
 
 ########################
 # Plot full LRO images #
@@ -119,7 +125,7 @@ IMGCOMP=3
 ########################
 IMGLIST="imglist.txt"
 arg="echo -n >| ${IMGLIST}"
-eval ${arg}
+# eval ${arg}
 while read -r CRATERCATALOG
 do
     run=$(echo "${CRATERCATALOG}" | awk -F'_' '{print $3}')
@@ -129,12 +135,12 @@ do
 	if [[ "${imname:12:2}" == "RE" ]]
 	then
 	    arg="echo ${CRATERCATALOG:17:10}LE 0 10000 >> ${IMGLIST}"
-	    eval ${arg}
+	    # eval ${arg}
 	    arg="echo ${CRATERCATALOG:17:10}RE 0 10000 >> ${IMGLIST}"
-	    eval ${arg}
+	    # eval ${arg}
 	else
 	    arg="echo ${CRATERCATALOG:17:12} 0 10000 >> ${IMGLIST}"
-	    eval ${arg}
+	    # eval ${arg}
 	fi
     fi
 done < "${CRATERCATALOGS}"
@@ -146,7 +152,7 @@ nelements=$(cat ${CRATERCATALOGS} | wc -l)
 if [[ ${nelements} -gt 0 ]]
 then
     arg="./${EXE3} ${IMGLIST}"
-    eval ${arg}
+    # eval ${arg}
 else
     exit
 fi
@@ -156,14 +162,14 @@ fi
 ###############################
 IMGDIRLIST="imgdirlist.txt"
 arg="echo -n >| ${IMGDIRLIST}"
-eval ${arg}
+# eval ${arg}
 while read -r line
 do
     imname=$(echo "${line}" | awk -F' ' '{print $1}')
     arg="echo ${DIR}/images_${imname}: >> ${IMGDIRLIST}"
-    eval ${arg}
+    # eval ${arg}
     arg="ls ${DIR}/images_${imname} >> ${IMGDIRLIST}"
-    eval ${arg}
+    # eval ${arg}
 done < "${IMGLIST}"
 
 #########################
@@ -171,13 +177,13 @@ done < "${IMGLIST}"
 #########################
 val1=$((${IMGCOMP} * 2))
 val2=$((${val1} + 1))
-arg="${EXE1_DIR}${EXE1} ${EXE1_DIR}${EXE1_AUXILARYFILE} ${REDUCEDCRATERCATALOGS[${val1}]} ${REDUCEDCRATERCATALOGS[${val2}]} ${IMGDIRLIST} 2"
-eval ${arg}
+arg="${EXE1_DIR}${EXE1} ${EXE1_DIR}${EXE1_AUXILARYFILE} ${REDUCEDCRATERCATALOGS[${val1}]} ${REDUCEDCRATERCATALOGS[${val2}]} ${IMGDIRLIST}"
+# eval ${arg}
 
 #####################
 # Plot image mosaic #
 #####################
-arg="${EXE1_DIR}${EXE1} ${EXE1_DIR}${EXE1_AUXILARYFILE} ${IMGDIRLIST} 3"
+arg="${EXE1_DIR}${EXE1} ${EXE1_DIR}${EXE1_AUXILARYFILE} ${IMGDIRLIST}"
 #eval ${arg}
 
 #############################################

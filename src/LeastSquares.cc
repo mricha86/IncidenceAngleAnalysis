@@ -243,6 +243,23 @@ vector <double> LeastSquares::GetY_data()
   return y_data;
 }
 
+vector <int> LeastSquares::SelectRandomIndicies()
+{
+  /*************************************/
+  /* Declaration of function variables */
+  /*************************************/
+  vector <int> indicies(ndatapoints);
+  RandGen rand;
+
+  /********************************/
+  /* Random selection of indicies */
+  /********************************/
+  for(int i = 0; i < ndatapoints; i++)
+    indicies[i] = rand.Uniform_Dist(0, ndatapoints-1);
+
+  return indicies;
+}
+
 vector < vector <double> > LeastSquares::GetCovariance_matrix()
 {
   return covariance_matrix;
@@ -378,41 +395,38 @@ void LeastSquares::ChooseModel()
       break;
   }
   nparameters = (int)parameters.size();
-  ndatatablecolumns = 1+nparameters;
+  ndatatablerows = 1+nparameters;
   
   return;
 }
 
 void LeastSquares::ComputeCovarianceMatrix()
 {
-  /********************************/
-  /* Number of rows in data table */
-  /********************************/
-  ndatatablerows = (int)data_table.size();
-
+  /***********************************/
+  /* Number of columns in data table */
+  /***********************************/
+  ndatatablecolumns = (int)data_table.size();
+  
   /*************************/
   /* Calculate mean vector */
   /*************************/
   ComputeMeanVector();
-
+  
   /******************************/
   /* Calculate deviation vector */
   /******************************/
   ComputeDeviationVector();
-
+  
   /*******************************/
   /* Calculate covariance matrix */
   /*******************************/
   vector < vector <double> > cov(nparameters, vector <double> (nparameters, 0.0));
-  for(int i=0; i<nparameters; i++)
-    for(int j=i; j<nparameters; j++)
-    {
+  for(int i = 0; i < nparameters; i++)
+    for(int j = i; j < nparameters; j++) {
       double sum = 0.0;
-      for(int k=0; k<ndatatablerows; k++)
-      {
+      for(int k = 0; k < ndatatablecolumns; k++)
 	sum += deviation_vector[k][i]*deviation_vector[k][j];
-      }
-      cov[i][j] = cov[j][i] = sum/(ndatatablerows-1.0);
+      cov[i][j] = cov[j][i] = sum/(ndatatablecolumns-1.0);
     }
   covariance_matrix = cov;
 }
@@ -422,15 +436,11 @@ void LeastSquares::ComputeDeviationVector()
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  vector < vector <double> > deviations(ndatatablerows, vector <double> (nparameters, 0.0));
-
-  for(int i=0; i<ndatatablerows; i++)
-  {
-    for(int j=0; j<nparameters; j++)
-    {
-      deviations[i][j] = data_table[i][j]-mean_vector[j];
-    }
-  }
+  vector < vector <double> > deviations(ndatatablecolumns, vector <double> (nparameters, 0.0));
+  
+  for(int i = 0; i < nparameters; i++)
+    for(int j = 0; j < ndatatablecolumns; j++)
+      deviations[j][i] = data_table[j][i]-mean_vector[i];
   deviation_vector = deviations;
 }
 
@@ -441,15 +451,18 @@ void LeastSquares::ComputeMeanVector()
   /****************************************************/
   vector <double> means(nparameters, 0.0);
 
-  for(int i=0; i<ndatatablerows; i++)
-  {
-    for(int j=0; j<nparameters; j++)
-    {
-      means[j] += data_table[i][j];
-    }
-  }
-  for(int j=0; j<nparameters; j++)
-    means[j] /= ndatatablerows;
+  /**************************/
+  /* Compute parameter sums */
+  /**************************/
+  for(int i = 0; i < nparameters; i++)
+    for(int j = 0; j < ndatatablecolumns; j++)
+      means[i] += data_table[j][i];
+
+  /***************************/
+  /* Compute parameter means */
+  /***************************/
+  for(int i = 0; i < nparameters; i++)
+      means[i] /= ndatatablecolumns;
   mean_vector = means;
 }
 
@@ -474,17 +487,17 @@ void LeastSquares::FillModelVector()
   return;
 }
 
-void LeastSquares::Fit(int method, int modelchoice, vector <double> &params, vector <double> &stepsizes, double &stepDown)
+void LeastSquares::Fit(int method, int modelchoice, double &stepDown, vector <double> &stepsizes, vector <double> &params)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
   double epsilon = 1.0E-12;
   
-  /************************************************/
-  /* Clears data table and sets number of columns */
-  /************************************************/
-  data_table.clear();
+  /*************************/
+  /* Sets niterations to 0 */
+  /*************************/
+  niterations = 0;
 
   /*******************************/
   /* Select least squares method */
@@ -524,7 +537,7 @@ void LeastSquares::Fit(int method, int modelchoice, vector <double> &params, vec
       /*************************************************************/
       int index_greatestChange = 0;
       double greatestChange = 0;
-      for(int i=0; i<GetNparameters(); i++)
+      for(int i = 0; i < GetNparameters(); i++)
       {
     	double param_diff = params_after[i]-params_before[i];
     	if(fabs(param_diff) > fabs(greatestChange))
@@ -563,19 +576,97 @@ void LeastSquares::Fit(int method, int modelchoice, vector <double> &params, vec
     }
   }
 
+  return;
+}
+
+void LeastSquares::Fit(int method, int modelchoice, double &stepDown, vector <double> &stepsizes, vector <double> &params, vector <double> &errors)
+{
+  /***********************************/
+  /* Retrieve best fit for real data */
+  /***********************************/
+  Fit(method, modelchoice, stepDown, stepsizes, params);
+
+  /**************************************/
+  /* Save params and current chi square */
+  /**************************************/
+  double true_chi_square = chiSquare;
+  int true_niterations = niterations;
+  vector <double> true_params = params;
+  vector <double> true_x_data = x_data;
+  vector <double> true_y_data = y_data;
+
+  /*****************************/
+  /* Saving data to data table */
+  /*****************************/
+  ndatatablerows = nparameters+1;
+  vector <double> col(ndatatablerows);
+  for(int i = 0; i < nparameters; i++)
+    col[i] = params[i];
+  col[ndatatablerows-1] = chiSquare;
+  data_table.push_back(col);
+  
+  /****************************/
+  /* Perform bootstrap method */
+  /****************************/
+  unsigned nbootstrap = 1000;
+  for(unsigned i = 0; i < nbootstrap; i++) {    
+    /*********************************/
+    /* Randomly select n data points */
+    /*********************************/
+    vector <int> indicies = SelectRandomIndicies();
+    
+    /*********************************************/
+    /* Modify x and y data by random replacement */
+    /*********************************************/
+    for(int j = 0; j < ndatapoints; j++) {
+      x_data[j] = true_x_data[indicies[j]];
+      y_data[j] = true_y_data[indicies[j]];
+    }
+    
+    /**************************************************/
+    /* Retrieve best fit for current data realization */
+    /**************************************************/
+    Fit(method, modelchoice, stepDown, stepsizes, params);
+
+
+    cout << i << endl;
+    
+    /*****************************/
+    /* Saving data to data table */
+    /*****************************/
+    for(int i = 0; i < nparameters; i++)
+      col[i] = params[i];
+    col[ndatatablerows-1] = chiSquare;
+    data_table.push_back(col);
+  }
+
   /*******************************/
   /* Calculate covariance matrix */
   /*******************************/
   ComputeCovarianceMatrix();
 
-  return;
+  /****************************/
+  /* Retrieve error estimates */
+  /****************************/
+  errors.resize(nparameters);
+  for(int i = 0; i < nparameters; i++)
+    errors[i] = sqrt(covariance_matrix[i][i]);
+
+  /***********************************************/
+  /* Return parameters to state before bootstrap */
+  /***********************************************/
+  chiSquare = true_chi_square;
+  niterations = true_niterations;
+  params = true_params;
+  x_data = true_x_data;
+  y_data = true_y_data;
 }
 
 void LeastSquares::LeastSquaresGradientSearch(int modelchoice, vector <double> &params, vector <double> &stepsizes, double &stepDown)
 {
-  /*************************************/
-  /* Declaration of function variables */
-  /*************************************/
+  /****************************************************/
+  /* Declaration/Initialization of function variables */
+  /****************************************************/
   double chiSquare1;
   double chiSquare2;  
   double chiSquare3;
@@ -585,7 +676,6 @@ void LeastSquares::LeastSquaresGradientSearch(int modelchoice, vector <double> &
   /***********************************/
   /* Initialize important parameters */
   /***********************************/
-  niterations = 0;
   modelselection = modelchoice;
   parameters = params;
   delta_parameter = stepsizes;
@@ -594,7 +684,7 @@ void LeastSquares::LeastSquaresGradientSearch(int modelchoice, vector <double> &
   /* Choose model (fitting function) */
   /***********************************/
   ChooseModel();
-
+  
   /***************************************/
   /* Initial calculation of model values */
   /***************************************/
@@ -688,7 +778,7 @@ void LeastSquares::LeastSquaresGradientSearch(int modelchoice, vector <double> &
   /* Calculate minimum Chi Square */
   /********************************/
   chiSquare = CalculateChiSquare();
-
+  
   /*********************/
   /* Change parameters */
   /*********************/
@@ -723,12 +813,6 @@ void LeastSquares::LeastSquaresGridSearch(int modelchoice, vector <double> &para
   /* Choose model (fitting function) */
   /***********************************/
   ChooseModel();
-  
-  /****************************************/
-  /* Vector to record parameter selection */
-  /* and corresponding chi square value   */
-  /****************************************/
-  vector <double> row(ndatatablecolumns);
 
   /***************************************/
   /* Initial calculation of model values */
@@ -806,20 +890,7 @@ void LeastSquares::LeastSquaresGridSearch(int modelchoice, vector <double> &para
       chiSquare1 = chiSquare2;
       chiSquare2 = chiSquare3;
       chiSquare3 = CalculateChiSquare();
-
-      /***************/ 
-      /* Record data */
-      /***************/
-      // for(int i=0; i<nparameters; i++)
-      // 	row[i] = parameters[i];
-      // row[ndatatablecolumns-1] = chiSquare3;
-      // data_table.push_back(row);
     } while(chiSquare3 < chiSquare2);
-
-    /********************************/
-    /* Remove last data table entry */
-    /********************************/
-    //data_table.pop_back();
 
     /**************************************/
     /* Calculate minimum local chi square */
@@ -842,14 +913,6 @@ void LeastSquares::LeastSquaresGridSearch(int modelchoice, vector <double> &para
     /* Calculate Minimum Chi Square */
     /********************************/
     chiSquare2 = CalculateChiSquare();
-    
-    /***************/ 
-    /* Record data */
-    /***************/
-    for(int i=0; i<nparameters; i++)
-      row[i] = parameters[i];
-    row[ndatatablecolumns-1] = chiSquare2;
-    data_table.push_back(row);
     
     /****************************************/
     /* Adjust step size (needs to be fixed) */
@@ -902,26 +965,28 @@ void LeastSquares::SetNparameters(int n)
   nparameters = n;
 }
 
-void LeastSquares::LeastSquaresLinear(vector <double> x, vector <double> y, double &slope, double &y_intercept)
+void LeastSquares::OrdinaryLeastSquares(vector <double> &x, vector <double> &y, double &slope, double &y_intercept, double &slope_err, double &y_intercept_err)
 {
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  int nelements;
+  double b;
+  double b_err;
   double constant;
   double m;
-  double b;
+  double m_err;
+  unsigned nelements;
 
   /********************************************/
   /* Step 1: Determine the number of elements */
   /********************************************/
   if(x.size() == y.size())
-    nelements = (int)x.size();
+    nelements = x.size();
   else
   {
     cout << "Invalid array sizes: " << x.size() << " does not equal " << y.size() << endl;
     cout << "Terminating program..." << endl;
-    exit(1);
+    exit(EXIT_FAILURE);
   }
   
   /********************************************/
@@ -930,7 +995,7 @@ void LeastSquares::LeastSquaresLinear(vector <double> x, vector <double> y, doub
   vector <double> x_squared(nelements);
   vector <double> xy(nelements);
   vector <double> y_squared(nelements);
-  for(int i=0; i<nelements; i++)
+  for(unsigned i = 0; i < nelements; i++)
   {
     x_squared[i] = x[i]*x[i];
     xy[i] = x[i]*y[i];
@@ -941,11 +1006,11 @@ void LeastSquares::LeastSquaresLinear(vector <double> x, vector <double> y, doub
   /* Step 3: Solve the following sums */
   /************************************/
   vector <double> sum(5);
-  sum[0] = ArraySum(y_squared.data(), nelements);
-  sum[1] = ArraySum(xy.data(), nelements);
-  sum[2] = ArraySum(y.data(), nelements);
-  sum[3] = ArraySum(x_squared.data(), nelements);
-  sum[4] = ArraySum(x.data(), nelements);
+  sum[0] = ArraySum(nelements, y_squared.data());
+  sum[1] = ArraySum(nelements, xy.data());
+  sum[2] = ArraySum(nelements, y.data());
+  sum[3] = ArraySum(nelements, x_squared.data());
+  sum[4] = ArraySum(nelements, x.data());
   
   /*************************************************************************/
   /* Step 4: Calculate the coefficients of the Mean Squared Error function */
@@ -1002,12 +1067,39 @@ void LeastSquares::LeastSquaresLinear(vector <double> x, vector <double> y, doub
   /* Step 8: Solve for y-intercept */
   /*********************************/
   b = y_intercept_coefficient[0]+y_intercept_coefficient[1]*m;
+
+  /**********************************************/
+  /* Step 9: Calculate sum of squared residuals */
+  /**********************************************/
+  double sum_res_squared = 0;
+  for(unsigned i = 0; i < nelements; i++)
+    sum_res_squared += pow((y[i] - (m*x[i] + b)), 2);
+
+  /*************************************************/
+  /* Step 10: Calculate sum of squared x residuals */
+  /*************************************************/
+  double xmean = ArrayAverage(nelements, x.data());
+  double sum_xres_squared = 0;
+  for(unsigned i = 0; i < nelements; i++)
+    sum_xres_squared += pow((x[i] - xmean), 2);
   
-  /********************************/
-  /* Record slope and y-intercept */
-  /********************************/
+  /*********************************/
+  /* Step 9: Solve for slope error */
+  /*********************************/
+  m_err = sqrt(1.0/(nelements-2))*sqrt((sum_res_squared)/sum_xres_squared);
+  
+  /****************************************/
+  /* Step 10: Solve for y-intercept error */
+  /****************************************/
+  b_err = m_err*sqrt(sum[3]/nelements);
+  
+  /*********************************************************/
+  /* Record slope and y-intercept and corresponding errors */
+  /*********************************************************/
   slope = m;
   y_intercept = b;
+  slope_err = m_err;
+  y_intercept_err = b_err;
   
   return;
 }
@@ -1022,159 +1114,63 @@ void LeastSquares::Test()
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  const double epsilon = 1.0E-6;
-  double cs1;
-  double sd;
+  double cs;
+  double sd = 0.5;
+  double sd2 = 0.5;
   double slope;
+  double slope_error;
   double yintercept;
-  int modelchoice;
+  double yintercept_error;
+  int methodchoice;
+  int modelchoice = 4; // Linear model
   int nchisquare_evaluations;
-  vector <double> xpoints = {1, 2, 3, 4}; // Test Vector
-  vector <double> ypoints = {6, 5, 7, 10}; // Test Vector
+  vector <double> errors;
+  // vector <double> xpoints = {1, 2, 3, 4}; // Test Vector
+  // vector <double> ypoints = {6, 5, 7, 10}; // Test Vector
+  vector <double> xpoints = {2, 4, 6, 8, 9}; // Test Vector
+  vector <double> ypoints = {1, 2, 3, 4, 5}; // Test Vector
   vector <double> params = {100, 100};
   vector <double> params2 = {100, 100};
   vector <double> stepsizes = {0.01, 0.01};
   vector <double> stepsizes2 = {0.01, 0.01};
+  vector < vector <double> > covMatrix;
   
   /**************************************/
   /* Least Squares Linear Test Method 1 */
   /**************************************/
-  LeastSquares::LeastSquaresLinear(xpoints, ypoints, slope, yintercept);
-  cout << "Solution: slope = 1.4, y-intercept = 3.5" << endl;
-  cout << "Simple linear regression yields: m = " << slope << ", y-intercept = " << yintercept << endl << endl;
+  LeastSquares::OrdinaryLeastSquares(xpoints, ypoints, slope, yintercept, slope_error, yintercept_error);
+  // cout << "Solution: slope = 1.4, y-intercept = 3.5" << endl;
+  cout << "Solution: slope = 0.548780487804878 +/- 0.0352042847066828, y-intercept = -0.182926829268292 +/- 0.22320738070393" << endl;
+  cout << "Simple linear regression yields: m = " << slope << " +/- " << slope_error << ", y-intercept = " << yintercept << " +/- " << yintercept_error << endl << endl;
 
-  /**************************************/
-  /* Least Squares Linear Test Method 2 */
-  /**************************************/
-  nchisquare_evaluations = 0;
-  modelchoice = 4;
+  /************************************************/
+  /* Least Squares Linear Test Method Grid Search */
+  /************************************************/
+  methodchoice = 2;
   LeastSquares Tester(xpoints, ypoints);
-  Tester.LeastSquaresGridSearch(modelchoice, params, stepsizes, sd);
-  nchisquare_evaluations += Tester.GetNiterations();
-  cs1 = Tester.GetChiSquare();
-  while(true)
-  {
-    /************************/
-    /* Calculate chi square */
-    /************************/
-    Tester.LeastSquaresGridSearch(modelchoice, params, stepsizes, sd);
-    nchisquare_evaluations += Tester.GetNiterations();
-    double cs2 = Tester.GetChiSquare();
-    double cs_diff = fabs(cs1-cs2);
+  Tester.Fit(methodchoice, modelchoice, sd, stepsizes, params, errors);
+  covMatrix = Tester.GetCovariance_matrix();
+  nchisquare_evaluations = Tester.GetNiterations();
+  cs = Tester.GetChiSquare();
 
-    cout << "Solution: slope = 1.4, y-intercept = 3.5" << endl;
-    cout << "Least Squares fit by the grid search method yields: m = " << params[0] << ", y-intercept = " << params[1] <<  ", chi-square = " << cs2 << endl;
-    
-    if(cs_diff < epsilon)
-    {
-      cout << endl;
-      break;
-    }
-    else
-      cs1 = cs2;
-  }
+  // cout << "Solution: slope = 1.4, y-intercept = 3.5" << endl;
+  cout << "Solution: slope = 0.548780487804878 +/- 0.0352042847066828, y-intercept = -0.182926829268292 +/- 0.22320738070393" << endl;
+  cout << "Least Squares fit by the grid search method yields: m = " << params[0] << " +/- " << errors[0] << ", y-intercept = " << params[1] <<  " +/- " << errors[1] << ", chi-square = " << cs << endl;
   cout << "Grid search method total number of chi square evaluations: " << nchisquare_evaluations << endl << endl;
   
-  /**************************************/
-  /* Least Squares Linear Test Method 3 */
-  /**************************************/
-  nchisquare_evaluations = 0;
-  sd = 0.5;
-  Tester.LeastSquaresGradientSearch(modelchoice, params2, stepsizes2, sd);
-  nchisquare_evaluations += Tester.GetNiterations();
-  cs1 = Tester.GetChiSquare();
-  while(true)
-  {
-    /************************/
-    /* Calculate chi square */
-    /************************/
-    Tester.LeastSquaresGradientSearch(modelchoice, params2, stepsizes2, sd);
-    nchisquare_evaluations += Tester.GetNiterations();
-    double cs2 = Tester.GetChiSquare();
-    double percent_diff = (cs1-cs2)/cs1;
+  /****************************************************/
+  /* Least Squares Linear Test Method Gradient Search */
+  /****************************************************/
+  methodchoice = 1;
+  Tester.Fit(methodchoice, modelchoice, sd2, stepsizes2, params2, errors);
+  nchisquare_evaluations = Tester.GetNiterations();
+  cs = Tester.GetChiSquare();
 
-    cout << "Solution: slope = 1.4, y-intercept = 3.5" << endl;
-    cout << "Least Squares fit by the gradient search method yields: m = " << params2[0] << ", y-intercept = " << params2[1] <<  ", chi-square = " << cs2 << endl;
-    
-    if(percent_diff < epsilon)
-    {
-      cout << endl;
-      break;
-    }
-    else
-      cs1 = cs2;
-  }
+  // cout << "Solution: slope = 1.4, y-intercept = 3.5" << endl;
+  cout << "Solution: slope = 0.548780487804878 +/- 0.0352042847066828, y-intercept = -0.182926829268292 +/- 0.22320738070393" << endl;
+  cout << "Least Squares fit by the gradient search method yields: m = " << params2[0] << " +/- " << errors[0] << ", y-intercept = " << params2[1] <<  " +/- " << errors[1] << ", chi-square = " << cs << endl;
   cout << "Gradient search method total number of chi square evaluations: " << nchisquare_evaluations << endl << endl;
   
   return;
 }
 
-void LeastSquares::Test2()
-{
-  /*****************/
-  /* Fake data set */
-  /*****************/
-  vector <vector <double> > mock_data(5, vector <double> (3));
-  mock_data[0][0] = 4.0;
-  mock_data[0][1] = 2.0;
-  mock_data[0][2] = 0.60;
-  mock_data[1][0] = 4.2;
-  mock_data[1][1] = 2.1;
-  mock_data[1][2] = 0.59;
-  mock_data[2][0] = 3.9;
-  mock_data[2][1] = 2.0;
-  mock_data[2][2] = 0.58;
-  mock_data[3][0] = 4.3;
-  mock_data[3][1] = 2.1;
-  mock_data[3][2] = 0.62;
-  mock_data[4][0] = 4.1;
-  mock_data[4][1] = 2.2;
-  mock_data[4][2] = 0.63;
-
-  /*****************************************************/
-  /* Initialize an instance of the least squares class */
-  /*****************************************************/
-  LeastSquares Tester;
-
-  /******************************************************/
-  /* Set values for data table and number of parameters */
-  /******************************************************/
-  Tester.SetNparameters(3);
-  Tester.SetData_table(mock_data);
-
-  /*****************************/
-  /* Compute covariance matrix */
-  /*****************************/
-  Tester.ComputeCovarianceMatrix();
-
-  /*******************/
-  /* Print mock data */
-  /*******************/
-  for(int i=0; i<(int)mock_data.size(); i++)
-  {
-    for(int j=0; j<(int)mock_data[i].size(); j++)
-      cout << mock_data[i][j] << " ";
-  cout << endl;
-  }
-
-  /*********************/
-  /* Print mean vector */
-  /*********************/
-  vector <double> mv = Tester.GetMean_vector();
-  for(int i=0; i<(int)mv.size(); i++)
-    cout << mv[i] << " "; 
-  cout << endl;
- 
-  /***************************/
-  /* Print covariance matrix */
-  /***************************/
-  vector < vector <double> > cov = Tester.GetCovariance_matrix();
-  for(int i=0; i<(int)cov.size(); i++)
-  {
-    for(int j=0; j<(int)cov[i].size(); j++)
-      cout << cov[i][j] << " ";
-    cout << endl;
-  }
-
-  return;
-}

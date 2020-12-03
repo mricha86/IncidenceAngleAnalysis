@@ -8,8 +8,10 @@
 #include <math.h>
 #include <string>
 #include <vector>
+
 #include "AuxilaryFunctions.h"
 #include "Constants.h"
+#include "RandGen.h"
 #include "Utilities.h"
 
 class LeastSquares
@@ -65,6 +67,7 @@ class LeastSquares
     std::vector <double> GetSigma();
     std::vector <double> GetX_data();
     std::vector <double> GetY_data();
+    std::vector <int> SelectRandomIndicies();
     std::vector < std::vector <double> > GetCovariance_matrix();
     std::vector < std::vector <double> > GetData_table();
     void CalculateGradient(double &, double &, std::vector <double> &);
@@ -76,15 +79,15 @@ class LeastSquares
     void ComputeDeviationVector();
     void ComputeMeanVector();
     void FillModelVector();
-    void Fit(int, int, std::vector <double> &, std::vector <double> &, double &);
+    void Fit(int, int, double &, std::vector <double> &, std::vector <double> &);
+    void Fit(int, int, double &, std::vector <double> &, std::vector <double> &, std::vector <double> &);
     void LeastSquaresGradientSearch(int, std::vector <double> &, std::vector <double> &, double &);
     void LeastSquaresGridSearch(int, std::vector <double> &, std::vector <double> &, double &);
     void Method(int, std::vector <double> &, std::vector <double> &, double &);
     void SetData_table(std::vector < std::vector <double> > &);
     void SetNparameters(int);
-    static void LeastSquaresLinear(std::vector <double>, std::vector <double>, double &, double &);
+    static void OrdinaryLeastSquares(std::vector <double> &, std::vector <double> &, double &, double &, double &, double &);
     static void Test();
-    static void Test2();
 };
 
 #endif
