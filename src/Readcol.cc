@@ -98,7 +98,7 @@ int Readcol::Read(string filename, string format, ...)
   return rownum;
 }
 
-int Readcol::Read(string filename, string skipline, string format, ...)
+int Readcol::Read(string filename, string skipline, int offset, string format, ...)
 {
   /*************************************/
   /* Declaration of function variables */
@@ -129,8 +129,16 @@ int Readcol::Read(string filename, string skipline, string format, ...)
   unsigned rownum = 0;
   while(getline(InFile, buffer)) {
     // Apply simple skipline condition
-    if(buffer.compare(0, skipline.length(), skipline) == 0)
-      continue;
+    if (offset >= 0) {
+      if (((int)buffer.length() >= offset) && buffer.compare(offset, skipline.length(), skipline) == 0)
+	continue;
+    }
+    else {
+      if (buffer.compare(buffer.length()-skipline.length(), skipline.length(), skipline) == 0)
+	continue;
+    }
+      
+    
 
     // Continue reading line
     double *double_vector;

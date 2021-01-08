@@ -98,15 +98,22 @@ void IncidenceAngleAnalysis_Plot::CSFDFittingRoutine(vector <double> &diameter, 
   }
 }
 
-void IncidenceAngleAnalysis_Plot::CumulativeCraterDensity(TH1F *h, double area, vector <double> &density, vector <double> &density_err)
+void IncidenceAngleAnalysis_Plot::CumulativeCraterDensity(TH1F *h, double area, vector <double> &xaxis, vector <double> &density, vector <double> &density_err)
 {
   int nbins = h->GetNbinsX();
   density.resize(nbins);
   density_err.resize(nbins);
+  xaxis.resize(nbins);
+
+  /**************************/
+  /* Retrieve x axis values */
+  /**************************/
+  for (int i = 0; i < nbins; i++)
+    xaxis[i] = h->GetBinLowEdge(i+1);
   
-  /******************************************/
-  /* Calculate cumulative density and error */
-  /******************************************/
+  /**************************************************/
+  /* Calculate cumulative density, respective error */
+  /**************************************************/
   for(int i = nbins; i >= 1; i--) {
     int N = 0;
     for(int j = i; j <= nbins; j++) {
@@ -117,776 +124,6 @@ void IncidenceAngleAnalysis_Plot::CumulativeCraterDensity(TH1F *h, double area, 
   }
 }
 
-void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string CraterCatalogue2)
-{
-  /*************************************/
-  /* Declaration of function variables */
-  /*************************************/
-  double binwidth;
-  double incidence_angle_1;
-  double incidence_angle_2;
-  double log10_xlow;
-  double log10_xup;
-  double total_area;
-  double xlow;
-  double xup;
-  double ylow_1;
-  double ylow_2;
-  double yup_1;
-  double yup_2;
-  ifstream InFile;
-  int canheight;
-  int canwidth;
-  int index1;
-  int index2;
-  int length;
-  int max_elements;
-  int n;
-  int nbins;
-  int nlines;
-  ofstream OutFile1;
-  ofstream OutFile2;
-  string buffer;
-  string format;
-  string filename;
-  string imagename1;
-  string imagename2;
-  TCanvas *can;
-  TCanvas *can2;
-  TCanvas *can3;
-  TGraph *F1;
-  TGraph *F2;
-  TGraphErrors *TG1;
-  TGraphErrors *TG2;
-  TGraphErrors *TG3;
-  TGraphErrors *TG4;
-  TH1F *hist1;
-  TH1F *hist2;
-  THStack *bar;
-  TLegend *leg;
-  TLegend *leg2;
-  TLegend *leg3;
-  vector <double> A1;
-  vector <double> A2;
-  vector <double> D1;
-  vector <double> D2;
-  vector <double> XAXISBIN;
-  vector <double> XAXISBINLOG;
-
-  /***********************************/
-  /* Request memory for data vectors */
-  /***********************************/
-  n = 10;
-  max_elements = 100000;
-  vector < vector <double> > CC1(n, vector <double> (max_elements));
-  vector < vector <double> > CC2(n, vector <double> (max_elements));
-  
-  /**********************/
-  /* Read-in Filename 1 */
-  /**********************/
-  format = "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf";
-  nlines = Readcol::Read(CraterCatalogue1, format, CC1[0].data(), CC1[1].data(),
-		CC1[2].data(), CC1[3].data(), CC1[4].data(), CC1[5].data(),
-		CC1[6].data(), CC1[7].data(), CC1[8].data(), CC1[9].data());
-  for(int i = 0; i < (int)CC1.size(); i++)
-    CC1[i].resize(nlines);
-  
-  /**********************/
-  /* Read-in Filename 2 */
-  /**********************/
-  nlines = Readcol::Read(CraterCatalogue2, format, CC2[0].data(), CC2[1].data(),
-		CC2[2].data(), CC2[3].data(), CC2[4].data(), CC2[5].data(),
-		CC2[6].data(), CC2[7].data(), CC2[8].data(), CC2[9].data());
-  for(int i = 0; i < (int)CC2.size(); i++)
-    CC2[i].resize(nlines);
-
-  /******************************************************/
-  /* Parse filename 1 to retrieve pertinent information */
-  /******************************************************/
-  index1 = CraterCatalogue1.find("_M")+1;
-  index2 = CraterCatalogue1.find("E_")+1;
-  length = index2-index1;
-  imagename1 = CraterCatalogue1.substr(index1, length);
-  index1 = index2+1;
-  index2 = CraterCatalogue1.rfind(".");
-  length = index2-index1;
-  incidence_angle_1 = stod(CraterCatalogue1.substr(index1, length));
-
-  /******************************************************/
-  /* Parse filename 1 to retrieve pertinent information */
-  /******************************************************/
-  index1 = CraterCatalogue2.find("_M")+1;
-  index2 = CraterCatalogue2.find("E_")+1;
-  length = index2-index1;
-  imagename2 = CraterCatalogue2.substr(index1, length);
-  index1 = index2+1;
-  index2 = CraterCatalogue2.rfind(".");
-  length = index2-index1;
-  incidence_angle_2 = stod(CraterCatalogue2.substr(index1, length));
-  
-  /***************/
-  /* Select data */
-  /***************/
-  for(int i=0; i<(int)CC1.size(); i++)
-  {
-    D1.push_back(CC1[i][5]*m2km);
-    A1.push_back(CC1[i][8]*m2km*m2km);
-  }
-  for(int i=0; i<(int)CC2.size(); i++)
-  {
-    D2.push_back(CC2[i][5]*m2km);
-    A2.push_back(CC2[i][8]*m2km*m2km);
-  }
-
-  /***************/
-  /* Data switch */
-  /***************/
-  if(incidence_angle_2 > incidence_angle_1)
-  {
-    D1.swap(D2);
-    A1.swap(A2);
-    imagename1.swap(imagename2);
-    double temp = incidence_angle_1;
-    incidence_angle_1 = incidence_angle_2;
-    incidence_angle_2 = temp;
-  }
-  
-  /*****************************************/
-  /* Determine plot spacing and number of  */
-  /* bins (Using even logarithmic spacing) */
-  /*****************************************/
-  binwidth = log10(sqrt(2)); 
-  xlow = 8.0*m2km;
-  xup = 110.0*m2km;
-  log10_xlow = log10(xlow);
-  log10_xup = log10(xup);
-  nbins = MaxNearestMultiple(log10_xup-log10_xlow, binwidth)/binwidth;
-  log10_xup = log10_xlow+nbins*binwidth;
-  xup = pow(10, log10_xup);
-
-  /***********************************/
-  /* Calculate left edge of each bin */
-  /***********************************/
-  for(int i=0; i<nbins; i++)
-  {
-    XAXISBINLOG.push_back(log10_xlow+binwidth*i);
-    XAXISBIN.push_back(pow(10, XAXISBINLOG.back()));
-  }
-
-  /*************************/
-  /* Initialize histograms */
-  /*************************/
-  hist1 = new TH1F("", "", nbins, log10_xlow, log10_xup);
-  hist2 = new TH1F("", "", nbins, log10_xlow, log10_xup);
-  
-  /**************************************/
-  /* Calculate cumulative distributions */
-  /**************************************/
-  vector <double> Density1(nbins, 0.0);
-  vector <double> Density2(nbins, 0.0);
-  vector <double> Density1_Error(nbins, 0.0);
-  vector <double> Density2_Error(nbins, 0.0);
-  vector <double> n_K1(nbins, 0.0);
-  vector <double> n_K2(nbins, 0.0);
-  double bin_number = 1.0/binwidth;
-  for(int i=0; i<(int)D1.size(); i++)
-  {    
-    /******************************************/
-    /* Calculate common log value of diameter */
-    /******************************************/
-    double logD = log10(D1[i]);
-
-    /******************/
-    /* Fill histogram */
-    /******************/
-    hist1->Fill(logD);
-    
-    /************************/
-    /* Determine bin number */
-    /************************/
-    int index = floor((logD-log10_xlow)*bin_number);
-    
-    /*******************************************/
-    /* Only include data above threshold value */
-    /*******************************************/
-    if((index < 0) || (index > nbins-1))
-      continue;
-
-    /**************************************/
-    /* Increment all bins associated with */
-    /* diameters less than or equal logD  */
-    /**************************************/
-    n_K1[index]++;
-  }
-  
-  for(int i=0; i<(int)D2.size(); i++)
-  {
-    /******************************************/
-    /* Calculate common log value of diameter */
-    /******************************************/
-    double logD = log10(D2[i]);
-
-    /********************/
-    /* Fill histogram 2 */
-    /********************/
-    hist2->Fill(logD);
-    
-    /************************/
-    /* Determine bin number */
-    /************************/
-    int index = floor((logD-log10_xlow)*bin_number);
-
-    /*******************************************/
-    /* Only include data above threshold value */
-    /*******************************************/
-    if((index < 0) || (index > nbins-1))
-      continue;
-
-    /***************************************/
-    /* Increment bin associated with index */
-    /***************************************/
-    n_K2[index]++;
-  }
-
-  /************************/
-  /* Calculate total area */
-  /************************/
-  total_area = A1[0];
-
-  /*************************/
-  /* Determined total area */
-  /*************************/
-  //cout << "Calculated total area for cumulative plot is: " << to_string(total_area) << " km^2" << endl;
-  
-  /***********************/
-  /* Density calculation */
-  /***********************/
-  for(int i=nbins-1; i>=0; i--)
-  {
-    for(int j=i; j<nbins; j++)
-    {
-      Density1[i] += n_K1[j]/total_area;
-      Density2[i] += n_K2[j]/total_area;
-    }
-  }
-  
-  /*****************************/
-  /* Density error calculation */
-  /*****************************/
-  ylow_1 = std::numeric_limits<double>::infinity();
-  yup_1 = -std::numeric_limits<double>::infinity();
-  for(int i=nbins-1; i>=0; i--)
-  {
-    double N1 = 0;
-    double N2 = 0;
-    for(int j=i; j<nbins; j++)
-    {
-      N1 += n_K1[j];
-      N2 += n_K2[j];
-    }
-    
-    Density1_Error[i] = (N1 != 0) ? Density1[i]/sqrt(N1) : 0;
-    Density2_Error[i] = (N2 != 0) ? Density2[i]/sqrt(N2) : 0;
-    
-    /***************************************************/
-    /* Determine absolute max and min densities values */
-    /***************************************************/
-    double low_arg1 = Density1[i]-Density1_Error[i];
-    double low_arg2 = Density2[i]-Density2_Error[i];
-    double up_arg1 = Density1[i]+Density1_Error[i];
-    double up_arg2 = Density2[i]+Density2_Error[i];
-    if(low_arg1 < low_arg2)
-      ylow_1 = (low_arg1 < ylow_1) ? low_arg1 : ylow_1;
-    else
-      ylow_1 = (low_arg2 < ylow_1) ? low_arg2 : ylow_1;
-    if(up_arg1 > up_arg2)
-      yup_1 = (up_arg1 > yup_1) ? up_arg1 : yup_1;
-    else
-      yup_1 = (up_arg2 > yup_1) ? up_arg2 : yup_1;
-  }
-
-  /***************************/
-  /* Calculation of R values */
-  /***************************/
-  vector <double> R1(nbins);
-  vector <double> R1_Error(nbins);
-  vector <double> R2(nbins);
-  vector <double> R2_Error(nbins);
-  ylow_2 = std::numeric_limits<double>::infinity();
-  yup_2 = -std::numeric_limits<double>::infinity();
-  for(int i=0; i<nbins; i++)
-  {
-    double b1 = XAXISBIN[i];
-    double b2 = b1+pow(10,binwidth);
-    double D = sqrt(b1*b2);
-
-    /**********************/
-    /* First distribution */
-    /**********************/
-    double numerator = pow(D, 3.0)*n_K1[i];
-    double denominator = total_area*(b2-b1);
-    R1[i] = numerator/denominator;
-    R1_Error[i] = (n_K1[i] != 0) ? R1[i]/sqrt(n_K1[i]) : 0;
-
-    /***********************/
-    /* Second distribution */
-    /***********************/
-    numerator = pow(D, 3.0)*n_K2[i];
-    R2[i] = numerator/denominator;
-    R2_Error[i] = (n_K2[i] != 0) ? R2[i]/sqrt(n_K2[i]) : 0;
-
-    /*******************************************/
-    /* Determine absolute max and min r values */
-    /*******************************************/
-    double low_arg1 = R1[i]-R1_Error[i];
-    double low_arg2 = R2[i]-R2_Error[i];
-    double up_arg1 = R1[i]+R1_Error[i];
-    double up_arg2 = R2[i]+R2_Error[i];
-    if(low_arg1 < low_arg2)
-      ylow_2 = (low_arg1 < ylow_2) ? low_arg1 : ylow_2;
-    else
-      ylow_2 = (low_arg2 < ylow_2) ? low_arg2 : ylow_2;
-    if(up_arg1 > up_arg2)
-      yup_2 = (up_arg1 > yup_2) ? up_arg1 : yup_2;
-    else
-      yup_2 = (up_arg2 > yup_2) ? up_arg2 : yup_2;
-  }
-
-  /*******************************/
-  /* Establish slope restriction */
-  /*******************************/
-  double slope_restriction = 2.0;
-  
-  /****************************************************/
-  /* Calculate log-log slope and y-intercept of first */
-  /* cumulative distribution assuming power law       */
-  /****************************************************/
-  double chiSquare1 = 0;
-  double power1 = 0;
-  double power1_error = 0;
-  double coefficient1 = 0;
-  double coefficient1_error = 0;
-  int index = nbins-1;
-  vector < vector <double> > cov1;
-  while(index > 2)
-  {
-    /********************************/
-    /* Retrieve x and y data points */
-    /********************************/
-    vector <double> x;
-    vector <double> y;
-    for(int i=nbins-1; i>=index-1; i--)
-    {
-      /*************************************************/
-      /* Removes data points where density equals zero */
-      /*************************************************/
-      if(Density1[i] == 0)
-	continue;
-      
-      /*************************************************/
-      /* Record x and y data point for fit calculation */
-      /*************************************************/
-      x.push_back(XAXISBIN[i]);
-      y.push_back(Density1[i]);
-    }
-    
-    /***************************************/
-    /* Ensures that a minimum of two data  */
-    /* points are used for fit calculation */
-    /***************************************/
-    if((int)y.size() < 2)
-    {
-      /****************/
-      /* Update index */
-      /****************/
-      index--;
-      
-      continue;
-    }
-
-    /**************************/
-    /* Fit initial conditions */
-    /**************************/
-    int methodchoice = 2; // Least squares grid search method
-    int modelchoice = 8; // Power-law fitting function (y = ax^-k)
-    double sd = 0.5;
-    vector <double> params = {3, 1}; // {k, a}
-    vector <double> stepsizes = {0.001, 0.001};
-
-    /****************************/
-    /* Determine fit parameters */
-    /****************************/
-    LeastSquares Regression(x, y);
-    Regression.Fit(methodchoice, modelchoice, sd, stepsizes, params);
-
-    /***********************************************************/
-    /* Apply slope condition as stated in Wilcox et al. (2006) */
-    /***********************************************************/
-    if(params[0] >= slope_restriction)
-    {
-      power1 = params[0];
-      coefficient1 = params[1];
-      chiSquare1 = Regression.GetChiSquare();
-      cov1 = Regression.GetCovariance_matrix();
-      power1_error = sqrt(cov1[0][0]);
-      coefficient1_error = sqrt(cov1[1][1]);
-    }
-    
-    /**********************************************/
-    /* If we have not satisfied slope condition   */
-    /* increase the number of points used for the */
-    /* fit starting at the highest diameter bin   */
-    /**********************************************/
-    index--;
-  }
-
-  /*****************************************************/
-  /* Calculate log-log slope and y-intercept of second */
-  /* cumulative distribution assuming power law        */
-  /*****************************************************/
-  double chiSquare2;
-  double power2 = 0;
-  double power2_error = 0;
-  double coefficient2 = 0;
-  double coefficient2_error = 0;
-  index = nbins-1;
-  vector < vector <double> > cov2;
-  while(index > 2)
-  {
-    /********************************/
-    /* Retrieve x and y data points */
-    /********************************/
-    vector <double> x;
-    vector <double> y;
-    for(int i=nbins-1; i>=index-1; i--)
-    {
-      /*************************************************/
-      /* Removes data points where density equals zero */
-      /*************************************************/
-      if(Density2[i] == 0)
-	continue;
-      
-      /*************************************************/
-      /* Record x and y data point for fit calculation */
-      /*************************************************/
-      x.push_back(XAXISBIN[i]);
-      y.push_back(Density2[i]);
-    }
-
-    /***************************************/
-    /* Ensures that a minimum of two data  */
-    /* points are used for fit calculation */
-    /***************************************/
-    if((int)y.size() < 2)
-    {
-      /****************/
-      /* Update index */
-      /****************/
-      index--;
-      
-      continue;
-    }
-    
-    /**************************/
-    /* Fit initial conditions */
-    /**************************/
-    int methodchoice = 2; // Least squares grid search method
-    int modelchoice = 8; // Power-law fitting function (y = ax^-k)
-    double sd = 0.5;
-    vector <double> params = {3, 1}; // {k, a}
-    vector <double> stepsizes = {0.001, 0.001};
-
-    /****************************/
-    /* Determine fit parameters */
-    /****************************/
-    LeastSquares Regression(x, y);
-    Regression.Fit(methodchoice, modelchoice, sd, stepsizes, params);
-    
-    /***********************************************************/
-    /* Apply slope condition as stated in Wilcox et al. (2006) */
-    /***********************************************************/
-    if(params[0] >= slope_restriction)
-    {
-      power2 = params[0];
-      coefficient2 = params[1];
-      chiSquare2 = Regression.GetChiSquare();
-      cov2 = Regression.GetCovariance_matrix();
-      power2_error = sqrt(cov2[0][0]);
-      coefficient2_error = sqrt(cov2[1][1]);
-    }
-    
-    /**********************************************/
-    /* If we have not satisfied slope condition   */
-    /* increase the number of points used for the */
-    /* fit starting at the highest diameter bin   */
-    /**********************************************/
-    index--;
-  }
-  
-  printf("Distribution 1: slope = %lf +/- %lf, amplitude = %lf +/- %lf\n", -power1, power1_error, coefficient1, coefficient1_error);
-  printf("Distribution 2: slope = %lf +/- %lf, amplitude = %lf +/- %lf\n", -power2, power2_error, coefficient2, coefficient2_error);
-
-  /*****************/
-  /* Retrieve fits */
-  /*****************/
-  vector <double> Fit1(nbins);
-  vector <double> Fit2(nbins);
-  for(int i=0; i<nbins; i++)
-  {
-    Fit1[i] = coefficient1*pow(XAXISBIN[i], -power1);
-    Fit2[i] = coefficient2*pow(XAXISBIN[i], -power2);
-  }
-
-  /*********************/
-  /* Initialize canvas */
-  /*********************/
-  canwidth = 1000;
-  canheight = 800;
-  can = new TCanvas("Canvas", "", canwidth, canheight);
-  can->SetLogy();
-  can->SetLogx();
-  can->SetGridx();
-  can->SetGridy();
-  
-  /**********************/
-  /* Initialize graph 1 */
-  /**********************/
-  TG1 = new TGraphErrors(nbins, XAXISBIN.data(), Density1.data(), 0, Density1_Error.data());
-  
-  /**********************/
-  /* Initialize graph 2 */
-  /**********************/
-  TG2 = new TGraphErrors(nbins, XAXISBIN.data(), Density2.data(), 0, Density2_Error.data());
-  
-  /********************/
-  /* Initialize fit 1 */
-  /********************/
-  F1 = new TGraph(nbins, XAXISBIN.data(), Fit1.data());
-    
-  /********************/
-  /* Initialize fit 2 */
-  /********************/
-  F2 = new TGraph(nbins, XAXISBIN.data(), Fit2.data());
-
-  /*****************/
-  /* Plot settings */
-  /*****************/
-  TG1->SetTitle("");
-  TG1->GetXaxis()->SetTitle("Diameter [km]");
-  TG1->GetYaxis()->SetTitle("Cumulative Number of Craters [km^{-2}]");
-  TG1->GetXaxis()->CenterTitle();
-  TG1->GetYaxis()->CenterTitle();
-  TG1->SetMarkerStyle(kOpenTriangleUp);
-  TG1->SetMarkerColor(kBlue);
-  TG1->GetXaxis()->SetRangeUser(xlow, xup);
-  TG1->GetYaxis()->SetRangeUser(ylow_1, yup_1);
-  TG1->Draw("AP");
-  TG2->SetMarkerStyle(kFullTriangleUp);
-  TG2->SetMarkerColor(kRed);
-  TG2->Draw("P");
-  F1->SetMarkerStyle(kDot);
-  F1->SetMarkerColor(kBlue);
-  F1->SetLineColor(kBlue);
-  F1->Draw("L");
-  F2->SetMarkerStyle(kDot);
-  F2->SetMarkerColor(kRed);
-  F2->SetLineColor(kRed);
-  F2->Draw("L");
-
-  /**********/
-  /* Legend */
-  /**********/
-  //leg = new TLegend(0.7,0.7,0.9,0.9);
-  leg = new TLegend(0.2,0.2,0.4,0.4);
-  buffer = imagename1+", "+to_string(incidence_angle_1);
-  leg->AddEntry(TG1, buffer.c_str(), "p");
-  buffer = imagename2+", "+to_string(incidence_angle_2);
-  leg->AddEntry(TG2, buffer.c_str(), "p");
-  leg->Draw();
-  
-  /*********************/
-  /* Save plot to file */
-  /*********************/
-  filename = "CumulativeFrequency_vs_SizeDistribution.ps";
-  can->SaveAs(filename.c_str());
-
-  /***********************/
-  /* Initialize canvas 2 */
-  /***********************/
-  canwidth = 1000;
-  canheight = 800;
-  can2 = new TCanvas("Canvas 2", "", canwidth, canheight);
-
-  /**************************/
-  /* Make stacked bar graph */
-  /**************************/
-  buffer = "Frequency-Size Distribution; Crater Size [log_{10}(km)]; Frequency";
-  bar = new THStack("Bar", buffer.c_str());
-  hist1->SetFillColor(kBlue);
-  bar->Add(hist1);
-  hist2->SetFillColor(kRed);
-  bar->Add(hist2);
-  bar->Draw("nostackb");
-  bar->GetXaxis()->SetLimits(log10_xlow, log10_xup);
-
-  /************/
-  /* Legend 2 */
-  /************/
-  leg2 = new TLegend(0.7,0.7,0.9,0.9);
-  buffer = imagename1+", "+to_string(incidence_angle_1);
-  leg2->AddEntry(hist1, buffer.c_str(), "f");
-  buffer = imagename2+", "+to_string(incidence_angle_2);
-  leg2->AddEntry(hist2, buffer.c_str(), "f");
-  leg2->Draw();
-  
-  /*********************/
-  /* Save plot to file */
-  /*********************/
-  filename = "Frequency_vs_SizeDistribution.ps";
-  can2->SaveAs(filename.c_str());
-  
-  /***********************/
-  /* Initialize canvas 3 */
-  /***********************/
-  canwidth = 1000;
-  canheight = 800;
-  can3 = new TCanvas("Canvas 3", "", canwidth, canheight);
-  can3->SetLogy();
-  can3->SetLogx();
-  can3->SetGridx();
-  can3->SetGridy();
-  
-  /**********************/
-  /* Initialize graph 1 */
-  /**********************/
-  TG3 = new TGraphErrors(nbins, XAXISBIN.data(), R1.data(), 0, R1_Error.data());
-  
-  /**********************/
-  /* Initialize graph 2 */
-  /**********************/
-  TG4 = new TGraphErrors(nbins, XAXISBIN.data(), R2.data(), 0, R2_Error.data());
-  
-  /*****************/
-  /* Plot settings */
-  /*****************/
-  TG3->SetTitle("");
-  TG3->GetXaxis()->SetTitle("Diameter [km]");
-  TG3->GetYaxis()->SetTitle("R Value");
-  TG3->GetXaxis()->CenterTitle();
-  TG3->GetYaxis()->CenterTitle();
-  TG3->SetMarkerStyle(kOpenTriangleUp);
-  TG3->SetMarkerColor(kBlue);
-  TG3->GetXaxis()->SetRangeUser(xlow, xup);
-  TG3->GetYaxis()->SetRangeUser(ylow_2, yup_2);
-  TG3->Draw("AP");
-  TG4->SetMarkerStyle(kFullTriangleUp);
-  TG4->SetMarkerColor(kRed);
-  TG4->Draw("P");
-
-  /**********/
-  /* Legend */
-  /**********/
-  //leg = new TLegend(0.7,0.7,0.9,0.9);
-  leg3 = new TLegend(0.2,0.2,0.4,0.4);
-  buffer = imagename1+", "+to_string(incidence_angle_1);
-  leg3->AddEntry(TG3, buffer.c_str(), "p");
-  buffer = imagename2+", "+to_string(incidence_angle_2);
-  leg3->AddEntry(TG4, buffer.c_str(), "p");
-  leg3->Draw();
-  
-  /*********************/
-  /* Save plot to file */
-  /*********************/
-  filename = "RValue_vs_SizeDistribution.ps";
-  can3->SaveAs(filename.c_str());
-
-  /***********************/
-  /* Initialize canvas 3 */
-  /***********************/
-  canwidth = 1000;
-  canheight = 800;
-  TCanvas *can4 = new TCanvas("Canvas 4", "", canwidth, canheight);
-  can4->Divide(1,2,0,0);
-
-  gROOT->SetStyle("Plain");
-  gStyle->SetPadTickX(1);
-  gStyle->SetPadTickY(1);
-  gStyle->SetPadTopMargin(0.05);
-  gStyle->SetPadRightMargin(0.05);
-  gStyle->SetPadBottomMargin(0.16);
-  gStyle->SetPadLeftMargin(0.12);
-  gStyle->SetPadBorderMode(0);
-  gStyle->SetOptStat(0);
-  gStyle->SetOptTitle(0);
-  
-  can4->cd(1);
-  gPad->SetLogy();
-  gPad->SetLogx();
-  gPad->SetGridx();
-  gPad->SetGridy();
-  gPad->SetBottomMargin(0.001);
-  gPad->SetTopMargin(0.01);
-  gPad->SetRightMargin(0.01);
-  TG1->Draw("AP");
-  TG2->Draw("P");
-
-  can4->cd(2);
-  gPad->SetLogy();
-  gPad->SetLogx();
-  gPad->SetGridx();
-  gPad->SetGridy();
-  gPad->SetTopMargin(0.001);
-  gPad->SetRightMargin(0.01);
-  TG3->Draw("AP");
-  TG4->Draw("P");
-  //can4->Update();
-
-  /**********/
-  /* Legend */
-  /**********/
-  leg->Draw();
-  
-  /*********************/
-  /* Save plot to file */
-  /*********************/
-  filename = "FullDistribution.ps";
-  can4->SaveAs(filename.c_str());
-  
-  /********************************/
-  /* Output plotting data to file */
-  /********************************/
-  OutFile1.open("CumulativeSizeFrequencyDistribution_"+to_string(incidence_angle_1)+"_vs_"+to_string(incidence_angle_2)+".dat");
-  OutFile2.open("R_Distribution_"+to_string(incidence_angle_1)+"_vs_"+to_string(incidence_angle_2)+".dat");
-  OutFile1 << setw(10) << "x1" << " \t | \t " << setw(10) << "y1" << " \t | \t " << setw(10) << "y1_err" << " \t | \t " << setw(10) << "x2" << " \t | \t " << setw(10) << "y2" << " \t | \t " << setw(10) << "y2_err" << endl;
-  OutFile2 << setw(10) << "x1" << " \t | \t " << setw(10) << "y1" << " \t | \t " << setw(10) << "y1_err" << " \t | \t " << setw(10) << "x2" << " \t | \t " << setw(10) << "y2" << " \t | \t " << setw(10) << "y2_err" << endl;
-  for(int i=0; i<nbins; i++)
-  {
-    OutFile1 << setw(10) << XAXISBIN[i] << " \t | \t " << setw(10) << Density1[i] << " \t | \t " << setw(10) << Density1_Error[i] << " \t | \t " << setw(10) << XAXISBIN[i] << " \t | \t " << setw(10) << Density2[i] << " \t | \t " << setw(10) << Density2_Error[i] << endl;
-    OutFile2 << setw(10) << XAXISBIN[i] << " \t | \t " << setw(10) << R1[i] << " \t | \t " << setw(10) << R1_Error[i] << " \t | \t " << setw(10) << XAXISBIN[i] << " \t | \t " << setw(10) << R2[i] << " \t | \t " << setw(10) << R2_Error[i] << endl;
-  }
-  OutFile1.close();
-  OutFile2.close();
-
-  /***********************************/
-  /* Free memory reserved for canvas */
-  /***********************************/
-  delete can;
-  delete can2;
-  delete can3;
-  delete TG1;
-  delete TG2;
-  delete TG3;
-  delete TG4;
-  delete hist1;
-  delete hist2;
-  delete bar;
-  delete leg;
-  delete leg2;
-  delete leg3;
-
-  return;
-}
-
 void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string CraterCatalogue1, string CraterCatalogue2, TGraphErrors **CSFD1, TGraphErrors **CSFD2, TGraph **FIT1, TGraph **FIT2, TGraphErrors **RD1, TGraphErrors **RD2, TLegend **L)
 {
   /*************************************/
@@ -895,23 +132,9 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   double binwidth;
   double incidence_angle_1;
   double incidence_angle_2;
-  double intercept1;
-  double intercept1_error;
-  double intercept2;
-  double intercept2_error;
-  double log10_xlow;
-  double log10_xhigh;
-  double slope1;
-  double slope1_error;
-  double slope2;
-  double slope2_error;
   double total_area;
   double xlow;
   double xhigh;
-  // double ylow_1;
-  // double ylow_2;
-  // double yhigh_1;
-  // double yhigh_2;
   int max_elements;
   int n;
   int nlines;
@@ -921,18 +144,18 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   string imagename1;
   string imagename2;
   stringstream stream;
-  TGraph *F1 = nullptr;
-  TGraph *F2 = nullptr;
   TGraphErrors *TG1 = nullptr;
   TGraphErrors *TG2 = nullptr;
   TGraphErrors *TG3 = nullptr;
   TGraphErrors *TG4 = nullptr;
   TLegend *leg = nullptr;
   unsigned nbins;
+  vector <double> CSFD_Xaxis;
   vector <double> Density1;
   vector <double> Density2;
   vector <double> Density1_Error;
   vector <double> Density2_Error;
+  vector <double> RSFD_Xaxis;
   vector <double> R1;
   vector <double> R2;
   vector <double> R1_Error;
@@ -997,38 +220,37 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
     imagename1.swap(imagename2);
     vswap(incidence_angle_1, incidence_angle_2);
   }
-
-  /***************************************************/
-  /* Calculate the common logarithm of the diameters */
-  /***************************************************/
-  vector <double> logD1 = vectorLogarithm(D1);
-  vector <double> logD2 = vectorLogarithm(D2);
   
-  /*************************************/
-  /* Determine x-axis characteristics  */
-  /*************************************/
-  binwidth = log10(sqrt(2)); 
-  xlow = 10.0*m2km;
-  xhigh = 110.0*m2km;
-  log10_xlow = log10(xlow);
-  log10_xhigh = log10(xhigh);
-  nbins = MaxNearestMultiple(log10_xhigh-log10_xlow, binwidth)/binwidth;
-  log10_xhigh = log10_xlow+nbins*binwidth;
-  xhigh = pow(10, log10_xhigh);
+  /****************************************/
+  /* Initializing x-axis characteristics  */
+  /****************************************/
+  binwidth = 0.001; // Unit: km per bin
+  xlow = 10.0*m2km; // Unit: km (Note: Minimum reliable crater diameter for CosmoQuest data)
+  xhigh = xlow; // Unit: km
 
+  /******************************************/
+  /* Generate low edge of bins along x axis */
+  /* Note: Crater diameters appear to max   */
+  /* out at 110 meters in size              */
+  /******************************************/
+  CSFD_Xaxis.push_back(xlow);
+  while(xhigh < 110.0*m2km) {
+    xhigh = RoundtoNearest(pow(10, log10(xhigh*sqrt(2))), binwidth);
+    CSFD_Xaxis.push_back(xhigh);
+  }
+  nbins = CSFD_Xaxis.size()-1;
+  
   /**************************************************/
   /* Calculate histogram for crater identifications */
   /**************************************************/
-  TH1F *hist1 = Plot::Histogram(logD1, nbins, log10_xlow, log10_xhigh, CraterCatalogue1);
-  TH1F *hist2 = Plot::Histogram(logD2, nbins, log10_xlow, log10_xhigh, CraterCatalogue2);
-
-  /*******************/
-  /* Retrieve x-axis */
-  /*******************/
-  for(unsigned i = 0; i < nbins; i++) {
-    XAXISBIN.push_back(pow(10, hist1->GetXaxis()->GetBinLowEdge(i+1)));
-    XAXISBINLOG.push_back(hist1->GetXaxis()->GetBinLowEdge(i+1));
-  }
+  TH1F *temphist1 = Plot::Histogram(D1, (xhigh-xlow)/binwidth, xlow, xhigh, CraterCatalogue1);
+  TH1F *temphist2 = Plot::Histogram(D2, (xhigh-xlow)/binwidth, xlow, xhigh, CraterCatalogue2);
+  
+  /****************************************************/
+  /* Rebin histogram accounting for variable bin size */
+  /****************************************************/
+  TH1F *hist1 = (TH1F *)temphist1->Rebin(nbins, "hist1", CSFD_Xaxis.data());
+  TH1F *hist2 = (TH1F *)temphist2->Rebin(nbins, "hist2", CSFD_Xaxis.data());
   
   /***********************/
   /* Retrieve total area */
@@ -1038,46 +260,14 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   /************************************************************/
   /* Calculate cumulative distributions and associated errors */
   /************************************************************/
-  CumulativeCraterDensity(hist1, total_area, Density1, Density1_Error);
-  CumulativeCraterDensity(hist2, total_area, Density2, Density2_Error);
+  CumulativeCraterDensity(hist1, total_area, CSFD_Xaxis, Density1, Density1_Error);
+  CumulativeCraterDensity(hist2, total_area, CSFD_Xaxis, Density2, Density2_Error);
 
   /***************************************************/
   /* Calculate R distributions and associated errors */
   /***************************************************/
-  RelativeCraterDensity(hist1, total_area, R1, R1_Error);
-  RelativeCraterDensity(hist2, total_area, R2, R2_Error);
-  
-  /***************************************************/
-  /* Determine absolute max and min densities values */
-  /***************************************************/
-  // double low_arg1 = 0; //Density1[i]-Density1_Error[i];
-  // double low_arg2 = 0; //Density2[i]-Density2_Error[i];
-  // double up_arg1 = 0; //Density1[i]+Density1_Error[i];
-  // double up_arg2 = 0; //Density2[i]+Density2_Error[i];
-  // if(low_arg1 < low_arg2)
-  //   ylow_1 = (low_arg1 < ylow_1) ? low_arg1 : ylow_1;
-  // else
-  //   ylow_1 = (low_arg2 < ylow_1) ? low_arg2 : ylow_1;
-  // if(up_arg1 > up_arg2)
-  //   yhigh_1 = (up_arg1 > yhigh_1) ? up_arg1 : yhigh_1;
-  // else
-  //   yhigh_1 = (up_arg2 > yhigh_1) ? up_arg2 : yhigh_1;
-
-  /*******************************************/
-  /* Determine absolute max and min r values */
-  /*******************************************/
-  // double low_arg1 = 0; // R1[i]-R1_Error[i];
-  // double low_arg2 = 0; // R2[i]-R2_Error[i];
-  // double up_arg1 = 0; // R1[i]+R1_Error[i];
-  // double up_arg2 = 0; // R2[i]+R2_Error[i];
-  // if(low_arg1 < low_arg2)
-  //   ylow_2 = (low_arg1 < ylow_2) ? low_arg1 : ylow_2;
-  // else
-  //   ylow_2 = (low_arg2 < ylow_2) ? low_arg2 : ylow_2;
-  // if(up_arg1 > up_arg2)
-  //   yhigh_2 = (up_arg1 > yhigh_2) ? up_arg1 : yhigh_2;
-  // else
-  //   yhigh_2 = (up_arg2 > yhigh_2) ? up_arg2 : yhigh_2;
+  RelativeCraterDensity(hist1, total_area, RSFD_Xaxis, R1, R1_Error);
+  RelativeCraterDensity(hist2, total_area, RSFD_Xaxis, R2, R2_Error);
 
   /***************************************************************/
   /* Send crater population data to file for 1st incidence angle */
@@ -1088,75 +278,18 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   /* Send crater population data to file for 2nd incidence angle */
   /***************************************************************/
   Utilities::PrintCraterPopulationData(CraterCatalogue2, imagename2, incidence_angle_2, total_area, hist2, Density2, Density2_Error, R2, R2_Error);
-  
-  /****************************************/
-  /* Least Squares Fitting Algorithm Test */
-  /****************************************/
-  // LeastSquares::Test(); exit(0);
-  
-  /****************************************************/
-  /* Calculate log-log slope and y-intercept of first */
-  /* cumulative distribution assuming power law       */
-  /****************************************************/
-  // CSFDFittingRoutine(XAXISBIN, Density1, slope1, slope1_error, intercept1, intercept1_error);
-  
-  /*****************************************************/
-  /* Calculate log-log slope and y-intercept of second */
-  /* cumulative distribution assuming power law        */
-  /*****************************************************/
-  // CSFDFittingRoutine(XAXISBIN, Density2, slope2, slope2_error, intercept2, intercept2_error);
 
-  /*****************/
-  /* Retrieve fits */
-  /*****************/
-  // vector <double> Fit1(nbins);
-  // vector <double> Fit2(nbins);
-  // for(unsigned i = 0; i < nbins; i++)
-  // {
-  //   Fit1[i] = intercept1*pow(XAXISBIN[i], -slope1);
-  //   Fit2[i] = intercept2*pow(XAXISBIN[i], -slope2);
-  // }
-  
-  // cout << "Data below are best fit parameters for comparison between incidence angles " << incidence_angle_1 << " and " << incidence_angle_2 << endl; 
-  // cout << "Image " << imagename1 << " slope: " << slope1 << " +/- " << slope1_error << endl;
-  // cout << "Image " << imagename1 << " amplitude: " << intercept1 << " +/- " << intercept1_error << endl;
-  // cout << "Image " << imagename2 << " slope: " << slope2 << " +/- " << slope2_error << endl;
-  // cout << "Image " << imagename2 << " amplitude: " << intercept2 << " +/- " << intercept2_error << endl << endl;
-
-  /*****************/
-  /* Plot settings */
-  /*****************/
+  /********************/
+  /* Plot axes titles */
+  /********************/
   string xtitle = "Diameter [km]";
   string ytitle = "Cumulative Number of Craters [km^{-2}]";
   
-  /**********************/
-  /* Initialize graph 1 */
-  /**********************/
-  TG1 = Plot::ScatterPlot(XAXISBIN, Density1, vector <double> (0), Density1_Error, "", xtitle, ytitle, kBlue, 1, kOpenTriangleUp);
-    
-  /**********************/
-  /* Initialize graph 2 */
-  /**********************/
-  TG2 = Plot::ScatterPlot(XAXISBIN, Density2, vector <double> (0), Density2_Error, "", xtitle, ytitle, kRed, 1, kOpenTriangleUp);
-
-  /********************/
-  /* Initialize fit 1 */
-  /********************/
-  // F1 = Plot::ScatterPlot(XAXISBIN, Fit1, "", "", "", kBlue, 1, kDot);
-    
-  /********************/
-  /* Initialize fit 2 */
-  /********************/
-  // F2 = Plot::ScatterPlot(XAXISBIN, Fit2, "", "", "", kRed, 1, kDot);
-  
-  /*****************/
-  /* Plot settings */
-  /*****************/
-  // TG1->GetXaxis()->SetRangeUser(xlow, xhigh);
-  // TG1->GetYaxis()->SetRangeUser(ylow_1, yhigh_1);
-  //TG2->SetMarkerStyle(kFullDotMedium);
-  // F1->SetLineColor(kBlue);
-  // F2->SetLineColor(kRed);
+  /******************/
+  /* Generate plots */
+  /******************/
+  TG1 = Plot::ScatterPlot(CSFD_Xaxis, Density1, vector <double> (0), Density1_Error, "", xtitle, ytitle, kBlue, 1, kFullDotMedium);
+  TG2 = Plot::ScatterPlot(CSFD_Xaxis, Density2, vector <double> (0), Density2_Error, "", xtitle, ytitle, kRed, 1, kFullDotMedium);
   
   /**********/
   /* Legend */
@@ -1171,34 +304,22 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   stream.str(std::string());
   leg->AddEntry(TG2, buffer.c_str(), "lep");
 
-  /*****************/
-  /* Plot settings */
-  /*****************/
-  ytitle = "R Value";
+  /*********************************************************/
+  /* Y-axis title for Relative Size-Frequency Distribution */
+  /*********************************************************/
+  ytitle = "R";
   
-  /***********************/
-  /* Initialize R-plot 1 */
-  /***********************/
-  TG3 = Plot::ScatterPlot(XAXISBIN, R1, vector <double> (0), R1_Error, "", xtitle, ytitle, kBlue, 1, kOpenTriangleUp);
-  
-  /***********************/
-  /* Initialize R-plot 2 */
-  /***********************/
-  TG4 = Plot::ScatterPlot(XAXISBIN, R2, vector <double> (0), R2_Error, "", xtitle, ytitle, kRed, 1, kOpenTriangleUp);
-  
-  /*****************/
-  /* Plot settings */
-  /*****************/
-  // TG3->GetXaxis()->SetRangeUser(xlow, xhigh);
-  // TG3->GetYaxis()->SetRangeUser(ylow_2, yhigh_2);
-  
+  /******************/
+  /* Generate plots */
+  /******************/
+  TG3 = Plot::ScatterPlot(RSFD_Xaxis, R1, vector <double> (0), R1_Error, "", xtitle, ytitle, kBlue, 1, kFullDotMedium);
+  TG4 = Plot::ScatterPlot(RSFD_Xaxis, R2, vector <double> (0), R2_Error, "", xtitle, ytitle, kRed, 1, kFullDotMedium);
+    
   /***************/
   /* Record data */
   /***************/
   *CSFD1 = (TGraphErrors *)TG1->Clone();  
   *CSFD2 = (TGraphErrors *)TG2->Clone();
-  // *FIT1 = (TGraph *)F1->Clone();
-  // *FIT2 = (TGraph *)F2->Clone();
   *RD1 = (TGraphErrors *)TG3->Clone();
   *RD2 = (TGraphErrors *)TG4->Clone();
   *L = (TLegend *)leg->Clone();
@@ -1206,8 +327,6 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   /***********************************/
   /* Free memory reserved for canvas */
   /***********************************/
-  // delete F1;
-  // delete F2;
   delete TG1;
   delete TG2;
   delete TG3;
@@ -1300,7 +419,7 @@ void IncidenceAngleAnalysis_Plot::ImageComparison(double x1, double x2, double y
   /**********************/
   format = "%s";
   skipline = "/";
-  nlines = Readcol::Read(imagedirlist, skipline, format, image_files.data());
+  nlines = Readcol::Read(imagedirlist, skipline, 0, format, image_files.data());
   image_files.resize(nlines);
   
   /***************************************/
@@ -1651,11 +770,6 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  double incidence_angle_1;
-  double incidence_angle_2;
-  double incidence_angle_1_area;
-  double incidence_angle_2_area;
-  double incidence_angle_w_max_area;
   double spacing;
   double x_high;
   double x_low;
@@ -1670,71 +784,89 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
   ifstream InFile;
   int canheight;
   int canwidth;
-  int first_index;
-  int last_index;
   int n;
   int nlines;
-  int value;
+  int offset;
+  set <double> unique_incidence_angles;
   string buffer;
   string delay;
   string field;
   string filename;
   string format;
+  string skipline;
   TCanvas *can;
   TH1F *h1;
   vector <double> incidence_angles;
   vector <double> master_image_areas;
-  vector <double> maximum_latitude;
-  vector <double> maximum_longitude;
-  vector <double> maximum_x;
-  vector <double> maximum_y;
-  vector <double> minimum_latitude;
-  vector <double> minimum_longitude;
-  vector <double> minimum_x;
-  vector <double> minimum_y;
+  vector <double> master_maximum_latitude;
+  vector <double> master_maximum_longitude;
+  vector <double> master_maximum_x;
+  vector <double> master_maximum_y;
+  vector <double> master_minimum_latitude;
+  vector <double> master_minimum_longitude;
+  vector <double> master_minimum_x;
+  vector <double> master_minimum_y;
+  vector <int> indicies;
   vector <int> master_image_id;
-  vector <string> image_directories;
+  vector <int> nimages;
   vector <string> master_image_names;
-  vector < vector <TASImage *> > tasimages(6, vector <TASImage *> ());
-  vector < vector <TPad *> > pads(2, vector <TPad *> ());
+  vector < vector <bool> > skip;
+  vector < vector <double> > lower_left_latitude;
+  vector < vector <double> > lower_left_longitude;
+  vector < vector <double> > lower_left_x;
+  vector < vector <double> > lower_left_y;
+  vector < vector <double> > lower_right_latitude;
+  vector < vector <double> > lower_right_longitude;
+  vector < vector <double> > lower_right_x;
+  vector < vector <double> > lower_right_y;
+  vector < vector <double> > maximum_latitude;
+  vector < vector <double> > maximum_longitude;
+  vector < vector <double> > maximum_x;
+  vector < vector <double> > maximum_y;
+  vector < vector <double> > minimum_latitude;
+  vector < vector <double> > minimum_longitude;
+  vector < vector <double> > minimum_x;
+  vector < vector <double> > minimum_y;
+  vector < vector <double> > upper_left_latitude;
+  vector < vector <double> > upper_left_longitude;
+  vector < vector <double> > upper_left_x;
+  vector < vector <double> > upper_left_y;
+  vector < vector <double> > upper_right_latitude;
+  vector < vector <double> > upper_right_longitude;
+  vector < vector <double> > upper_right_x;
+  vector < vector <double> > upper_right_y;
+  vector < vector <int> > image_ids;
+  vector < vector <string> > imagenames;
 
+  /************************************************/
+  /* Hard coding background image incidence angle */
+  /************************************************/
+  double bkg_ia = 77.5;
+  
   /***********************************/
   /* Request memory for data vectors */
   /***********************************/
-  n = 10;
+  n = 10000;
+  vector <string> image_directories(n);
   vector <string> image_files(n);
   
-  /**********************/
-  /* Read-in Filename 1 */
-  /**********************/
-  format = "%[^:]";
-  nlines = Readcol::Read(imagedirlist, format, image_files.data());
+  /*****************************/
+  /* Read-in Image Directories */
+  /*****************************/
+  format = "%s";
+  offset = -1;
+  skipline = ".png";
+  nlines = Readcol::Read(imagedirlist, skipline, offset, format, image_directories.data());
+  image_directories.resize(nlines);
+
+  /***********************/
+  /* Read-in Image Files */
+  /***********************/
+  format = "%s";
+  offset = -1;
+  skipline = "E";
+  nlines = Readcol::Read(imagedirlist, skipline, offset, format, image_files.data());
   image_files.resize(nlines);
-  
-  /**********************/
-  /* Read-in image data */
-  /**********************/
-  // if(FileExists(imagedirlist))
-  //   InFile.open(imagedirlist.c_str());
-  // else
-  // {
-  //   printf("Error: File %s does not exist!\n", imagedirlist.c_str());
-  //   exit(EXIT_FAILURE);
-  // }
-  // while(getline(InFile, buffer))
-  // {
-  //   char str[250];
-  //   format = "%[^:]";
-  //   sscanf(buffer.c_str(), format.c_str(), str);
-  //   buffer = str;
-  //   int p1 = buffer.rfind("/")+1;
-  //   if(buffer.substr(p1, 6).compare("images") == 0)
-  //     image_directories.push_back(str);
-  //   p1 = buffer.rfind(".")+1;
-  //   if(buffer.substr(p1, 3).compare("png") == 0)
-  //     image_files.push_back(str);
-  // }
-  // InFile.close();
 
   /***************************************/
   /* Sort incidenceangles vector by name */
@@ -1755,11 +887,9 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
   /*****************************************************************/
   /* Retrieve master image names and corresponding incidence angle */
   /*****************************************************************/
-  incidence_angle_1 = 0;
-  incidence_angle_2 = 0;
   n = (int)incidenceangles.size();
-  for(int i=0; i<(int)image_directories.size(); i++)
-  {
+  for(int i=0; i<(int)image_directories.size(); i++) {
+    
     /*****************/
     /* Retrieve name */
     /*****************/
@@ -1772,26 +902,21 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
     /******************/
     int index = SearchData<IncidenceAngles>::BinarySearch(incidenceangles, 0, n-1, field, &imagename);
     incidence_angles.push_back(incidenceangles[index].GetIncidence_angle());
-
-    /*******************************/
-    /* Set incidence angle 1 and 2 */
-    /*******************************/
-    if(incidence_angle_1 == 0)
-      incidence_angle_1 = incidence_angles.back();
-    else
-      if((incidence_angles.back() != incidence_angle_1) && (incidence_angle_2 == 0))
-	incidence_angle_2 = incidence_angles.back();
-  }
-
-  /**************************/
-  /* Retrieve master images */
-  /**************************/
+    unique_incidence_angles.insert(incidenceangles[index].GetIncidence_angle());
+  }  
+  
+  /******************************************/
+  /* Retrieve each master image's meta data */
+  /******************************************/
+  double aspectRatio = 0.;
+  double height = 0.;
+  double width = 0.;
   n = (int)imagesets.size();
-  for(int i=0; i<(int)master_image_names.size(); i++)
-  {
-    /******************************/
-    /* Identify master image name */
-    /******************************/
+  for(int i=0; i<(int)master_image_names.size(); i++) {
+    
+    /**************************************/
+    /* Retrieve current master image name */
+    /**************************************/
     string master_image_name = master_image_names[i];
     
     /*********************************************/
@@ -1804,68 +929,25 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
     /******************************/
     master_image_areas.push_back(imagesets[index].GetArea());
     master_image_id.push_back(imagesets[index].GetId());
-    maximum_latitude.push_back(imagesets[index].GetMaximum_latitude());
-    maximum_longitude.push_back(imagesets[index].GetMaximum_longitude());
-    maximum_x.push_back(imagesets[index].GetMaximum_x());
-    maximum_y.push_back(imagesets[index].GetMaximum_y());
-    minimum_latitude.push_back(imagesets[index].GetMinimum_latitude());
-    minimum_longitude.push_back(imagesets[index].GetMinimum_longitude());
-    minimum_x.push_back(imagesets[index].GetMinimum_x());
-    minimum_y.push_back(imagesets[index].GetMinimum_y());
-  }
+    master_maximum_latitude.push_back(imagesets[index].GetMaximum_latitude());
+    master_maximum_longitude.push_back(imagesets[index].GetMaximum_longitude());
+    master_maximum_x.push_back(imagesets[index].GetMaximum_x());
+    master_maximum_y.push_back(imagesets[index].GetMaximum_y());
+    master_minimum_latitude.push_back(imagesets[index].GetMinimum_latitude());
+    master_minimum_longitude.push_back(imagesets[index].GetMinimum_longitude());
+    master_minimum_x.push_back(imagesets[index].GetMinimum_x());
+    master_minimum_y.push_back(imagesets[index].GetMinimum_y());
 
-  /***********************************/
-  /* Determine which incidence angle */
-  /* covers the most surface area    */
-  /***********************************/
-  incidence_angle_1_area = 0;
-  incidence_angle_2_area = 0;
-  for(int i=0; i<(int)master_image_areas.size(); i++)
-  {
-    incidence_angle_1_area += (incidence_angles[i] == incidence_angle_1) ? 
-                              master_image_areas[i] : incidence_angle_1_area;
-    incidence_angle_2_area += (incidence_angles[i] == incidence_angle_2) ? 
-                              master_image_areas[i] : incidence_angle_2_area;
-  }
-  incidence_angle_w_max_area = (incidence_angle_1_area > incidence_angle_2_area) ? 
-                               incidence_angle_1 : incidence_angle_2;
-
-  /*****************/
-  /* Axes settings */
-  /*****************/
-  if(selenographic)
-  {
-    buffer = "; X [Degree]; Y [Degree]";
-    x_high = -std::numeric_limits<double>::infinity();
-    x_low = std::numeric_limits<double>::infinity();
-    y_high = -std::numeric_limits<double>::infinity();
-    y_low = std::numeric_limits<double>::infinity();
-    for(int i=0; i<(int)master_image_id.size(); i++)
-    {
-      x_high = (maximum_longitude[i] > x_high) ? maximum_longitude[i] : x_high;
-      x_low = (minimum_longitude[i] < x_low) ? minimum_longitude[i] : x_low;
-      y_high = (maximum_latitude[i] > y_high) ? maximum_latitude[i] : y_high;
-      y_low = (minimum_latitude[i] < y_low) ? minimum_latitude[i] : y_low;
+    /******************************************/
+    /* Retrieve background image aspect ratio */
+    /******************************************/
+    if (incidence_angles[i] == bkg_ia) {
+      height = (imagesets[index].GetHeight() > height) ? imagesets[index].GetHeight() : height;
+      width += imagesets[index].GetWidth();
     }
-    spacing = 1.0E-2;
   }
-  else
-  {
-    buffer = "; X [m]; Y [m]";
-    x_high = -std::numeric_limits<double>::infinity();
-    x_low = std::numeric_limits<double>::infinity();
-    y_high = -std::numeric_limits<double>::infinity();
-    y_low = std::numeric_limits<double>::infinity();
-    for(int i=0; i<(int)master_image_id.size(); i++)
-    {
-      x_high = (maximum_x[i] > x_high) ? maximum_x[i] : x_high;
-      x_low = (minimum_x[i] < x_low) ? minimum_x[i] : x_low;
-      y_high = (maximum_y[i] > y_high) ? maximum_y[i] : y_high;
-      y_low = (minimum_y[i] < y_low) ? minimum_y[i] : y_low;
-    }
-    spacing = 1.0E3;
-  }
-
+  aspectRatio = width/height;
+  
   /**********************/
   /* Sort images vector */
   /**********************/
@@ -1874,11 +956,266 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
   sortimages.arrange();
   images = sortimages.GetData();
 
+  /*******************************************************************************************/
+  /* Determine number of sub-images for each master image (Only using zero scale sub-images) */
+  /*******************************************************************************************/
+  n = (int)images.size();
+  for (int i = 0; i < (int)master_image_id.size(); i++) {
+    field = "image_set_id";
+    int ivalue = master_image_id[i];
+    int starting_index = SearchData<Images>::FirstOccurence(images, 0, n-1, field, &ivalue);
+    int ending_index = SearchData<Images>::LastOccurence(images, 0, n-1, field, &ivalue);
+    
+    /*******************/
+    /* Copy sub-vector */
+    /*******************/
+    vector <Images> temp_images(images.begin()+starting_index, images.begin()+ending_index);
+    
+    /**********************/
+    /* Sort images vector */
+    /**********************/
+    field = "id";
+    SortData <Images> temp_imsort(temp_images, field);
+    temp_imsort.arrange();
+    temp_images = temp_imsort.GetData();
+
+    for (int j = (int)temp_images.size()-1; j >= 0; j--) {
+      string imname = temp_images[j].GetName();
+      int p1 = imname.find("_")+1;
+      int p2 = imname.rfind("_");
+      int len = p2-p1;
+      int scale = stoi(imname.substr(p1, len));
+      if (scale == 0) {
+    	   nimages.push_back(stoi(imname.substr(p2+1))+1);
+        break;
+      }
+    }
+  }
+  
+  /*****************************/
+  /* Construct sub-image names */
+  /*****************************/
+  for (int i = 0; i < (int)nimages.size(); i++) {
+    vector <string> imnames;
+    for (int j = 0; j < nimages[i]; j++) {
+      string original_string_number = to_string(j);
+      string new_string_number = string(5-original_string_number.length(), '0')+original_string_number;
+      imnames.push_back(master_image_names[i]+"_0_"+original_string_number);
+    }
+    imagenames.push_back(imnames);
+  }
+
+  /**********************/
+  /* Sort images vector */
+  /**********************/
+  field = "name";
+  sortimages.SetFieldValue(field);
+  sortimages.arrange();
+  images = sortimages.GetData();
+  
+  /******************/
+  /* Sub-image data */
+  /******************/
+  n = (int)images.size();
+  for (int i = 0; i < (int)imagenames.size(); i++) {
+    vector <bool> sk;
+    vector <double> llla;
+    vector <double> lllo;
+    vector <double> llx;
+    vector <double> lly;
+    vector <double> lrla;
+    vector <double> lrlo;
+    vector <double> lrx;
+    vector <double> lry;
+    vector <double> maxla;
+    vector <double> maxlo;
+    vector <double> maxx;
+    vector <double> maxy;
+    vector <double> minla;
+    vector <double> minlo;
+    vector <double> minx;
+    vector <double> miny;    
+    vector <double> ulla;
+    vector <double> ullo;
+    vector <double> ulx;
+    vector <double> uly;
+    vector <double> urla;
+    vector <double> urlo;
+    vector <double> urx;
+    vector <double> ury;
+    vector <int> sii;
+    for (int j = 0; j < (int)imagenames[i].size(); j++) {
+      string sub_image_name = imagenames[i][j];
+      int sub_image_index = SearchData<Images>::BinarySearch(images, 0, n-1, field, &sub_image_name);
+      if (sub_image_index == -1) {
+  	sk.push_back(true);
+  	sii.push_back(std::nan("1"));
+  	llla.push_back(std::nan("1")); // Unit: degree
+	lllo.push_back(std::nan("1")); // Unit: degree
+	llx.push_back(std::nan("1")); // Unit: meter
+  	lly.push_back(std::nan("1")); // Unit: meter
+	lrla.push_back(std::nan("1")); // Unit: degree
+	lrlo.push_back(std::nan("1")); // Unit: degree
+	lrx.push_back(std::nan("1")); // Unit: meter
+  	lry.push_back(std::nan("1")); // Unit: meter
+	maxla.push_back(std::nan("1")); // Unit: degree
+  	maxlo.push_back(std::nan("1")); // Unit: degree
+  	maxx.push_back(std::nan("1")); // Unit: meter
+  	maxy.push_back(std::nan("1")); // Unit: meter
+  	minla.push_back(std::nan("1")); // Unit: degree
+  	minlo.push_back(std::nan("1")); // Unit: degree
+  	minx.push_back(std::nan("1")); // Unit: meter
+  	miny.push_back(std::nan("1")); // Unit: meter
+  	ulla.push_back(std::nan("1")); // Unit: degree
+	ullo.push_back(std::nan("1")); // Unit: degree
+	ulx.push_back(std::nan("1")); // Unit: meter
+  	uly.push_back(std::nan("1")); // Unit: meter
+  	urla.push_back(std::nan("1")); // Unit: degree
+	urlo.push_back(std::nan("1")); // Unit: degree
+  	urx.push_back(std::nan("1")); // Unit: meter
+  	ury.push_back(std::nan("1")); // Unit: meter
+  	continue;
+      }
+      sk.push_back(false);
+      sii.push_back(images[sub_image_index].GetId());
+      llla.push_back(images[sub_image_index].GetLower_left_latitude()); // Unit: degree
+      lllo.push_back(images[sub_image_index].GetLower_left_longitude()); // Unit: degree
+      llx.push_back(images[sub_image_index].GetLower_left_x()); // Unit: meter
+      lly.push_back(images[sub_image_index].GetLower_left_y()); // Unit: meter
+      lrla.push_back(images[sub_image_index].GetLower_right_latitude()); // Unit: degree
+      lrlo.push_back(images[sub_image_index].GetLower_right_longitude()); // Unit: degree
+      lrx.push_back(images[sub_image_index].GetLower_right_x()); // Unit: meter
+      lry.push_back(images[sub_image_index].GetLower_right_y()); // Unit: meter
+      maxla.push_back(images[sub_image_index].GetMaximum_latitude()); // Unit: degree
+      maxlo.push_back(images[sub_image_index].GetMaximum_longitude()); // Unit: degree
+      maxx.push_back(images[sub_image_index].GetMaximum_x()); // Unit: meter
+      maxy.push_back(images[sub_image_index].GetMaximum_y()); // Unit: meter
+      minla.push_back(images[sub_image_index].GetMinimum_latitude()); // Unit: degree
+      minlo.push_back(images[sub_image_index].GetMinimum_longitude()); // Unit: degree
+      minx.push_back(images[sub_image_index].GetMinimum_x()); // Unit: meter
+      miny.push_back(images[sub_image_index].GetMinimum_y()); // Unit: meter
+      ulla.push_back(images[sub_image_index].GetUpper_left_latitude()); // Unit: degree
+      ullo.push_back(images[sub_image_index].GetUpper_left_longitude()); // Unit: degree
+      ulx.push_back(images[sub_image_index].GetUpper_left_x()); // Unit: meter
+      uly.push_back(images[sub_image_index].GetUpper_left_y()); // Unit: meter
+      urla.push_back(images[sub_image_index].GetUpper_right_latitude()); // Unit: degree
+      urlo.push_back(images[sub_image_index].GetUpper_right_longitude()); // Unit: degree
+      urx.push_back(images[sub_image_index].GetUpper_right_x()); // Unit: meter
+      ury.push_back(images[sub_image_index].GetUpper_right_y()); // Unit: meter
+    }
+    skip.push_back(sk);
+    image_ids.push_back(sii);
+    lower_left_latitude.push_back(llla); // Unit: degree
+    lower_left_longitude.push_back(lllo); // Unit: degree
+    lower_left_x.push_back(llx); // Unit: meter
+    lower_left_y.push_back(lly); // Unit: meter
+    lower_right_latitude.push_back(lrla); // Unit: degree
+    lower_right_longitude.push_back(lrlo); // Unit: degree
+    lower_right_x.push_back(lrx); // Unit: meter
+    lower_right_y.push_back(lry); // Unit: meter
+    maximum_latitude.push_back(maxla); // Unit: degree
+    maximum_longitude.push_back(maxlo); // Unit: degree
+    maximum_x.push_back(maxx); // Unit: meter
+    maximum_y.push_back(maxy); // Unit: meter
+    minimum_latitude.push_back(minla); // Unit: degree
+    minimum_longitude.push_back(minlo); // Unit: degree
+    minimum_x.push_back(minx); // Unit: meter
+    minimum_y.push_back(miny); // Unit: meter
+    upper_left_latitude.push_back(ulla); // Unit: degree
+    upper_left_longitude.push_back(ullo); // Unit: degree
+    upper_left_x.push_back(ulx); // Unit: meter
+    upper_left_y.push_back(uly); // Unit: meter
+    upper_right_latitude.push_back(urla); // Unit: degree
+    upper_right_longitude.push_back(urlo); // Unit: degree
+    upper_right_x.push_back(urx); // Unit: meter
+    upper_right_y.push_back(ury); // Unit: meter
+  }
+
+  /*******************************************************/
+  /* Determine minimum x and y values for physical units */
+  /*******************************************************/
+  double constant = 1.0E-3;
+  double min_x = std::numeric_limits<double>::infinity();
+  double min_y = std::numeric_limits<double>::infinity();  
+  for (unsigned i = 0; i < minimum_x.size(); i++) {
+    double mx = ArrayMinimum(minimum_x[i].size(), minimum_x[i].data())*constant; // Unit: kilometer
+    min_x = (min_x < mx) ? min_x : mx;
+    double my = ArrayMinimum(minimum_y[i].size(), minimum_y[i].data())*constant; // Unit: kilometer
+    min_y = (min_y < my) ? min_y : my;
+  }
+
+  /************************************************/
+  /* Make corrections to data with physical units */
+  /************************************************/
+  for (unsigned i = 0; i < minimum_x.size(); i++) {
+    for (unsigned j = 0; j < minimum_x[i].size(); j++) {
+      lower_left_x[i][j] *= constant; // Unit: kilometer
+      lower_left_y[i][j] *= constant; // Unit: kilometer
+      lower_right_x[i][j] *= constant; // Unit: kilometer
+      lower_right_y[i][j] *= constant; // Unit: kilometer
+      maximum_x[i][j] *= constant; // Unit: kilometer
+      maximum_y[i][j] *= constant; // Unit: kilometer
+      minimum_x[i][j] *= constant; // Unit: kilometer
+      minimum_y[i][j] *= constant; // Unit: kilometer
+      upper_left_y[i][j] *= constant; // Unit: kilometer
+      upper_left_x[i][j] *= constant; // Unit: kilometer
+      upper_right_x[i][j] *= constant; // Unit: kilometer
+      upper_right_y[i][j] *= constant; // Unit: kilometer
+      lower_left_x[i][j] -= min_x; // Applying x-offset
+      lower_left_y[i][j] -= min_y; // Applying y-offset
+      lower_right_x[i][j] -= min_x; // Applying x-offset
+      lower_right_y[i][j] -= min_y; // Applying y-offset
+      maximum_x[i][j] -= min_x; // Applying x-offset
+      maximum_y[i][j] -= min_y; // Applying y-offset
+      minimum_x[i][j] -= min_x; // Applying x-offset
+      minimum_y[i][j] -= min_y; // Applying y-offset
+      upper_left_x[i][j] -= min_x; // Applying x-offset
+      upper_left_y[i][j] -= min_y; // Applying y-offset
+      upper_right_x[i][j] -= min_x; // Applying x-offset
+      upper_right_y[i][j] -= min_y; // Applying y-offset
+    }
+  }
+  
+  /*****************/
+  /* Axes settings */
+  /*****************/
+  x_high = -std::numeric_limits<double>::infinity();
+  x_low = std::numeric_limits<double>::infinity();
+  y_high = -std::numeric_limits<double>::infinity();
+  y_low = std::numeric_limits<double>::infinity();
+  if(selenographic) {
+    buffer = "; X [Degree]; Y [Degree]";
+    for(int i=0; i<(int)master_image_id.size(); i++) {
+      x_high = (master_maximum_longitude[i] > x_high) ? master_maximum_longitude[i] : x_high;
+      x_low = (master_minimum_longitude[i] < x_low) ? master_minimum_longitude[i] : x_low;
+      y_high = (master_maximum_latitude[i] > y_high) ? master_maximum_latitude[i] : y_high;
+      y_low = (master_minimum_latitude[i] < y_low) ? master_minimum_latitude[i] : y_low;
+    }
+    spacing = 1.0E-2;
+  }
+  else
+  {
+    buffer = "; X [m]; Y [m]";
+    for(int i=0; i<(int)master_image_id.size(); i++) {
+      x_high = (master_maximum_x[i] > x_high) ? master_maximum_x[i] : x_high;
+      x_low = (master_minimum_x[i] < x_low) ? master_minimum_x[i] : x_low;
+      y_high = (master_maximum_y[i] > y_high) ? master_maximum_y[i] : y_high;
+      y_low = (master_minimum_y[i] < y_low) ? master_minimum_y[i] : y_low;
+    }
+    spacing = 1.0E3;
+  }
+
+  /*************************************/
+  /* Remove past instance of animation */
+  /*************************************/
+  filename = "Graphic.gif";
+  remove(filename.c_str());
+  
   /*********************/
   /* Initialize Canvas */
   /*********************/
-  canheight = 1200;
-  canwidth = 800;
+  canheight = 1000;
+  canwidth = aspectRatio*canheight;
   can = new TCanvas("Canvas", "", canheight, canwidth);
   can->SetGridx();
   can->SetGridy();
@@ -1893,304 +1230,352 @@ void IncidenceAngleAnalysis_Plot::ImageMosaic(string imagedirlist, vector <Image
   h1->GetXaxis()->SetNdivisions(5);
   gPad->GetRange(x_min, y_min, x_max, y_max);
   xrange = x_max-x_min;
-  yrange = y_max-y_min;  
-
-  /*********************************/
-  /* Iterate through master images */
-  /*********************************/
-  for(int i=0; i<(int)master_image_id.size(); i++)
-  {
-    /*******************************************************************/
-    /* Find first and last occurrence of image_set_id in images vector */
-    /*******************************************************************/
-    n = (int)images.size();
-    value = master_image_id[i];
-    first_index = SearchData<Images>::FirstOccurence(images, 0, n-1, field, &value);
-    last_index = SearchData<Images>::LastOccurence(images, 0, n-1, field, &value);
-
-    /*****************************************************/
-    /* Iterate through images vector and plot sub-images */
-    /*****************************************************/
-    for(int j=first_index; j<=last_index; j++)
-    {
-      /*****************************/
-      /* Determine sub-image scale */
-      /*****************************/
-      string sub_image_name = images[j].GetName();
-      int p1 = sub_image_name.find("_")+1;
-      int scl = stoi(sub_image_name.substr(p1, 1), nullptr);
-      if(scl == 0)
-      {
-	/************************************/
-	/* Determine sub-image slice number */
-	/************************************/
-	int p2 = sub_image_name.rfind("_")+1;
-	int p3 = sub_image_name.length();
-	int length = p3-p2;
-	int image_slice_number = stoi(sub_image_name.substr(p2, length), nullptr);
-	
-	/***********************/
-	/* Find image filename */
-	/***********************/
-	int index = -1;
-	for(int k=0; k<(int)image_files.size(); k++)
-	{
-	  string name = image_files[k].substr(0, 12);
-	  p2 = image_files[k].rfind("_")+1;
-	  p3 = image_files[k].find(".")+1;
-	  length = p3-p2;
-	  int isn = stoi(image_files[k].substr(p2, length), nullptr);
-	  if((master_image_names[i].compare(name) == 0) && (image_slice_number == isn))
-	  {
-	    index = k;
-	    break;
-	  }
-	}
-
-	/*********************************/
-	/* Construct image full filename */
-	/*********************************/
-	filename = (index != -1) ? image_directories[i]+"/"+image_files[index] : nullptr;
-
-	/*************************************************/
-	/* Retrieve positional information for sub-image */
-	/*************************************************/
-	double sub_image_lower_left_latitude = images[j].GetLower_left_latitude();
-	double sub_image_lower_left_y = images[j].GetLower_left_y();
-	double sub_image_maximum_latitude = images[j].GetMaximum_latitude();
-	double sub_image_maximum_longitude = images[j].GetMaximum_longitude();
-	double sub_image_maximum_x = images[j].GetMaximum_x();
-	double sub_image_maximum_y = images[j].GetMaximum_y();
-	double sub_image_minimum_latitude = images[j].GetMinimum_latitude();
-	double sub_image_minimum_longitude = images[j].GetMinimum_longitude();
-	double sub_image_minimum_x = images[j].GetMinimum_x();
-	double sub_image_minimum_y = images[j].GetMinimum_y();
-	double sub_image_upper_left_latitude = images[j].GetUpper_left_latitude();
-	double sub_image_upper_left_longitude = images[j].GetUpper_left_longitude();
-	double sub_image_upper_left_x = images[j].GetUpper_left_x();
-	double sub_image_upper_left_y = images[j].GetUpper_left_y();
-	double sub_image_upper_right_longitude = images[j].GetUpper_right_longitude();
-	double sub_image_upper_right_x = images[j].GetUpper_right_x();
-
-	/******************/
-	/* Initialize pad */
-	/******************/
+  yrange = y_max-y_min;
+  
+  /**************************************/
+  /* Generate plot for background image */
+  /**************************************/
+  vector < TASImage *> bkgimgs;
+  vector < TPad *> bkgpads;
+  int index = 0;
+  delay = "100"; // Delay between gif images - Unit:ms
+  for (int i = 0; i < (int)incidence_angles.size(); i++) {
+      
+    /********************************************/
+    /* Draw all sub-images for background image */
+    /********************************************/
+    if (incidence_angles[i] == bkg_ia) {
+      for (int j = 0; j < nimages[i]; j++) {
+    
+	/****************************************/
+	/* Skip frames that have no useful data */
+	/****************************************/
+	if(skip[i][j]) continue;
+      
+	/****************************/
+	/* Initialize and store pad */
+	/****************************/
 	double x1 = 0;
 	double x2 = 0;
 	double y1 = 0;
 	double y2 = 0;
-	if(selenographic)
-	{
-	  x2 = (sub_image_maximum_longitude-x_min)/xrange;
-	  x1 = (sub_image_minimum_longitude-x_min)/xrange;
-	  y2 = (sub_image_maximum_latitude-y_min)/yrange;
-	  y1 = (sub_image_minimum_latitude-y_min)/yrange;
+	if(selenographic) {
+	  x2 = (maximum_longitude[i][j]-x_min)/xrange;
+	  x1 = (minimum_longitude[i][j]-x_min)/xrange;
+	  y2 = (maximum_latitude[i][j]-y_min)/yrange;
+	  y1 = (minimum_latitude[i][j]-y_min)/yrange;
 	}
-	else
-	{
-	  x2 = (sub_image_maximum_x-x_min)/xrange;
-	  x1 = (sub_image_minimum_x-x_min)/xrange;
-	  y2 = (sub_image_maximum_y-y_min)/yrange;
-	  y1 = (sub_image_minimum_y-y_min)/yrange;
+	else {
+	  x2 = (maximum_x[i][j]-x_min)/xrange;
+	  x1 = (minimum_x[i][j]-x_min)/xrange;
+	  y2 = (maximum_y[i][j]-y_min)/yrange;
+	  y1 = (minimum_y[i][j]-y_min)/yrange;
 	}
-	TPad *pad = new TPad(image_files[index].c_str(), image_files[index].c_str(), x1, y1, x2, y2);
-	
-	/************************/
-	/* Make pad transparent */
-	/************************/
-	pad->SetFillColorAlpha(kWhite, 0.);
-
-	/********************************/
-	/* Record current sub-image pad */
-	/********************************/	
-	if(incidence_angle_w_max_area == incidence_angles[i])
-	  pads[0].push_back(pad);
-	else
-	  pads[1].push_back(pad);
-
-	/**************************/
-	/* Open current sub-image */
-	/**************************/
+	TPad *pad = new TPad(imagenames[i][j].c_str(), "", x1, y1, x2, y2);
+	pad->SetFillColorAlpha(kWhite, 0.); // Make pad transparent
+	bkgpads.push_back(pad);
+      
+	/*****************/
+	/* Read in image */
+	/*****************/
+	filename = image_directories[i]+"/"+image_files[index+j];
 	TASImage *img = new TASImage(filename.c_str());
-	if (!img)
-	{
-	  printf("Could not open image %s.\nTerminating program...\n", filename.c_str());
-	  exit(1);
+	if (!img) {
+	  cout << "Could not open image " << filename << ".\nTerminating program ...\n" << endl;
+	  exit(EXIT_FAILURE);
 	}
-	img->SetConstRatio(kFALSE);
+	img->SetConstRatio(kTRUE);
 	img->SetImageQuality(TAttImage::kImgBest);
-
+      
 	/*****************************/
 	/* Correct image orientation */
 	/*****************************/
-	if(selenographic)
-	{
-	  if(sub_image_upper_left_longitude > sub_image_upper_right_longitude)
-	  {
-	    if(sub_image_upper_left_latitude < sub_image_lower_left_latitude)
+	if(selenographic) {
+	  if(upper_left_longitude[i][j] > upper_right_longitude[i][j]) {
+	    if(upper_left_latitude[i][j] < lower_left_latitude[i][j])
 	      img->Flip(180);
-	    else	    
+	    else
 	      img->Mirror(true);
 	  }
 	}
-	else
-	{
-	  if(sub_image_upper_left_x > sub_image_upper_right_x)
-	  {
-	    if(sub_image_upper_left_y < sub_image_lower_left_y)
+	else {
+	  if(upper_left_x[i][j] > upper_right_x[i][j]) {
+	    if(upper_left_y[i][j] < lower_left_y[i][j])
 	      img->Flip(180);
 	    else
 	      img->Mirror(true);
 	  }
 	}
 	img->SetEditable(kTRUE);
-
-	/***************************************/
-	/* Make overlapping images transparent */
-	/***************************************/
-	if(incidence_angle_w_max_area == incidence_angles[i])
-	{
-	  tasimages[0].push_back(img);
-	}
-	else
-	{
-	  /*******************/
-	  /* Clone sub-image */
-	  /*******************/
-	  vector <TASImage *> cloned_images(5);
-	  for(int k=0; k<5; k++)
-	  {
-	    buffer = "img_clone_"+to_string(k);
-	    cloned_images[k] = (TASImage *)img->Clone(buffer.c_str());
-	  }
-
-	  int image_transparency_level = 0;
-	  while(image_transparency_level < 5)
-	  {
-	    /***********************/
-	    /* Retrieve ARGB array */
-	    /***********************/
-	    unsigned int *argb = (unsigned int *)cloned_images[image_transparency_level]->GetArgbArray();
-	    int w = cloned_images[image_transparency_level]->GetWidth();
-	    int h = cloned_images[image_transparency_level]->GetHeight();
-	    
-	    /************************************/
-	    /* Scan all pixels in current image */
-	    /* and make all colors transparent. */
-	    /************************************/
-	    for(int k=0; k<h; k++)
-	    {
-	      for(int l=0; l<w; l++)
-	      {
-		int idx = k*w + l;
-		
-		/**************************/
-		/* RGB part of ARGB color */
-		/**************************/
-		unsigned int col = argb[idx] & 0xffffff;
-		
-		/******************************/
-		/* Alpha channel modification */
-		/******************************/
-		switch(image_transparency_level)
-		{
-		  case 0: argb[idx] = 0x00000000 + col; // 100 percent transparency
-		    break;
-		  case 1: argb[idx] = 0x3F000000 + col; // 75 percent transparency
-		    break;
-		  case 2: argb[idx] = 0x7F000000 + col; // 50 percent transparency
-		    break;
-		  case 3: argb[idx] = 0xBF000000 + col; // 25 percent transparency
-		    break;
-		  case 4: argb[idx] = 0xFF000000 + col; // 0 percent transparency
-		    break;
-		}
-	      }
-	    }
-	    
-	    /********************/
-	    /* Record sub-image */
-	    /********************/
-	    tasimages[image_transparency_level+1].push_back(cloned_images[image_transparency_level]);
-
-	    /**********************************/
-	    /* Update image tranparency level */
-	    /**********************************/
-	    image_transparency_level++;
-	  }
-	}
+	bkgimgs.push_back(img);
       }
     }
+
+    /****************/
+    /* Update index */
+    /****************/
+    index += nimages[i];
   }
+  printf("Finished processing background image.\n");
+  
+  /****************************************/
+  /* Generate plots for foreground images */
+  /****************************************/
+  for (std::set<double>::iterator it = unique_incidence_angles.begin(); it != unique_incidence_angles.end(); it++) {
+    /************************************/
+    /* Retrieve current incidence angle */
+    /************************************/
+    double ia = *it;
 
-  /********************/
-  /* Speed up drawing */
-  /********************/
-  gStyle->SetCanvasPreferGL(kTRUE);
+    /*************************/
+    /* Skip background image */
+    /*************************/
+    if (ia == bkg_ia)
+      continue;
 
-  /*************************************/
-  /* Remove past instance of animation */
-  /*************************************/
-  filename = "Graphic.gif";
-  remove(filename.c_str());
+    /************************************************/
+    /* Only allow a single image (Used for testing) */
+    /************************************************/
+    // double myIncidenceAngle = 58.00;
+    // if (ia != myIncidenceAngle)
+    //   continue;
+    
+    /************************************/
+    /* Evaluate current incidence angle */
+    /************************************/
+    vector < TASImage *> imgs;
+    vector < TPad *> pads;
+    index  = 0;
+    string curimname;
+    for (int i = 0; i < (int)incidence_angles.size(); i++) {
+      
+      /************************************************/
+      /* Draw all sub-images for non-background image */
+      /************************************************/
+      if (incidence_angles[i] == ia) {
+	curimname = master_image_names[i];
+	for (int j = 0; j < nimages[i]; j++) {
+	
+	  /****************************************/
+	  /* Skip frames that have no useful data */
+	  /****************************************/
+	  if(skip[i][j]) continue;
+          
+	  /****************************/
+	  /* Initialize and store pad */
+	  /****************************/
+	  double x1 = 0;
+	  double x2 = 0;
+	  double y1 = 0;
+	  double y2 = 0;
+	  if(selenographic) {
+	    x2 = (maximum_longitude[i][j]-x_min)/xrange;
+	    x1 = (minimum_longitude[i][j]-x_min)/xrange;
+	    y2 = (maximum_latitude[i][j]-y_min)/yrange;
+	    y1 = (minimum_latitude[i][j]-y_min)/yrange;
+	  }
+	  else {
+	    x2 = (maximum_x[i][j]-x_min)/xrange;
+	    x1 = (minimum_x[i][j]-x_min)/xrange;
+	    y2 = (maximum_y[i][j]-y_min)/yrange;
+	    y1 = (minimum_y[i][j]-y_min)/yrange;
+	  }
+	  TPad *pad = new TPad(imagenames[i][j].c_str(), "", x1, y1, x2, y2);
+	  pad->SetFillColorAlpha(kWhite, 0.); // Make pad transparent
+	  pads.push_back(pad);
+	  
+	  /*****************/
+	  /* Read in image */
+	  /*****************/
+	  filename = image_directories[i]+"/"+image_files[index+j];
+	  TASImage *img = new TASImage(filename.c_str());
+	  if (!img) {
+	    cout << "Could not open image " << filename << ".\nTerminating program ...\n" << endl;
+	    exit(EXIT_FAILURE);
+	  }
+	  img->SetConstRatio(kTRUE);
+	  img->SetImageQuality(TAttImage::kImgBest);
+	  
+	  /*****************************/
+	  /* Correct image orientation */
+	  /*****************************/
+	  if(selenographic) {
+	    if(upper_left_longitude[i][j] > upper_right_longitude[i][j]) {
+	      if(upper_left_latitude[i][j] < lower_left_latitude[i][j])
+		img->Flip(180);
+	      else
+		img->Mirror(true);
+	    }
+	  }
+	  else {
+	    if(upper_left_x[i][j] > upper_right_x[i][j]) {
+	      if(upper_left_y[i][j] < lower_left_y[i][j])
+		img->Flip(180);
+	      else
+		img->Mirror(true);
+	    }
+	  }
+	  img->SetEditable(kTRUE);
+	  imgs.push_back(img);
 
-  /*************************/
-  /* Draw background image */
-  /*************************/
-  for(int j=0; j<(int)pads[0].size(); j++)
-  {     
-    pads[0][j]->Draw();
-    pads[0][j]->cd();
-    tasimages[0][j]->Draw("X");
-    can->cd();
-  }
+	}
+      }
 
-  /*****************/
-  /* Overplot pads */
-  /*****************/
-  for(int j=0; j<(int)pads[1].size(); j++)
-  {
-    pads[1][j]->Draw();
-    can->cd();
-  }
-
-  /*********************/
-  /* Save plot to file */
-  /*********************/
-  delay = "100";
-  filename = "Graphic.gif+"+delay;
-  can->Print(filename.c_str());
-
-  /******************************/
-  /* Overplot foreground images */
-  /******************************/
-  int imagenumber = 1;
-  while(imagenumber < (int)tasimages.size())
-  {
-    for(int j=0; j<(int)pads[1].size(); j++)
-    {
-      pads[1][j]->cd();
-      tasimages[imagenumber][j]->Draw("X");
-      can->cd();
+      /****************/
+      /* Update index */
+      /****************/
+      index += nimages[i];
     }
+    
+    printf("Finished processing foreground image.\n");
+    
+    /*********************************************/
+    /* Iterate through different levels of image */
+    /* transparency for current master image     */
+    /*********************************************/
+    int image_transparency_level = 0;
+    while (image_transparency_level < 5) {
 
-    /*********************/
-    /* Save plot to file */
-    /*********************/
-    can->Print(filename.c_str());
+      /*********************/
+      /* Initialize Canvas */
+      /*********************/
+      string canname = "Canvas_"+to_string(image_transparency_level)+"_"+curimname;
+      TCanvas *tempcan = new TCanvas(canname.c_str(), "", canheight, canwidth);
+      tempcan->SetGridx();
+      tempcan->SetGridy();
+      tempcan->SetRightMargin(0.09);
+      tempcan->SetLeftMargin(0.15);
+      tempcan->SetBottomMargin(0.15);
+      
+      /**************/
+      /* Draw frame */
+      /**************/
+      TH1F * temph = tempcan->DrawFrame(x_low-spacing, y_low-spacing, x_high+spacing, y_high+spacing, buffer.c_str());
+      temph->GetYaxis()->CenterTitle();
+      temph->GetYaxis()->SetNdivisions(5);
+      temph->GetXaxis()->CenterTitle();
+      temph->GetXaxis()->SetNdivisions(5);
+      // gPad->GetRange(x_min, y_min, x_max, y_max);
+      // xrange = x_max-x_min;
+      // yrange = y_max-y_min;
 
-    /**********************/
-    /* Update imagenumber */
-    /**********************/
-    imagenumber++;
+      printf("Finished initializing new canvas.\n");
+      
+      /*************************/
+      /* Draw background image */
+      /*************************/
+      for (int i = 0; i < (int)bkgimgs.size(); i++) {
+      
+	/******************/
+	/* Draw sub-image */
+	/******************/
+	tempcan->cd();
+	bkgpads[i]->Draw();
+	bkgpads[i]->cd();
+	bkgimgs[i]->Draw("X");
+	tempcan->cd();
+      }
+
+      printf("Finished drawing background image.\n");
+
+      /*************************/
+      /* Draw foreground image */
+      /*************************/
+      vector < TASImage * > imgcopies;
+      for (int i = 0; i < (int)imgs.size(); i++) {
+	
+    	/********************************************/
+    	/* Retrieve ARGB array of current sub-image */
+    	/********************************************/
+    	unsigned int *argb = (unsigned int *)imgs[i]->GetArgbArray();
+    	int w = imgs[i]->GetWidth();
+    	int h = imgs[i]->GetHeight();
+	
+    	/************************************/
+    	/* Scan pixels in current image and */
+    	/* change each pixels transparency. */
+    	/************************************/
+    	for(int j = 0; j < h; j++) {
+    	  for(int k = 0; k < w; k++) {
+    	    int idx = j*w + k;
+	    
+    	    /**************************/
+    	    /* RGB part of ARGB color */
+    	    /**************************/
+    	    unsigned int col = argb[idx] & 0xffffff;
+    
+    	    /******************************/
+    	    /* Alpha channel modification */
+    	    /******************************/
+    	    switch(image_transparency_level) {
+    	    case 0: argb[idx] = 0x00000000 + col; // 100 percent transparency
+    	      break;
+    	    case 1: argb[idx] = 0x3F000000 + col; // 75 percent transparency
+    	      break;
+    	    case 2: argb[idx] = 0x7F000000 + col; // 50 percent transparency
+    	      break;
+    	    case 3: argb[idx] = 0xBF000000 + col; // 25 percent transparency
+    	      break;
+    	    case 4: argb[idx] = 0xFF000000 + col; // 0 percent transparency
+    	      break;
+    	    }
+    	  }
+    	}
+
+	/******************************/
+	/* Make copy of current image */
+	/******************************/
+	string tempname = "Clone_"+to_string(image_transparency_level)+"_"+curimname;
+	TASImage * imgcopy = (TASImage *)imgs[i]->Clone(tempname.c_str());
+	imgcopies.push_back(imgcopy);
+	  
+	/******************/
+	/* Draw sub-image */
+	/******************/
+	tempcan->cd();
+	pads[i]->Draw();
+	pads[i]->cd();
+	imgcopy->Draw("X");
+	tempcan->cd();
+      }
+
+      printf("Finished drawing foreground image.\n");
+      
+      /***************/
+      /* Print image */
+      /***************/
+      filename = "Graphic.gif+"+delay;
+      tempcan->Print(filename.c_str());
+      printf("An image frame has been printed.\n");
+
+      /*************************/
+      /* Free allocated memory */
+      /*************************/
+      imgcopies.clear();
+      // delete temph;
+      // delete tempcan;
+      
+      /*****************************/
+      /* Update transparency level */
+      /*****************************/
+      image_transparency_level += 1;
+    }
+    
+    /*************************/
+    /* Free allocated memory */
+    /*************************/
+    pads.clear();
+    imgs.clear();
   }
 
-  /*********************/
-  /* Save plot to file */
-  /*********************/
-  filename = "Graphic.gif++";
-  can->Print(filename.c_str());
-
+  /*************************/
+  /* Free allocated memory */
+  /*************************/
+  bkgpads.clear();
+  bkgimgs.clear();
+  delete h1;
+  delete can;
+    
   return;
 }
 
@@ -3289,8 +2674,6 @@ void IncidenceAngleAnalysis_Plot::PaperPlots(string list)
   /****************************************************/
   /* Declaration/Initialization of function variables */
   /****************************************************/
-  double canheight;
-  double canwidth;
   ifstream InFile;
   int max_elements;
   int n;
@@ -3602,7 +2985,13 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   vector < vector <bool> > comparison_skip;
   vector < vector <bool> > skip;
   vector < vector <double> > comparison_lower_left_latitude;
+  vector < vector <double> > comparison_lower_left_longitude;
+  vector < vector <double> > comparison_lower_left_x;
   vector < vector <double> > comparison_lower_left_y;
+  vector < vector <double> > comparison_lower_right_latitude;
+  vector < vector <double> > comparison_lower_right_longitude;
+  vector < vector <double> > comparison_lower_right_x;
+  vector < vector <double> > comparison_lower_right_y;
   vector < vector <double> > comparison_maximum_latitude;
   vector < vector <double> > comparison_maximum_longitude;
   vector < vector <double> > comparison_maximum_x;
@@ -3615,10 +3004,18 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   vector < vector <double> > comparison_upper_left_longitude;
   vector < vector <double> > comparison_upper_left_x;
   vector < vector <double> > comparison_upper_left_y;
+  vector < vector <double> > comparison_upper_right_latitude;
   vector < vector <double> > comparison_upper_right_longitude;
   vector < vector <double> > comparison_upper_right_x;
+  vector < vector <double> > comparison_upper_right_y;
   vector < vector <double> > lower_left_latitude;
+  vector < vector <double> > lower_left_longitude;
+  vector < vector <double> > lower_left_x;
   vector < vector <double> > lower_left_y;
+  vector < vector <double> > lower_right_latitude;
+  vector < vector <double> > lower_right_longitude;
+  vector < vector <double> > lower_right_x;
+  vector < vector <double> > lower_right_y;
   vector < vector <double> > maximum_latitude;
   vector < vector <double> > maximum_longitude;
   vector < vector <double> > maximum_x;
@@ -3631,8 +3028,10 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   vector < vector <double> > upper_left_longitude;
   vector < vector <double> > upper_left_x;
   vector < vector <double> > upper_left_y;
+  vector < vector <double> > upper_right_latitude;
   vector < vector <double> > upper_right_longitude;
   vector < vector <double> > upper_right_x;
+  vector < vector <double> > upper_right_y;
   vector < vector <int> > comparison_sub_image_ids;
   vector < vector <int> > sub_image_ids;
   vector < vector <TASImage *> > imgs;
@@ -3865,7 +3264,13 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   for (int i = 0; i < (int)imagenames.size(); i++) {
     vector <bool> sk;
     vector <double> llla;
+    vector <double> lllo;
+    vector <double> llx;
     vector <double> lly;
+    vector <double> lrla;
+    vector <double> lrlo;
+    vector <double> lrx;
+    vector <double> lry;
     vector <double> maxla;
     vector <double> maxlo;
     vector <double> maxx;
@@ -3878,8 +3283,10 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
     vector <double> ullo;
     vector <double> ulx;
     vector <double> uly;
+    vector <double> urla;
     vector <double> urlo;
     vector <double> urx;
+    vector <double> ury;
     vector <int> sii;
     for (int j = 0; j < (int)imagenames[i].size(); j++) {
       string sub_image_name = imagenames[i][j];
@@ -3888,13 +3295,13 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
 	sk.push_back(true);
 	sii.push_back(std::nan("1"));
 	llla.push_back(std::nan("1")); // Unit: degree
+	lllo.push_back(std::nan("1")); // Unit: degree
+	llx.push_back(std::nan("1")); // Unit: meter
 	lly.push_back(std::nan("1")); // Unit: meter
-	ulla.push_back(std::nan("1")); // Unit: degree
-	uly.push_back(std::nan("1")); // Unit: meter
-	ullo.push_back(std::nan("1")); // Unit: degree
-	ulx.push_back(std::nan("1")); // Unit: meter
-	urlo.push_back(std::nan("1")); // Unit: degree
-	urx.push_back(std::nan("1")); // Unit: meter
+	lrla.push_back(std::nan("1")); // Unit: degree
+	lrlo.push_back(std::nan("1")); // Unit: degree
+	lrx.push_back(std::nan("1")); // Unit: meter
+	lry.push_back(std::nan("1")); // Unit: meter
 	maxla.push_back(std::nan("1")); // Unit: degree
 	maxlo.push_back(std::nan("1")); // Unit: degree
 	maxx.push_back(std::nan("1")); // Unit: meter
@@ -3903,18 +3310,26 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
 	minlo.push_back(std::nan("1")); // Unit: degree
 	minx.push_back(std::nan("1")); // Unit: meter
 	miny.push_back(std::nan("1")); // Unit: meter
+	ulla.push_back(std::nan("1")); // Unit: degree
+	ullo.push_back(std::nan("1")); // Unit: degree
+	ulx.push_back(std::nan("1")); // Unit: meter
+	uly.push_back(std::nan("1")); // Unit: meter
+	urla.push_back(std::nan("1")); // Unit: degree
+	urlo.push_back(std::nan("1")); // Unit: degree
+	urx.push_back(std::nan("1")); // Unit: meter
+	ury.push_back(std::nan("1")); // Unit: meter
 	continue;
       }
       sk.push_back(false);
       sii.push_back(images[sub_image_index].GetId());
       llla.push_back(images[sub_image_index].GetLower_left_latitude()); // Unit: degree
+      lllo.push_back(images[sub_image_index].GetLower_left_longitude()); // Unit: degree
+      llx.push_back(images[sub_image_index].GetLower_left_x()); // Unit: meter
       lly.push_back(images[sub_image_index].GetLower_left_y()); // Unit: meter
-      ulla.push_back(images[sub_image_index].GetUpper_left_latitude()); // Unit: degree
-      uly.push_back(images[sub_image_index].GetUpper_left_y()); // Unit: meter
-      ullo.push_back(images[sub_image_index].GetUpper_left_longitude()); // Unit: degree
-      ulx.push_back(images[sub_image_index].GetUpper_left_x()); // Unit: meter
-      urlo.push_back(images[sub_image_index].GetUpper_right_longitude()); // Unit: degree
-      urx.push_back(images[sub_image_index].GetUpper_right_x()); // Unit: meter
+      lrla.push_back(images[sub_image_index].GetLower_right_latitude()); // Unit: degree
+      lrlo.push_back(images[sub_image_index].GetLower_right_longitude()); // Unit: degree
+      lrx.push_back(images[sub_image_index].GetLower_right_x()); // Unit: meter
+      lry.push_back(images[sub_image_index].GetLower_right_y()); // Unit: meter
       maxla.push_back(images[sub_image_index].GetMaximum_latitude()); // Unit: degree
       maxlo.push_back(images[sub_image_index].GetMaximum_longitude()); // Unit: degree
       maxx.push_back(images[sub_image_index].GetMaximum_x()); // Unit: meter
@@ -3923,17 +3338,25 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
       minlo.push_back(images[sub_image_index].GetMinimum_longitude()); // Unit: degree
       minx.push_back(images[sub_image_index].GetMinimum_x()); // Unit: meter
       miny.push_back(images[sub_image_index].GetMinimum_y()); // Unit: meter
+      ulla.push_back(images[sub_image_index].GetUpper_left_latitude()); // Unit: degree
+      ullo.push_back(images[sub_image_index].GetUpper_left_longitude()); // Unit: degree
+      ulx.push_back(images[sub_image_index].GetUpper_left_x()); // Unit: meter
+      uly.push_back(images[sub_image_index].GetUpper_left_y()); // Unit: meter
+      urla.push_back(images[sub_image_index].GetUpper_right_latitude()); // Unit: degree
+      urlo.push_back(images[sub_image_index].GetUpper_right_longitude()); // Unit: degree
+      urx.push_back(images[sub_image_index].GetUpper_right_x()); // Unit: meter
+      ury.push_back(images[sub_image_index].GetUpper_right_y()); // Unit: meter
     }
     skip.push_back(sk);
     sub_image_ids.push_back(sii);
     lower_left_latitude.push_back(llla); // Unit: degree
+    lower_left_longitude.push_back(lllo); // Unit: degree
+    lower_left_x.push_back(llx); // Unit: meter
     lower_left_y.push_back(lly); // Unit: meter
-    upper_left_latitude.push_back(ulla); // Unit: degree
-    upper_left_y.push_back(uly); // Unit: meter
-    upper_left_longitude.push_back(ullo); // Unit: degree
-    upper_left_x.push_back(ulx); // Unit: meter
-    upper_right_longitude.push_back(urlo); // Unit: degree
-    upper_right_x.push_back(urx); // Unit: meter
+    lower_right_latitude.push_back(lrla); // Unit: degree
+    lower_right_longitude.push_back(lrlo); // Unit: degree
+    lower_right_x.push_back(lrx); // Unit: meter
+    lower_right_y.push_back(lry); // Unit: meter
     maximum_latitude.push_back(maxla); // Unit: degree
     maximum_longitude.push_back(maxlo); // Unit: degree
     maximum_x.push_back(maxx); // Unit: meter
@@ -3942,6 +3365,14 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
     minimum_longitude.push_back(minlo); // Unit: degree
     minimum_x.push_back(minx); // Unit: meter
     minimum_y.push_back(miny); // Unit: meter
+    upper_left_latitude.push_back(ulla); // Unit: degree
+    upper_left_longitude.push_back(ullo); // Unit: degree
+    upper_left_x.push_back(ulx); // Unit: meter
+    upper_left_y.push_back(uly); // Unit: meter
+    upper_right_latitude.push_back(urla); // Unit: degree
+    upper_right_longitude.push_back(urlo); // Unit: degree
+    upper_right_x.push_back(urx); // Unit: meter
+    upper_right_y.push_back(ury); // Unit: meter
   }
 
   /*****************************/
@@ -3951,7 +3382,13 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
     for (int i = 0; i < (int)comparison_imagenames.size(); i++) {
       vector <bool> sk;
       vector <double> llla;
+      vector <double> lllo;
+      vector <double> llx;
       vector <double> lly;
+      vector <double> lrla;
+      vector <double> lrlo;
+      vector <double> lrx;
+      vector <double> lry;
       vector <double> maxla;
       vector <double> maxlo;
       vector <double> maxx;
@@ -3964,8 +3401,10 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
       vector <double> ullo;
       vector <double> ulx;
       vector <double> uly;
+      vector <double> urla;
       vector <double> urlo;
       vector <double> urx;
+      vector <double> ury;
       vector <int> sii;
       for (int j = 0; j < (int)comparison_imagenames[i].size(); j++) {
 	string sub_image_name = comparison_imagenames[i][j];
@@ -3974,13 +3413,13 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
 	  sk.push_back(true);
 	  sii.push_back(std::nan("1"));
 	  llla.push_back(std::nan("1")); // Unit: degree
+	  lllo.push_back(std::nan("1")); // Unit: degree
+	  llx.push_back(std::nan("1")); // Unit: meter
 	  lly.push_back(std::nan("1")); // Unit: meter
-	  ulla.push_back(std::nan("1")); // Unit: degree
-	  uly.push_back(std::nan("1")); // Unit: meter
-	  ullo.push_back(std::nan("1")); // Unit: degree
-	  ulx.push_back(std::nan("1")); // Unit: meter
-	  urlo.push_back(std::nan("1")); // Unit: degree
-	  urx.push_back(std::nan("1")); // Unit: meter
+	  lrla.push_back(std::nan("1")); // Unit: degree
+	  lrlo.push_back(std::nan("1")); // Unit: degree
+	  lrx.push_back(std::nan("1")); // Unit: meter
+	  lry.push_back(std::nan("1")); // Unit: meter
 	  maxla.push_back(std::nan("1")); // Unit: degree
 	  maxlo.push_back(std::nan("1")); // Unit: degree
 	  maxx.push_back(std::nan("1")); // Unit: meter
@@ -3989,18 +3428,26 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
 	  minlo.push_back(std::nan("1")); // Unit: degree
 	  minx.push_back(std::nan("1")); // Unit: meter
 	  miny.push_back(std::nan("1")); // Unit: meter
+	  ulla.push_back(std::nan("1")); // Unit: degree
+	  ullo.push_back(std::nan("1")); // Unit: degree
+	  ulx.push_back(std::nan("1")); // Unit: meter
+	  uly.push_back(std::nan("1")); // Unit: meter
+	  urla.push_back(std::nan("1")); // Unit: degree
+	  urlo.push_back(std::nan("1")); // Unit: degree
+	  urx.push_back(std::nan("1")); // Unit: meter
+	  ury.push_back(std::nan("1")); // Unit: meter
 	  continue;
 	}
 	sk.push_back(false);
 	sii.push_back(images[sub_image_index].GetId());
 	llla.push_back(images[sub_image_index].GetLower_left_latitude()); // Unit: degree
+	lllo.push_back(images[sub_image_index].GetLower_left_longitude()); // Unit: degree
+	llx.push_back(images[sub_image_index].GetLower_left_x()); // Unit: meter
 	lly.push_back(images[sub_image_index].GetLower_left_y()); // Unit: meter
-	ulla.push_back(images[sub_image_index].GetUpper_left_latitude()); // Unit: degree
-	uly.push_back(images[sub_image_index].GetUpper_left_y()); // Unit: meter
-	ullo.push_back(images[sub_image_index].GetUpper_left_longitude()); // Unit: degree
-	ulx.push_back(images[sub_image_index].GetUpper_left_x()); // Unit: meter
-	urlo.push_back(images[sub_image_index].GetUpper_right_longitude()); // Unit: degree
-	urx.push_back(images[sub_image_index].GetUpper_right_x()); // Unit: meter
+	lrla.push_back(images[sub_image_index].GetLower_right_latitude()); // Unit: degree
+	lrlo.push_back(images[sub_image_index].GetLower_right_longitude()); // Unit: degree
+	lrx.push_back(images[sub_image_index].GetLower_right_x()); // Unit: meter
+	lry.push_back(images[sub_image_index].GetLower_right_y()); // Unit: meter
 	maxla.push_back(images[sub_image_index].GetMaximum_latitude()); // Unit: degree
 	maxlo.push_back(images[sub_image_index].GetMaximum_longitude()); // Unit: degree
 	maxx.push_back(images[sub_image_index].GetMaximum_x()); // Unit: meter
@@ -4009,17 +3456,25 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
 	minlo.push_back(images[sub_image_index].GetMinimum_longitude()); // Unit: degree
 	minx.push_back(images[sub_image_index].GetMinimum_x()); // Unit: meter
 	miny.push_back(images[sub_image_index].GetMinimum_y()); // Unit: meter
+	ulla.push_back(images[sub_image_index].GetUpper_left_latitude()); // Unit: degree
+	ullo.push_back(images[sub_image_index].GetUpper_left_longitude()); // Unit: degree
+	ulx.push_back(images[sub_image_index].GetUpper_left_x()); // Unit: meter
+	uly.push_back(images[sub_image_index].GetUpper_left_y()); // Unit: meter
+	urla.push_back(images[sub_image_index].GetUpper_right_latitude()); // Unit: degree
+	urlo.push_back(images[sub_image_index].GetUpper_right_longitude()); // Unit: degree
+	urx.push_back(images[sub_image_index].GetUpper_right_x()); // Unit: meter
+	ury.push_back(images[sub_image_index].GetUpper_right_y()); // Unit: meter
       }
       comparison_skip.push_back(sk);
       comparison_sub_image_ids.push_back(sii);
       comparison_lower_left_latitude.push_back(llla); // Unit: degree
+      comparison_lower_left_longitude.push_back(lllo); // Unit: degree
+      comparison_lower_left_x.push_back(llx); // Unit: meter
       comparison_lower_left_y.push_back(lly); // Unit: meter
-      comparison_upper_left_latitude.push_back(ulla); // Unit: degree
-      comparison_upper_left_y.push_back(uly); // Unit: meter
-      comparison_upper_left_longitude.push_back(ullo); // Unit: degree
-      comparison_upper_left_x.push_back(ulx); // Unit: meter
-      comparison_upper_right_longitude.push_back(urlo); // Unit: degree
-      comparison_upper_right_x.push_back(urx); // Unit: meter
+      comparison_lower_right_latitude.push_back(lrla); // Unit: degree
+      comparison_lower_right_longitude.push_back(lrlo); // Unit: degree
+      comparison_lower_right_x.push_back(lrx); // Unit: meter
+      comparison_lower_right_y.push_back(lry); // Unit: meter
       comparison_maximum_latitude.push_back(maxla); // Unit: degree
       comparison_maximum_longitude.push_back(maxlo); // Unit: degree
       comparison_maximum_x.push_back(maxx); // Unit: meter
@@ -4028,6 +3483,14 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
       comparison_minimum_longitude.push_back(minlo); // Unit: degree
       comparison_minimum_x.push_back(minx); // Unit: meter
       comparison_minimum_y.push_back(miny); // Unit: meter
+      comparison_upper_left_latitude.push_back(ulla); // Unit: degree
+      comparison_upper_left_longitude.push_back(ullo); // Unit: degree
+      comparison_upper_left_x.push_back(ulx); // Unit: meter
+      comparison_upper_left_y.push_back(uly); // Unit: meter
+      comparison_upper_right_latitude.push_back(urla); // Unit: degree
+      comparison_upper_right_longitude.push_back(urlo); // Unit: degree
+      comparison_upper_right_x.push_back(urx); // Unit: meter
+      comparison_upper_right_y.push_back(ury); // Unit: meter
     }
   
   /************************************/
@@ -4055,22 +3518,30 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   /************************************************/
   for (unsigned i = 0; i < minimum_x.size(); i++) {
     for (unsigned j = 0; j < minimum_x[i].size(); j++) {
+      lower_left_x[i][j] *= constant; // Unit: kilometer
       lower_left_y[i][j] *= constant; // Unit: kilometer
+      lower_right_x[i][j] *= constant; // Unit: kilometer
+      lower_right_y[i][j] *= constant; // Unit: kilometer
       maximum_x[i][j] *= constant; // Unit: kilometer
-      minimum_x[i][j] *= constant; // Unit: kilometer
       maximum_y[i][j] *= constant; // Unit: kilometer
+      minimum_x[i][j] *= constant; // Unit: kilometer
       minimum_y[i][j] *= constant; // Unit: kilometer
-      upper_left_y[i][j] *= constant; // Unit: kilometer
       upper_left_x[i][j] *= constant; // Unit: kilometer
+      upper_left_y[i][j] *= constant; // Unit: kilometer
       upper_right_x[i][j] *= constant; // Unit: kilometer
+      upper_right_y[i][j] *= constant; // Unit: kilometers
+      lower_left_x[i][j] -= min_x; // Applying x-offset
       lower_left_y[i][j] -= min_y; // Applying y-offset
+      lower_right_x[i][j] -= min_x; // Applying x-offset
+      lower_right_y[i][j] -= min_y; // Applying y-offset
       maximum_x[i][j] -= min_x; // Applying x-offset
-      minimum_x[i][j] -= min_x; // Applying x-offset
       maximum_y[i][j] -= min_y; // Applying y-offset
+      minimum_x[i][j] -= min_x; // Applying x-offset
       minimum_y[i][j] -= min_y; // Applying y-offset
-      upper_left_y[i][j] -= min_y; // Applying y-offset
       upper_left_x[i][j] -= min_x; // Applying x-offset
+      upper_left_y[i][j] -= min_y; // Applying y-offset
       upper_right_x[i][j] -= min_x; // Applying x-offset
+      upper_right_y[i][j] -= min_y; // Applying y-offset
     }
   }
 
@@ -4080,22 +3551,28 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   if(comparison_incidence_angle != 0)
     for (int i = 0; i < (int) comparison_minimum_x.size(); i++) {
       for (int j = 0; j < (int) comparison_minimum_x[i].size(); j++) {
+	comparison_lower_left_x[i][j] *= constant; // Unit: kilometer
 	comparison_lower_left_y[i][j] *= constant; // Unit: kilometer
+	comparison_lower_right_x[i][j] *= constant; // Unit: kilometer
+	comparison_lower_right_y[i][j] *= constant; // Unit: kilometer
 	comparison_maximum_x[i][j] *= constant; // Unit: kilometer
-	comparison_minimum_x[i][j] *= constant; // Unit: kilometer
 	comparison_maximum_y[i][j] *= constant; // Unit: kilometer
+	comparison_minimum_x[i][j] *= constant; // Unit: kilometer
 	comparison_minimum_y[i][j] *= constant; // Unit: kilometer
-	comparison_upper_left_y[i][j] *= constant; // Unit: kilometer
 	comparison_upper_left_x[i][j] *= constant; // Unit: kilometer
+	comparison_upper_left_y[i][j] *= constant; // Unit: kilometer
 	comparison_upper_right_x[i][j] *= constant; // Unit: kilometer
+	comparison_upper_right_y[i][j] *= constant; // Unit: kilometer
+	comparison_lower_left_x[i][j] -= min_x; // Applying x-offset
 	comparison_lower_left_y[i][j] -= min_y; // Applying y-offset
 	comparison_maximum_x[i][j] -= min_x; // Applying x-offset
-	comparison_minimum_x[i][j] -= min_x; // Applying x-offset
 	comparison_maximum_y[i][j] -= min_y; // Applying y-offset
+	comparison_minimum_x[i][j] -= min_x; // Applying x-offset
 	comparison_minimum_y[i][j] -= min_y; // Applying y-offset
-	comparison_upper_left_y[i][j] -= min_y; // Applying y-offset
 	comparison_upper_left_x[i][j] -= min_x; // Applying x-offset
+	comparison_upper_left_y[i][j] -= min_y; // Applying y-offset
 	comparison_upper_right_x[i][j] -= min_x; // Applying x-offset
+	comparison_upper_right_y[i][j] -= min_y; // Applying y-offset
       }
     }
   
@@ -4200,25 +3677,30 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   /* Draw frame */
   /**************/
   double spacing = 0.;
+  int textfontstyle = 62;
   h1 = can->DrawFrame(x_degree_low-spacing, y_degree_low-spacing, x_degree_high+spacing, y_degree_high+spacing, axes1.c_str());
   h1->GetYaxis()->CenterTitle();
   h1->GetYaxis()->SetNdivisions(5);
+  h1->GetYaxis()->SetLabelFont(textfontstyle);
+  h1->GetYaxis()->SetTitleFont(textfontstyle);
   h1->GetXaxis()->CenterTitle();
   h1->GetXaxis()->SetNdivisions(5);
+  h1->GetXaxis()->SetLabelFont(textfontstyle);
+  h1->GetXaxis()->SetTitleFont(textfontstyle);
   gPad->GetRange(x_min, y_min, x_max, y_max);
   xrange = x_max-x_min;
   yrange = y_max-y_min;
   
-  /**************************************/
-  /* Create images to insert into frame */
-  /**************************************/
+  /***********************************/
+  /* Generate mosaic of master image */
+  /***********************************/
   for (int i = 0; i < (int)nimages.size(); i++) {
     vector <TPad *> p;
     vector <TASImage *> im;
     for (int j = 0; j < nimages[i]; j++) {
-      /****************************************/
-      /* Skip frames that have no useful data */
-      /****************************************/
+      /***************************************************/
+      /* Skip frames/sub-images that have no useful data */
+      /***************************************************/
       if(skip[i][j]) continue;
       
       /****************************/
@@ -4262,7 +3744,7 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   /***********************************************************************/
   /* Create transparent pads to insert into frame if comparison is given */
   /***********************************************************************/
-  if(comparison_incidence_angle != 0)
+  if(comparison_incidence_angle != 0) {
     for (int i = 0; i < (int)comparison_nimages.size(); i++) {
       vector <TPad *> p;
       for (int j = 0; j < comparison_nimages[i]; j++) {
@@ -4284,34 +3766,31 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
       }
       comparison_pads.push_back(p);
     }
+  }
   
-  /********************/
-  /* Speed up drawing */
-  /********************/
-  // gStyle->SetCanvasPreferGL(kTRUE);
-
-  /**************/
-  /* Draw image */
-  /**************/
+  /**********************/
+  /* Draw primary image */
+  /**********************/
   for (int i = 0; i < (int)pads.size(); i++) {
     for (int j = 0; j < (int)pads[i].size(); j++) {
-      can->cd();
       pads[i][j]->Draw();
       pads[i][j]->cd();
       imgs[i][j]->Draw("X");
+      can->cd();
     }
   }
 
   /********************************************/
   /* Draw comparison transparent shaded image */
   /********************************************/
-  if(comparison_incidence_angle != 0)
+  if(comparison_incidence_angle != 0) {
     for (int i = 0; i < (int)comparison_pads.size(); i++) {
       for (int j = 0; j < (int)comparison_pads[i].size(); j++) {
-  	can->cd();
   	comparison_pads[i][j]->Draw();
+  	can->cd();
       }
     }
+  }
   
   /**********************/
   /* Save image to file */
@@ -4321,27 +3800,25 @@ void IncidenceAngleAnalysis_Plot::PlotRealMasterImage(string imdir, double incid
   /**************************/
   /* Delete reserved memory */
   /**************************/
-  for (int i = 0; i < (int)pads.size(); i++) {
-    for (int j = 0; j < (int)pads[i].size(); j++) {
-      delete pads[i][j];
+  for(int i = 0; i < (int)imgs.size(); i++) {
+    for(int j = 0; j < (int)imgs[i].size(); j++)
       delete imgs[i][j];
-      pads[i][j] = NULL;
-      imgs[i][j] = NULL;
-    }
-
   }
+  for(int i = 0; i < (int)pads.size(); i++) {
+    for(int j = 0; j < (int)pads[i].size(); j++)
+      delete pads[i][j];
+  }
+  imgs.clear();
+  pads.clear();
   if(comparison_incidence_angle != 0) {
-    for (int i = 0; i < (int)comparison_pads.size(); i++) {
-      for (int j = 0; j < (int)comparison_pads[i].size(); j++) {
+    for(int i = 0; i < (int)comparison_pads.size(); i++) {
+      for(int j = 0; j < (int)comparison_pads[i].size(); j++)
 	delete comparison_pads[i][j];
-	comparison_pads[i][j] = NULL;
-      }
     }
+    comparison_pads.clear();
   }
   delete h1;
   delete can;
-  h1 = NULL;
-  can = NULL;
   
   return;
 }
@@ -4605,20 +4082,25 @@ void IncidenceAngleAnalysis_Plot::PlotOverlap(OverlappedImages a, bool print_coo
   delete can;
 }
 
-void IncidenceAngleAnalysis_Plot::RelativeCraterDensity(TH1F *h, double area, vector <double> &R, vector <double> &R_err)
+void IncidenceAngleAnalysis_Plot::RelativeCraterDensity(TH1F *h, double area, vector <double> &xaxis, vector <double> &R, vector <double> &R_err)
 {
   int nbins = h->GetNbinsX();
-  double binwidth = h->GetBinWidth(0);
   R.resize(nbins);
   R_err.resize(nbins);
+  xaxis.resize(nbins);
   
+  /*********************************************/
+  /* Calculate relative density and respective */
+  /* error and retrieve x axis values          */
+  /*********************************************/
   for(int i=1; i<=nbins; i++) {
-    double D_a = pow(10, h->GetXaxis()->GetBinLowEdge(i));
-    double D_b = D_a+pow(10, binwidth);
+    double D_a = h->GetXaxis()->GetBinLowEdge(i);
+    double D_b = D_a+h->GetBinWidth(i);
     double D = sqrt(D_a*D_b);
     int N = h->GetBinContent(i);
     double numerator = pow(D, 3.0)*N;
     double denominator = area*(D_b-D_a);
+    xaxis[i-1] = D;
     R[i-1] = numerator/denominator;
     R_err[i-1] = (N != 0) ? R[i-1]/sqrt(N) : 0;
   }
@@ -5654,17 +5136,19 @@ void IncidenceAngleAnalysis_Plot::Visualization1(vector <double> &selected_angle
   /*************************************/
   /* Declaration of function variables */
   /*************************************/
+  int n;
   string imdir;
 
   // Hard coded for now
   imdir = "/Users/MRichardson/Desktop/Incidence_Angle_Analysis/images/";
   
-  for (int i = 0; i < (int)selected_angles.size(); i++) {
+  n = selected_angles.size();
+  for (int i = 0; i < n; i++) {
     PlotRealMasterImage(imdir, selected_angles[i], incidenceangles, imagesets, images);
-    /*for (int j = 0; j < (int)selected_angles.size(); j++) {
+    for (int j = 0; j < (int)selected_angles.size(); j++) {
       if(i == j)
-	continue;
+  	continue;
       PlotRealMasterImage(imdir, selected_angles[i], incidenceangles, imagesets, images, selected_angles[j]);
-      }*/
+    }
   }
 }

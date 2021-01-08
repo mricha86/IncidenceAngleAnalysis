@@ -1,7 +1,7 @@
-/Users/mrichardson/Desktop/Incidence_Angle_Analysis/obj/Readcol.o: \
-  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/src/Readcol.cc \
-  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Readcol.h \
-  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
+/Users/MRichardson/Desktop/Incidence_Angle_Analysis/obj/Readcol.o: \
+  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/src/Readcol.cc \
+  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Readcol.h \
+  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
   /usr/local/include/boost/numeric/ublas/io.hpp \
   /usr/local/include/boost/numeric/ublas/matrix_expression.hpp \
   /usr/local/include/boost/numeric/ublas/vector_expression.hpp \

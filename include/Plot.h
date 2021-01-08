@@ -31,7 +31,8 @@ class Plot
   /**********************************/
   public:
     static TCanvas * CreateCanvas(std::string, std::string = "", int = 800, int = 1000, bool = false, bool = false, bool = false, bool = false);
-    static TH1F * CreateFrame(TCanvas *, std::string, double, double, double, double, double, double, int, int);
+    static TH1F * CreateFrame(TCanvas *, std::string, double, double, double, double, double = 0, double = 0, int = 5, int = 5, std::string = "", std::string = "");
+    static TH1F * CreateFrame(TVirtualPad *, std::string, double, double, double, double, double = 0, double = 0, int = 5, int = 5, std::string = "", std::string = "");
     static TH1F * Histogram(std::vector <double> const &, int, double, double, std::string, std::string = "", std::string = "", std::string = "");
     static TGraph * ScatterPlot(std::vector <double> const &, std::vector <double> const &, std::string = "", std::string = "", std::string = "", Color_t = kBlack, Size_t = 1, Style_t = 1);
     static TGraphErrors * ScatterPlot(std::vector <double> const &, std::vector <double> const &, std::vector <double> const &, std::vector <double> const &, std::string = "", std::string = "", std::string = "", Color_t = kBlack, Size_t = 1, Style_t = 1);

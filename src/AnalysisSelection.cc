@@ -103,7 +103,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
     /* If enabled, calculation of raw crater catalogues */
     /****************************************************/
     if(sel.count(2) == 1) {
-
+      
       /****************************/
       /* Declaration of variables */
       /****************************/
@@ -135,7 +135,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /***********************************/
       /* Identify overlapping sub-images */
       /***********************************/
-      //overlappedimages = Utilities::FindOverlappingImages(images, incidenceangles);
+      overlappedimages = Utilities::FindOverlappingImages(images, incidenceangles);
 
       /**************/
       /* Checkpoint */
@@ -146,7 +146,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /*******************************************************************/
       /* Identify overlapping sub-images with different incidence angles */
       /*******************************************************************/
-      //different_incidence_angle_overlappedimages = Utilities::FindDifferentIncidenceAngleOverlappingImages(overlappedimages);
+      different_incidence_angle_overlappedimages = Utilities::FindDifferentIncidenceAngleOverlappingImages(overlappedimages);
 
       /**************/
       /* Checkpoint */
@@ -157,7 +157,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /***************************************************************************************/
       /* Identify overlapping sub-images with different incidence angles at the same "scale" */
       /***************************************************************************************/
-      //scale_0_different_incidence_angle_overlappedimages = Utilities::FindSameScaleOverlappingImages(different_incidence_angle_overlappedimages, 0);
+      scale_0_different_incidence_angle_overlappedimages = Utilities::FindSameScaleOverlappingImages(different_incidence_angle_overlappedimages, 0);
       
       /**************/
       /* Checkpoint */
@@ -175,8 +175,8 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
 	double incidence_angle_1 = selected_angles[i];
 	for(int j = i+1; j < n; j++) {
 	  double incidence_angle_2 = selected_angles[j];
-	  // Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, scale_0_different_incidence_angle_overlappedimages, marks, run, true);
-	  //Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, different_incidence_angle_overlappedimages, marks, run, true);
+	  Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, scale_0_different_incidence_angle_overlappedimages, marks, run, true);
+	  // Utilities::PrintCraterCatalog(incidence_angle_1, incidence_angle_2, incidenceangles, different_incidence_angle_overlappedimages, marks, run, true);
 	  run++;
 	}
       }
@@ -190,7 +190,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
       /*******************************************************************/
       /* Visualization of region imaged at each selected incidence angle */
       /*******************************************************************/
-      IncidenceAngleAnalysis_Plot::Visualization1(selected_angles, imagesets, images, incidenceangles);
+      // IncidenceAngleAnalysis_Plot::Visualization1(selected_angles, imagesets, images, incidenceangles);
   
       /**************/
       /* Checkpoint */
@@ -203,7 +203,7 @@ void AnalysisSelection::Execute(map <int, vector <string> > sel) {
     /* If enabled, creation of image mosaic */
     /****************************************/
     if(sel.count(3) == 1) {
-
+      
       /******************/
       /* Ready the data */
       /******************/

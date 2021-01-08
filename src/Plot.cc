@@ -34,7 +34,7 @@ TCanvas * Plot::CreateCanvas(string name, string title, int height, int width, b
   return can;
 }
 
-TH1F * CreateFrame(TCanvas *can, string name, double xlow, double ylow, double xhigh, double yhigh, double xmargin = 0, double ymargin = 0, int nxdiv = 5, int nydiv = 5)
+TH1F * Plot::CreateFrame(TCanvas *can, string name, double xlow, double ylow, double xhigh, double yhigh, double xmargin, double ymargin, int nxdiv, int nydiv, string xtitle, string ytitle)
 {
   /*************************************/
   /* Declaration of function variables */
@@ -51,8 +51,35 @@ TH1F * CreateFrame(TCanvas *can, string name, double xlow, double ylow, double x
   /******************/
   frame->GetYaxis()->CenterTitle();
   frame->GetYaxis()->SetNdivisions(nydiv);
+  frame->SetYTitle(ytitle.c_str());
   frame->GetXaxis()->CenterTitle();
   frame->GetXaxis()->SetNdivisions(nxdiv);
+  frame->SetXTitle(xtitle.c_str());
+
+  return frame;
+}
+
+TH1F * Plot::CreateFrame(TVirtualPad *pad, string name, double xlow, double ylow, double xhigh, double yhigh, double xmargin, double ymargin, int nxdiv, int nydiv, string xtitle, string ytitle)
+{
+  /*************************************/
+  /* Declaration of function variables */
+  /*************************************/
+  TH1F *frame;
+
+  /****************/
+  /* Create frame */
+  /****************/
+  frame = pad->DrawFrame(xlow-xmargin, ylow-ymargin, xhigh+xmargin, yhigh+ymargin, name.c_str());
+
+  /******************/
+  /* Frame settings */
+  /******************/
+  frame->GetYaxis()->CenterTitle();
+  frame->GetYaxis()->SetNdivisions(nydiv);
+  frame->SetYTitle(ytitle.c_str());
+  frame->GetXaxis()->CenterTitle();
+  frame->GetXaxis()->SetNdivisions(nxdiv);
+  frame->SetXTitle(xtitle.c_str());
 
   return frame;
 }

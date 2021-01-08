@@ -1,6 +1,6 @@
-/Users/mrichardson/Desktop/Incidence_Angle_Analysis/obj/MySQLConnection.o: \
-  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/src/MySQLConnection.cc \
-  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/MySQLConnection.h \
+/Users/MRichardson/Desktop/Incidence_Angle_Analysis/obj/MySQLConnection.o: \
+  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/src/MySQLConnection.cc \
+  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/MySQLConnection.h \
   /usr/local/Cellar/mysql-connector-c++@1.1/1.1.13_1/include/cppconn/driver.h \
   /usr/local/Cellar/mysql-connector-c++@1.1/1.1.13_1/include/cppconn/connection.h \
   /usr/local/Cellar/mysql-connector-c++@1.1/1.1.13_1/include/cppconn/build_config.h \

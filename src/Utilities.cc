@@ -943,7 +943,7 @@ void Utilities::PrintCraterPopulationData(string catalog, string imagename, doub
 	  << setprecision(7) << setw(10) << left << "N" << "\t"
 	  << setprecision(7) << setw(10) << left << "Relative" << "\t"
 	  << setprecision(7) << setw(10) << left << "Rel. Error" << endl;
-  int counter = int(RoundtoNearest(density.front()*area, "ones"));
+  int counter = int(RoundtoNearest(density.front()*area, 1.));
   for(int i = 0; i < hist->GetNbinsX(); i++) {
     outfile << setprecision(7) << setw(10) << left << pow(10, hist->GetXaxis()->GetBinLowEdge(i+1)) << "\t"
 	    << setprecision(7) << setw(10) << left << area << "\t"

@@ -124,6 +124,7 @@ class SortData
     int GetFieldValue();
     std::vector <T> GetData();
     void arrange();
+    void SetFieldValue(std::string);
 };
 
 template <typename T>
@@ -1571,6 +1572,11 @@ void SortData<T>::arrange()
   }
   
   return;
+}
+
+template <typename T>
+void SortData<T>::SetFieldValue(std::string value) {
+  field = value;
 }
 
 #endif

@@ -26,7 +26,8 @@ const std::string mysql_url = "tcp://localhost:3306";
 const std::string mysql_user = "root";
 // const std::string mysql_password = "00000000";
 const std::string mysql_password = "";
-const std::string mysql_database = "cosmoquest_corrected";
+// const std::string mysql_database = "cosmoquest_corrected";
+const std::string mysql_database = "cosmoquest_corrected_2";
 // const std::string mysql_database = "cosmoquest_original";
 
 /**************************/

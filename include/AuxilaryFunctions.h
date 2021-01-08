@@ -315,22 +315,9 @@ inline std::vector <T> vectorSlice(std::vector <T> const &v, int m, int n)
     return vec;
 }
 
-inline double RoundtoNearest(double val, std::string place)
-{
-  // Create place value map
-  map <std::string, double> p;
-  p["thousandths"] = 0.001;
-  p["hundredths"] = 0.01;
-  p["tenths"] = 0.1;
-  p["ones"] = 1.;
-  p["tens"] = 10.;
-  p["hundreds"] = 100.;
-  p["thousands"] = 1000.;
-  
-  // Calculate rounded value
-  double roundedVal = floor(val/p[place] + 0.5)*p[place];
-
-  return roundedVal;
+inline double RoundtoNearest(double val, double place)
+{ 
+  return floor(val/place + 0.5)*place;
 }
 
 #endif

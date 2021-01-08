@@ -16,7 +16,7 @@ class Readcol
 {
   public:
   static int Read(std::string, std::string, ...);
-  static int Read(std::string, std::string, std::string, ...);
+  static int Read(std::string, std::string, int, std::string, ...);
   static std::vector <std::string> FormatParser(std::string);
 };
 
