@@ -176,9 +176,9 @@ int main()
   sortimages.arrange();
   images = sortimages.GetData();
   
-  /************************************/
-  /* Find sub-images in images vector */
-  /************************************/
+  /***************************************************************/
+  /* Find sub-images in images vector and calculate aspect ratio */
+  /***************************************************************/
   double constant = 1.0E-3;
   n = (int)sub_image_names.size();
   m = (int)images.size();
@@ -263,7 +263,7 @@ int main()
     d_annotations.push_back(v3*constant); // Unit: kilometer
   }
   infile.close();
-
+  
   /********************************************/
   /* Read data in from reduced crater catalog */
   /********************************************/
@@ -287,24 +287,6 @@ int main()
     d_reduced.push_back(v3*constant); // Unit: kilometer
   }
   infile.close();
-    
-  
-  // /**********************/
-  // /* Retrieve all marks */
-  // /**********************/
-  // m = (int)marks.size();
-  // for (int i = 0; i < n; i++) {
-
-  //   // Retrieve all marks for current sub-image
-  //   int sub_image_id = sub_image_ids[i];
-  //   mark_first_index = SearchMarks::FirstOccurence(marks, 0, m-1, field, &sub_image_id);
-  //   mark_last_index = SearchMarks::LastOccurence(marks, 0, m-1, field, &sub_image_id);
-  //   for(int j=mark_first_index; j<=mark_last_index; j++) {
-  //     d.push_back(marks[j].GetPhysical_diameter()*constant);
-  //     x.push_back(marks[j].GetPhysical_x()*constant-min_x);
-  //     y.push_back(marks[j].GetPhysical_y()*constant-min_y);
-  //   }
-  // }
   
   /*****************/
   /* Axes settings */
@@ -317,7 +299,7 @@ int main()
     x_low = *min_element(minimum_longitude.begin(), minimum_longitude.end());
     y_high = *max_element(maximum_latitude.begin(), maximum_latitude.end());
     y_low = *min_element(minimum_latitude.begin(), minimum_latitude.end());
-    spacing = 1.0E-2;
+    spacing = 0.0E-2;
   }
   else
   {
@@ -332,24 +314,28 @@ int main()
   /*********************/
   /* Initialize Canvas */
   /*********************/
-  canheight = 800;
-  canwidth = 800;
-  //can = new TCanvas("Canvas", "", canheight, canwidth);
-  can1 = new TCanvas("Original Image");
+  canheight = 3*450;
+  canwidth = 4*450;
+  can1 = new TCanvas("Original Image", "Original Image", canwidth, canheight);
   can1->SetGridx();
   can1->SetGridy();
-  //can1->SetRightMargin(0.09);
-  //can1->SetLeftMargin(0.15);
-  //can1->SetBottomMargin(0.15);
+  can1->SetRightMargin(0.09);
+  can1->SetLeftMargin(0.15);
+  can1->SetBottomMargin(0.15);
   
   /**************/
   /* Draw frame */
   /**************/
+  int textfontstyle = 62;
   h1 = can1->DrawFrame(x_low-spacing, y_low-spacing, x_high+spacing, y_high+spacing, buffer.c_str());
   h1->GetYaxis()->CenterTitle();
   h1->GetYaxis()->SetNdivisions(5);
+  h1->GetYaxis()->SetLabelFont(textfontstyle);
+  h1->GetYaxis()->SetTitleFont(textfontstyle);
   h1->GetXaxis()->CenterTitle();
   h1->GetXaxis()->SetNdivisions(5);
+  h1->GetXaxis()->SetLabelFont(textfontstyle);
+  h1->GetXaxis()->SetTitleFont(textfontstyle);
   gPad->GetRange(x_min, y_min, x_max, y_max);
   xrange = x_max-x_min;
   yrange = y_max-y_min;
@@ -420,7 +406,7 @@ int main()
   /********************/
   /* Speed up drawing */
   /********************/
-  gStyle->SetCanvasPreferGL(kTRUE);
+  // gStyle->SetCanvasPreferGL(kTRUE);
   
   /**************/
   /* Draw image */
@@ -436,7 +422,7 @@ int main()
   /*************************/
   /* Initialize new canvas */
   /*************************/
-  can2 = new TCanvas("Annotated Image");
+  can2 = new TCanvas("Annotated Image", "Annotated Image", canwidth, canheight);
   can1->DrawClonePad();
   
   /*********************************************/
@@ -469,7 +455,7 @@ int main()
   /*************************/
   /* Initialize new canvas */
   /*************************/
-  can3 = new TCanvas("Crater Image");
+  can3 = new TCanvas("Crater Image", "Crater Image", canwidth, canheight);
   can1->DrawClonePad();
 
   /*********************************************/

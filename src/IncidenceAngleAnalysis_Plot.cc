@@ -203,12 +203,12 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   incidence_angle_2 = ExtractIncidenceAngle(CraterCatalogue2);
   
   /***************/
-  /* Select data */
+  /* Change unit */
   /***************/
-  vector <double> A1 = vectorMultiplication(CC1[8], m2km*m2km);
-  vector <double> A2 = vectorMultiplication(CC2[8], m2km*m2km);
-  vector <double> D1 = vectorMultiplication(CC1[5], m2km);
-  vector <double> D2 = vectorMultiplication(CC2[5], m2km);
+  vector <double> A1 = vectorMultiplication(CC1[8], m2km*m2km); // Unit: km^2
+  vector <double> A2 = vectorMultiplication(CC2[8], m2km*m2km); // Unit: km^2
+  vector <double> D1 = vectorMultiplication(CC1[5], m2km); // Unit: km
+  vector <double> D2 = vectorMultiplication(CC2[5], m2km); // Unit: km
   
   /*************/
   /* Data swap */
@@ -224,7 +224,7 @@ void IncidenceAngleAnalysis_Plot::CumulativeFrequencySizeDistribution(string Cra
   /****************************************/
   /* Initializing x-axis characteristics  */
   /****************************************/
-  binwidth = 0.001; // Unit: km per bin
+  binwidth = 0.000001; // Unit: km per bin
   xlow = 10.0*m2km; // Unit: km (Note: Minimum reliable crater diameter for CosmoQuest data)
   xhigh = xlow; // Unit: km
 
@@ -2878,8 +2878,6 @@ void IncidenceAngleAnalysis_Plot::PaperPlots(string list)
       TG1[plotnumber]->SetMinimum(YAxisMinimum1);
       TG1[plotnumber]->Draw("AP");
       TG2[plotnumber]->Draw("P");
-      // FIT1[plotnumber]->Draw("LP");
-      // FIT2[plotnumber]->Draw("LP");
       
       subpad->cd(2);
       gPad->SetLogy();

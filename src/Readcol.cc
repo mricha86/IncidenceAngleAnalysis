@@ -137,10 +137,10 @@ int Readcol::Read(string filename, string skipline, int offset, string format, .
       if (buffer.compare(buffer.length()-skipline.length(), skipline.length(), skipline) == 0)
 	continue;
     }
-      
-    
 
-    // Continue reading line
+    /*************************/
+    /* Continue reading line */
+    /*************************/
     double *double_vector;
     int *integer_vector;
     string *string_vector;

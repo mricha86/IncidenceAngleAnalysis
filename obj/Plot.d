@@ -1,6 +1,6 @@
-/Users/MRichardson/Desktop/Incidence_Angle_Analysis/obj/Plot.o: \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/src/Plot.cc \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Plot.h \
+/Users/mrichardson/Desktop/Incidence_Angle_Analysis/obj/Plot.o: \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/src/Plot.cc \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Plot.h \
   /usr/local/include/root/TASImage.h /usr/local/include/root/TImage.h \
   /usr/local/include/root/TNamed.h /usr/local/include/root/TObject.h \
   /usr/local/include/root/RConfigure.h /usr/local/include/root/Rtypes.h \

@@ -1,7 +1,7 @@
-/Users/MRichardson/Desktop/Incidence_Angle_Analysis/obj/Images.o: \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/src/Images.cc \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Images.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
+/Users/mrichardson/Desktop/Incidence_Angle_Analysis/obj/Images.o: \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/src/Images.cc \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Images.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
   /usr/local/include/boost/numeric/ublas/io.hpp \
   /usr/local/include/boost/numeric/ublas/matrix_expression.hpp \
   /usr/local/include/boost/numeric/ublas/vector_expression.hpp \
@@ -439,7 +439,7 @@
   /usr/local/include/boost/mpl/aux_/preprocessed/gcc/apply.hpp \
   /usr/local/include/boost/numeric/ublas/detail/vector_assign.hpp \
   /usr/local/include/boost/numeric/ublas/detail/matrix_assign.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Constants.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/EquirectangularProjection.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/ProjectiveTransformation.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Quadrilateral.h
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Constants.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/EquirectangularProjection.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/ProjectiveTransformation.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Quadrilateral.h

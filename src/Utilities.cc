@@ -929,11 +929,23 @@ void Utilities::PrintCraterCatalog(double incidence_angle_1, double incidence_an
 
 void Utilities::PrintCraterPopulationData(string catalog, string imagename, double incidenceangle, double area, TH1F *hist, vector <double> &density, vector <double> &density_err, vector <double> &R, vector <double> &R_err)
 {
+  /**********************/
+  /* Construct filename */
+  /**********************/
   int p1 = catalog.find("g_")+2;
   int p2 = catalog.find("_M");
   int len = p2-p1;
   int obs_num = stoi(catalog.substr(p1, len));
   string filename = "Crater_population_data_"+to_string(obs_num)+"_"+imagename+"_"+to_string(incidenceangle)+".txt";
+
+  /**********************************************/
+  /* Remove all instances of the above filename */
+  /**********************************************/
+  remove(filename.c_str());
+  
+  /**********************/
+  /* Write data to file */
+  /**********************/
   ofstream outfile(filename.c_str());
   outfile << setprecision(7) << setw(10) << left << "D (km)" << "\t"
 	  << setprecision(7) << setw(10) << left << "Area (km^2)" << "\t"
@@ -945,7 +957,7 @@ void Utilities::PrintCraterPopulationData(string catalog, string imagename, doub
 	  << setprecision(7) << setw(10) << left << "Rel. Error" << endl;
   int counter = int(RoundtoNearest(density.front()*area, 1.));
   for(int i = 0; i < hist->GetNbinsX(); i++) {
-    outfile << setprecision(7) << setw(10) << left << pow(10, hist->GetXaxis()->GetBinLowEdge(i+1)) << "\t"
+    outfile << setprecision(7) << setw(10) << left << hist->GetXaxis()->GetBinLowEdge(i+1) << "\t"
 	    << setprecision(7) << setw(10) << left << area << "\t"
 	    << setprecision(7) << setw(10) << left << counter << "\t"
 	    << setprecision(7) << setw(10) << left << density[i] << "\t"

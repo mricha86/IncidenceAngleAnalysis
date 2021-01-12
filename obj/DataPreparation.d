@@ -1,9 +1,9 @@
-/Users/MRichardson/Desktop/Incidence_Angle_Analysis/obj/DataPreparation.o: \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/src/DataPreparation.cc \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/DataPreparation.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Checkpoint.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Images.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
+/Users/mrichardson/Desktop/Incidence_Angle_Analysis/obj/DataPreparation.o: \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/src/DataPreparation.cc \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/DataPreparation.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Checkpoint.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Images.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
   /usr/local/include/boost/numeric/ublas/io.hpp \
   /usr/local/include/boost/numeric/ublas/matrix_expression.hpp \
   /usr/local/include/boost/numeric/ublas/vector_expression.hpp \
@@ -441,13 +441,13 @@
   /usr/local/include/boost/mpl/aux_/preprocessed/gcc/apply.hpp \
   /usr/local/include/boost/numeric/ublas/detail/vector_assign.hpp \
   /usr/local/include/boost/numeric/ublas/detail/matrix_assign.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Constants.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/EquirectangularProjection.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/ProjectiveTransformation.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Quadrilateral.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/ImageSets.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Marks.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/RetrieveData.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Constants.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/EquirectangularProjection.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/ProjectiveTransformation.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Quadrilateral.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/ImageSets.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Marks.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/RetrieveData.h \
   /usr/local/include/boost/algorithm/string.hpp \
   /usr/local/include/boost/algorithm/string/std_containers_traits.hpp \
   /usr/local/include/boost/algorithm/string/std/string_traits.hpp \
@@ -670,6 +670,6 @@
   /usr/local/include/boost/smart_ptr/detail/local_counted_base.hpp \
   /usr/local/include/boost/scoped_ptr.hpp \
   /usr/local/include/boost/smart_ptr/scoped_ptr.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/SortData.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/IncidenceAngles.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/OverlappedImages.h
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/SortData.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/IncidenceAngles.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/OverlappedImages.h

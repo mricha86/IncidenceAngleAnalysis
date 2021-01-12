@@ -1,6 +1,6 @@
-/Users/MRichardson/Desktop/Incidence_Angle_Analysis/obj/DataRetrieval.o: \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/src/DataRetrieval.cc \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/DataRetrieval.h \
+/Users/mrichardson/Desktop/Incidence_Angle_Analysis/obj/DataRetrieval.o: \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/src/DataRetrieval.cc \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/DataRetrieval.h \
   /usr/local/include/boost/algorithm/string.hpp \
   /usr/local/include/boost/algorithm/string/std_containers_traits.hpp \
   /usr/local/include/boost/config.hpp \
@@ -403,10 +403,10 @@
   /usr/local/include/boost/algorithm/string/formatter.hpp \
   /usr/local/include/boost/algorithm/string/detail/formatter.hpp \
   /usr/local/include/boost/algorithm/string/erase.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Checkpoint.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Constants.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Images.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Checkpoint.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Constants.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Images.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/AuxilaryFunctions.h \
   /usr/local/include/boost/numeric/ublas/io.hpp \
   /usr/local/include/boost/numeric/ublas/matrix_expression.hpp \
   /usr/local/include/boost/numeric/ublas/vector_expression.hpp \
@@ -619,13 +619,13 @@
   /usr/local/include/boost/serialization/array_optimization.hpp \
   /usr/local/include/boost/numeric/ublas/detail/vector_assign.hpp \
   /usr/local/include/boost/numeric/ublas/detail/matrix_assign.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/EquirectangularProjection.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/ProjectiveTransformation.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Quadrilateral.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/ImageSets.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/IncidenceAngles.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Marks.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/MySQLConnection.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/EquirectangularProjection.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/ProjectiveTransformation.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Quadrilateral.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/ImageSets.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/IncidenceAngles.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Marks.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/MySQLConnection.h \
   /usr/local/Cellar/mysql-connector-c++@1.1/1.1.13_1/include/cppconn/driver.h \
   /usr/local/Cellar/mysql-connector-c++@1.1/1.1.13_1/include/cppconn/connection.h \
   /usr/local/Cellar/mysql-connector-c++@1.1/1.1.13_1/include/cppconn/build_config.h \
@@ -671,9 +671,9 @@
   /usr/local/include/boost/smart_ptr/detail/local_counted_base.hpp \
   /usr/local/include/boost/scoped_ptr.hpp \
   /usr/local/include/boost/smart_ptr/scoped_ptr.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/ReadAuxilaryData.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Readcol.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/Utilities.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/ReadAuxilaryData.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Readcol.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/Utilities.h \
   /usr/local/include/boost/foreach.hpp \
   /usr/local/include/boost/utility/addressof.hpp \
   /usr/local/include/boost/foreach_fwd.hpp \
@@ -1803,9 +1803,9 @@
   /usr/local/include/root/TVectorFfwd.h \
   /usr/local/include/root/TVectorDfwd.h \
   /usr/local/include/root/TFitResultPtr.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/CheckOverlap.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/OverlappedImages.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/RetrieveData.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/CheckOverlap.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/OverlappedImages.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/RetrieveData.h \
   /usr/local/include/boost/any.hpp \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/SearchData.h \
-  /Users/MRichardson/Desktop/Incidence_Angle_Analysis/include/SortData.h
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/SearchData.h \
+  /Users/mrichardson/Desktop/Incidence_Angle_Analysis/include/SortData.h
